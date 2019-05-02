@@ -1,0 +1,42 @@
+name:           machinecomplexity
+version:        0.1.0.0
+--description:    Please see the README on GitHub at <https://github.com/wardwheeler/PhyloAlgInfo#readme>
+--homepage:       https://github.com/gwardwheeler/PhyloAlgInfo#readme
+--bug-reports:    https://github.com/wardwheeler/PhyloAlgInfo/issues
+--author:         Ward Wheeler
+--maintainer:     wheeler@amnh.org
+--copyright:      2018-2019 Ward Wheeler
+--license:        BSD3
+--license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+executable machineComplexity
+
+  main-is: machineComplexity.hs
+
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
+  build-depends:  base >=4.7 && <5
+                , containers >=0.6
+                , fingertree
+                , process
+
+  default-language: Haskell2010
+
+  other-modules:  Paths_kolmogorov
+                  Data.String.Utils
+                  Numeric.LinearAlgebra
+                  Data.Compression.Huffman
+                  Complexity.Utilities
+                  Complexity.MatrixUtilities
+                  Complexity.MathUtilities
+                  Complexity.Graphs
+                  Complexity.CharacterModels
+                  Complexity.Parsers
+                  Complexity.CodeStrings
+                  Complexity.Constants
+                  Complexity.Types
+                  Complexity.GTRExt
+                  Complexity.IntegratedModels
+
