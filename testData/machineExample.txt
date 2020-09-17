@@ -1,0 +1,313 @@
+--Kologorov machine specification  
+--need EBNF grammer 
+--Text module for parser so case irrelevent (except in names)
+ 
+--Do we need length for dynamic chacrets--or all? or does the machine length handle that
+
+--Graph specification
+--Will be modified during search if allowed
+Graph graphOne {
+	Leaves : 20;
+	Roots : 10;
+	Singletons : 2;
+	NetworkEdges : 4;
+}
+
+--Graph unused
+Graph graphTwo {
+	Leaves : 200;
+	Roots : 30;
+	Singletons : 20;
+	NetworkEdges : 20;
+}
+
+-- ADD numers after graph
+-- list of floarts for ditribution params
+
+--Machine specifies graph and block models with
+--number of characters for each in order
+Machine m0 {
+	Graph : graphTwo;
+	Block : JC69 : 215;
+	Block : k80 : 15;
+	Block : F81 :21;
+	Block : HKY85 : 1;
+	Block : F84 : 1;
+	Block : TN93E :1;
+	Block : TN93U :1;
+	Block : TN93EGTR :1;
+	Block : TN93UGTR :1;
+	Block : bm13 :2;
+	Block : F81GTR : 1;
+	Block : bm10 : 1;
+	Block : bm10N : 1;
+    Block : logM :1;
+}
+
+BlockModel logM {
+	Alphabet : ["0","1","2","3", "4"];
+	BranchLength : Exponential: 10;
+	Precision : 100;
+	RateModifiers  : Gamma:(classes:4, alpha:0.2);
+	ChangeModel :logmatrix : (RMatrix :[[0, 1,2, 3, 4],[1, 0,1,2, 3],[2, 1,0,1, 2],[3, 2,1,0,1],[4,3,2,1,0]], base:20);
+	Length : 50;
+}
+
+BlockModel JC69 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Uniform: 2;
+	Precision : 100;
+	RateModifiers  : Gamma:(classes:4, alpha:0.2);
+	ChangeModel :JC69;
+	Length : 50;
+}
+
+BlockModel k80 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Exponential: 10;
+	RateModifiers : Invariant:0.1;
+	ChangeModel :k80 :(alpha:2, beta:1);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel F81 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : exponential: 10;
+	RateModifiers : None;
+	ChangeModel :F81 :(PiVector:[0.25, 0.25, 0.25 ,0.25]);
+	Precision : 100;
+	Length : 50;
+}
+
+
+
+BlockModel F81GTR {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Uniform: 2;
+	RateModifiers :  Gamma:(classes:4, alpha:0.2), Invariant:0.1;
+	ChangeModel :GTR :(PiVector:[0.25, 0.25, 0.25 ,0.25], RMatrix :[[0, 1,1,1],[1, 1,1,1],[1, 1,1,1],[1, 1,1,1]]);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel HKY85 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Exponential: 10;
+	RateModifiers : Invariant:0.1;
+	ChangeModel :hKy85 :(beta:2.1, alpha : 1.5, PiVector:[0.25, 0.3, 0.2 ,0.25]);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel F84 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Uniform: 2;
+	RateModifiers : Invariant:0.1;
+	ChangeModel :f84 :(PiVector:[0.25, 0.3, 0.2 ,0.25], beta:2.1, kappa : 1.5);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel TN93U {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : uniform: 2;
+	RateModifiers :  Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :TN93 :(PiVector:[0.25, 0.3, 0.2 ,0.25], beta:0.9, alpha1 : 2.5, alpha2:1.7);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel TN93E {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : exponential: 10;
+	RateModifiers :  Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :TN93 :(PiVector:[0.25, 0.3, 0.2 ,0.25], beta:0.9, alpha1 : 2.5, alpha2:1.7);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel TN93EGTR {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Exponential: 10;
+	RateModifiers :  Gamma:(classes:4, alpha:0.2), Invariant:0.1;
+	ChangeModel :GTR :(PiVector:[0.25, 0.3, 0.2 ,0.25], RMatrix :[[1, 0.9,1.7, 0.9],[0.9, 1,0.9,2.5],[1.7, 0.9,1,0.9],[0.9, 2.5,0.9,1]]);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel TN93UGTR {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Uniform: 2;
+	RateModifiers :  Gamma:(classes:4, alpha:0.2), Invariant:0.1;
+	ChangeModel :GTR :(PiVector:[0.25, 0.3, 0.2 ,0.25], RMatrix :[[1, 0.9,1.7, 0.9],[0.9, 1,0.9,2.5],[1.7, 0.9,1,0.9],[0.9, 2.5,0.9,1]]);
+	Precision : 100;
+	Length : 50;
+}
+
+
+--Block analytical model
+--Q and Pi from "File"
+--Alphabet from "File"
+--Lenght refers to dynamic if > 1, to in prinicple sum of input lengths
+BlockModel bm1 {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Exponential: 10;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :GTR : (PiVector:[0.2, 0.2, 0.2, 0.2 ,0.2], RMatrix:[[-0.02, 0.002, 0.004, 0.006, 0.008],[0.002, -0.038, 0.010, 0.012, 0.014],[0.004, 0.010, -0.048, 0.016, 0.018],[0.006, 0.012,0.016,-0.54, 0.02],[0.008, 0.014, 0.018, 0.020,-0.06]]);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel bm11 {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Uniform: 2;
+	RateModifiers : none;
+	ChangeModel :GTR : (PiVector:[0.2, 0.2, 0.2, 0.2 ,0.2], RMatrix:[[-0.02, 0.002, 0.004, 0.006, 0.008],[0.002, -0.038, 0.010, 0.012, 0.014],[0.004, 0.010, -0.048, 0.016, 0.018],[0.006, 0.012,0.016,-0.54, 0.02],[0.008, 0.014, 0.018, 0.020,-0.06]]);
+	Precision : 100;
+	Length : 50;
+}
+BlockModel bm12 {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Exponential: 10;
+	RateModifiers : none;
+	ChangeModel :GTR : (PiVector:[0.2, 0.2, 0.2, 0.2 ,0.2], RMatrix:[[-0.02, 2.0, 1.0, 2.0, 4.0],[2.0, -0.038, 2.0, 1.0, 4.0],[1.0, 2.0, -0.048, 2.0, 4.0],[2.0, 1.0,2.0,-0.54, 4.0],[4.0, 4.0, 4.0, 4.0,-0.06]]);
+	Precision : 100;
+	Length : 50;
+}
+BlockModel bm13 {
+	Alphabet : ["A","C","G","T"];
+	BranchLength : Exponential: 10;
+	RateModifiers : none;
+	ChangeModel :GTR : (PiVector:[0.2, 0.2, 0.2, 0.2], RMatrix:[[-0.02, 2.0, 1.0, 2.0],[2.0, -0.038, 2.0, 1.0],[1.0, 2.0, -0.048, 2.0],[2.0, 1.0,2.0,-0.54]]);
+	Precision : 100;
+	Length : 50;
+}
+--Block analytical model
+--Q and Pi from "File"
+--Alphabet from "File"
+--Lenght refers to dynamic if > 1, to in prinicple sum of input lengths
+--Gamma:(classes:4, alpha:0.2), Invariant : 0.1
+BlockModel bm10 {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : exponential: 10.0;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :GTR : (PiVector:[0.20,0.20,0.20,0.20,0.20], RMatrix:[[1.0, 1.0,1.0,1.0,1.0],[1.0, 1.0,1.0,1.0,1.0],[1.0, 1.0,1.0,1.0,1.0],[1.0, 1.0,1.0,1.0,1.0],[1.0, 1.0,1.0,1.0,1.0]]);
+	Precision : 100;
+	Length : 50;
+}
+
+BlockModel bm10N {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Exponential: 10.0;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 50;
+}
+
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm0 {
+	Alphabet : ["0","1"];
+	BranchLength : Uniform : 0.5;
+	RateModifiers : none;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 1;
+}
+
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm4 {
+	Alphabet : ["0","1", "2"];
+	BranchLength : Exponential : 1.0;
+	RateModifiers : none;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 1;
+}
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm5 
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Exponential : 10;
+	RateModifiers : none;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 100;
+}
+
+
+
+--Block analytical model
+--Q and Pi from "File"
+--Alphabet from "File"
+BlockModel bm2 {
+	Alphabet : "AlphaFile";
+	BranchLength : Exponential: 10;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :GTR : (RMatrix:"RFile", PiVector: "PFile");
+	Precision : 100;
+	Length : 1000;
+}
+
+--Block analytical model
+--testiing--unused
+BlockModel bm3 {
+	Alphabet : "AlphaFile";
+	BranchLength : Exponential: 10;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.1;
+	ChangeModel :GTR : (RMatrix:"RFile", PiVector: "PFile");
+	Precision : 100;
+	Length : 25;
+}
+
+--Block : bm1 :1;
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm6 {
+	Alphabet : ["0","1", "2"];
+	BranchLength : Exponential : 1.0;
+	RateModifiers : Invariant : 0.1;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 1;
+}
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm7 {
+	Alphabet : ["0","1", "2"];
+	BranchLength : Uniform : 1.0;
+	RateModifiers : Gamma:(classes:4, alpha:0.2);
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 1;
+}
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm8 {
+	Alphabet : ["A","C","G","T","-"];
+	BranchLength : Exponential : 10;
+	RateModifiers : Gamma:(classes:4, alpha:0.2), Invariant : 0.2;
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 125;
+}
+
+--Block analytical model
+--MaxLength is 1 for static character
+BlockModel bm9 {
+	Alphabet : ["-", "A","C","G","T", "A"];
+	BranchLength : Exponential : 10;
+	RateModifiers : Invariant : 0.1, Gamma:(classes:6, alpha:0.7);
+	ChangeModel :neyman;
+	Precision : 100;
+	Length : 1025;
+}
