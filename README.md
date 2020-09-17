@@ -5,4 +5,4 @@ Haskell source code
 
 To compile:
 
-ghc -O2 machineComplexity.hs
+cabal build
