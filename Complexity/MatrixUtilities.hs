@@ -38,7 +38,7 @@ Portability :  portable (I hope)
 module Complexity.MatrixUtilities where
 
 import Data.List
-import Data.Ord
+-- import Data.Ord
 import Control.Applicative
 import Debug.Trace
 import Complexity.MathUtilities
@@ -153,7 +153,7 @@ getPij eigenVectorList uMatrix uInvMatrix time mLambda iRow jColumn iterations =
         --uInvjm = (uInvMatrix !! jColumn) !! mLambda
         umi = (uMatrix !! iRow) !! mLambda
         uInvjm = (uInvMatrix !! mLambda) !! jColumn
-        result = (expE (lambda * time) iterations 0 * umi * uInvjm)
+        result = (expE (lambda * time) * umi * uInvjm)
         --result = umi * uInvjm * exp (lambda * time) 
     in
     --trace ("getPij " ++ show mLambda ++ " " ++ (show lambda) ++ show iRow ++ " " ++ show jColumn ++ " "++ (show time) ++ " " ++ show (exp (lambda * time)) ++ " " ++ show time ++ " " ++ (show umi) ++ " " ++ (show uInvjm) ++ " " ++ (show result))

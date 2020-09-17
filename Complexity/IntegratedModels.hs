@@ -54,7 +54,7 @@ neymanUniformWithK r a iterations (kWeight, kFraction) =
     if kWeight < epsilon  then (kFraction, 0.0)
     else
         let r1 = fromIntegral r
-            eak = expE (-1 * a * kWeight) iterations 0
+            eak = expE (-1 * a * kWeight) 
             --pii throws some NaN fir invarants
             pii = ((((eak + 1) * (r1 -1)) + (a * kWeight))/(a * kWeight * r1))
             pij = ((eak + (a * kWeight) - 1)/(a * kWeight * r1))
@@ -88,7 +88,7 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
   | kWeight < epsilon = (kFraction, 0.0)
   | distribution == Uniform =
         let r1 = fromIntegral r
-            eak = expE (-1 * a * kWeight) iterations 0
+            eak = expE (-1 * a * kWeight) 
             --pii throws some NaN fir invarants
             pij = (eak + (a * kWeight) - 1)/(a * kWeight * r1)
             pii = 1 - ((r1 -1) * pij)
@@ -108,8 +108,8 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
 -- takes alphabetsize and uniform parameter [0.alpha] and iterations for expE function
 neymanUniform :: Int -> Double -> Int -> (Double, Double)
 neymanUniform alphabetSize alpha iterations =
-    let pii = (alpha - ((fromIntegral alphabetSize - 1) * (expE (-1 * alpha) iterations 0) - 1)) / (fromIntegral alphabetSize * alpha)
-        pij = (alpha - 1 + expE (-1 * alpha) iterations 0) / (fromIntegral alphabetSize * alpha)
+    let pii = (alpha - ((fromIntegral alphabetSize - 1) * (expE (-1 * alpha) ) - 1)) / (fromIntegral alphabetSize * alpha)
+        pij = (alpha - 1 + expE (-1 * alpha) ) / (fromIntegral alphabetSize * alpha)
     in
     (pii, pij)
 
@@ -190,10 +190,10 @@ tn93UniformWithK [alpha1, alpha2, beta] [pA, pC, pG, pT] expParam iterations (kW
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) iterations 0
-        enbkm = expE (-1 * beta * kWeight * expParam) iterations 0
-        enf1km = expE (-1 * f1 * kWeight * expParam) iterations 0
-        enf2km = expE (-1 * f2 * kWeight * expParam) iterations 0
+        ebkm = expE (beta * kWeight * expParam) 
+        enbkm = expE (-1 * beta * kWeight * expParam) 
+        enf1km = expE (-1 * f1 * kWeight * expParam) 
+        enf2km = expE (-1 * f2 * kWeight * expParam) 
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -284,10 +284,10 @@ f84UniformWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFr
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) iterations 0
-        enbkm = expE (-1 * beta * kWeight * expParam) iterations 0
-        enf1km = expE (-1 * f1 * kWeight * expParam) iterations 0
-        enf2km = expE (-1 * f2 * kWeight * expParam) iterations 0
+        ebkm = expE (beta * kWeight * expParam) 
+        enbkm = expE (-1 * beta * kWeight * expParam) 
+        enf1km = expE (-1 * f1 * kWeight * expParam) 
+        enf2km = expE (-1 * f2 * kWeight * expParam) 
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -374,10 +374,10 @@ hky85UniformWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, k
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) iterations 0
-        enbkm = expE (-1 * beta * kWeight * expParam) iterations 0
-        enf1km = expE (-1 * f1 * kWeight * expParam) iterations 0
-        enf2km = expE (-1 * f2 * kWeight * expParam) iterations 0
+        ebkm = expE (beta * kWeight * expParam) 
+        enbkm = expE (-1 * beta * kWeight * expParam) 
+        enf1km = expE (-1 * f1 * kWeight * expParam) 
+        enf2km = expE (-1 * f2 * kWeight * expParam) 
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -460,10 +460,10 @@ f81UniformWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (kWeight * expParam) iterations 0
-        enbkm = expE (-1 * kWeight * expParam) iterations 0
-        enf1km = expE (-1 * kWeight * expParam) iterations 0
-        enf2km = expE (-1 * kWeight * expParam) iterations 0
+        ebkm = expE (kWeight * expParam) 
+        enbkm = expE (-1 * kWeight * expParam) 
+        enf1km = expE (-1 * kWeight * expParam) 
+        enf2km = expE (-1 * kWeight * expParam) 
         bkmfactor = (enbkm + ((kWeight * expParam) - 1)) / (kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * kWeight * expParam) + c0Column + d0Row)) - c0Column)) - (d0Row * enf1km)) / (kWeight * expParam)
         p01 = pC * bkmfactor
@@ -520,9 +520,9 @@ k80UniformWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
     let f = (alpha +beta)/2
         cColumn = 0.25
         dRow = 0.5
-        ebkm = expE (beta * kWeight * expParam) iterations 0
-        enbkm = expE (-1 * beta * kWeight * expParam) iterations 0
-        enfkm = expE (-1 * f * kWeight * expParam) iterations 0
+        ebkm = expE (beta * kWeight * expParam) 
+        enbkm = expE (-1 * beta * kWeight * expParam) 
+        enfkm = expE (-1 * f * kWeight * expParam) 
         offDiagFactor = 0.25 * (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         plusFactor = ((enbkm * ((ebkm * ((0.25 * beta * f * kWeight * expParam) + (cColumn * f) + (beta * dRow))) - (cColumn * f))) - (beta * dRow * enfkm)) / (beta * f * kWeight * expParam)
         minusFactor = ((enbkm * ((ebkm * ((0.25 * beta * f * kWeight * expParam) + (cColumn * f) - (beta * dRow))) - (cColumn * f))) + (beta * dRow * enfkm)) / (beta * f * kWeight * expParam)

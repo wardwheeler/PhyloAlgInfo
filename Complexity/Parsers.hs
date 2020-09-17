@@ -49,6 +49,7 @@ import Data.Maybe
 import Complexity.Utilities
 
 -- | ArgCrust are charcaterts in arguments that may need to be filtered
+argCruft :: [Char]
 argCruft = ['(', ')','[',']']
 
 -- | removeContents filters out comments lines (beginning with '--') from file input
@@ -139,29 +140,29 @@ parseMachine inString =
         pieces = divideWith ';' guts
         machineElements =  getMachineElements pieces
     in
-    let graphName = getGraphName machineElements
+    let graphNameLocal = getGraphName machineElements
         blockPairs = getBlockName machineElements
     in
     --trace (name ++ " " ++ graphName ++ " " ++ show blockPairs)
-    (name, graphName, blockPairs)
+    (name, graphNameLocal, blockPairs)
 
 
 -- | getNumber looks through contents of graph specification and 
 -- pulls parts matching in string throuws error if not found
 getNumber :: String -> [String] -> Int
-getNumber find guts =
-  if null guts then error ("No parameter " ++ find ++ " specified in graph")
+getNumber findHere guts =
+  if null guts then error ("No parameter " ++ findHere ++ " specified in graph")
   else
     let firstGut = toLower Control.Applicative.<$> head guts
         parts = divideWith ':' firstGut
     in
-    if length parts /=2 then error ("Incorrect number of parameters " ++ show (length parts) ++ " in " ++ find ++ " in graphModel\n Should be 1.")
-    else if find == head parts then (read (last parts) :: Int)
-    else getNumber find (tail guts)
+    if length parts /=2 then error ("Incorrect number of parameters " ++ show (length parts) ++ " in " ++ findHere ++ " in graphModel\n Should be 1.")
+    else if findHere == head parts then (read (last parts) :: Int)
+    else getNumber findHere (tail guts)
 
 -- | parseGraph takes graph string and parses
 parseGraph :: String -> [String] -> [GraphModel]
-parseGraph graphName inStringList=
+parseGraph graphNameLocal inStringList=
   if null inStringList then []
   else
     let inString = head inStringList
@@ -173,12 +174,12 @@ parseGraph graphName inStringList=
         nSingletons = getNumber "singletons" pieces
         nNetworkEdges = getNumber "networkedges" pieces
     in
-    if graphName == gName then
+    if graphNameLocal == gName then
       let theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
       in
       --defaultGraph
-      theGraphModel : parseGraph graphName (tail inStringList)
-    else parseGraph graphName (tail inStringList)
+      theGraphModel : parseGraph graphNameLocal (tail inStringList)
+    else parseGraph graphNameLocal (tail inStringList)
 
 -- | getBlock takes a Sring--the name of the block and looks into a list of (String, Int)
 -- pairs and returns the number of chats if the name finds a match--zwero otherwise if not found.
@@ -484,16 +485,16 @@ putGapAtEnd inList =
 -- | getBlockParams takes strings opf args and retruns tuples of params
 getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
 getBlockParams inStringList =
-  let alphabet = putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabet'
-      branchLength = getBranchLength inStringList --(Uniform,[])
-      rateModifiers = getRateModifiers inStringList --[(None,[])] 
-      changeModel = getChangeModel (length alphabet) inStringList --(Neyman, [[]], [])
-      precision = getPrecision inStringList
-      charLength = getCharLength inStringList
+  let alphabetLocal = putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
+      branchLengthLocal = getBranchLength inStringList --(Uniform,[])
+      rateModifiersLocal = getRateModifiers inStringList --[(None,[])] 
+      changeModelLocal = getChangeModel (length alphabetLocal) inStringList --(Neyman, [[]], [])
+      precisionLocal = getPrecision inStringList
+      charLengthLocal = getCharLength inStringList
   in
-  if head alphabet /= "-" then (alphabet, branchLength, rateModifiers, changeModel, precision, charLength)
+  if head alphabetLocal /= "-" then (alphabetLocal, branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
   else
-  (tail alphabet ++ ["-"], branchLength, rateModifiers, changeModel, precision, charLength)
+  (tail alphabetLocal ++ ["-"], branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
 
 
 -- | parseCharModel takes character model string and parses
@@ -565,8 +566,8 @@ parseSections inSectionList =
     if length machineModels > 1 then error "Can only specify a single machine model"
     else
         --Find and pull Graph
-      let (gMachineName, graphName, blockModels) = head machineModels
-          graphModels = parseGraph graphName $ getElementString "graph" inSectionList
+      let (gMachineName, graphNameLocal, blockModels) = head machineModels
+          graphModels = parseGraph graphNameLocal $ getElementString "graph" inSectionList
         --Find and pull CharModel(s) 
           cCharModelList = parseCharModel blockModels $ getElementString "blockmodel" inSectionList
           reorderedCharacterModelList = reorderCharacterModels cCharModelList blockModels

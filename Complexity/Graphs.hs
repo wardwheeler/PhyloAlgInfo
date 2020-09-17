@@ -52,6 +52,7 @@ module Complexity.Graphs
 
 import Complexity.CodeStrings
 
+mainStartString :: String
 mainStartString = "main=do\n"
 
 -- | makeProgramString is wrapper for makeGraphProgramString to simplify interface

@@ -39,24 +39,20 @@ module Main where
 
 import System.IO
 import System.Environment
-import Debug.Trace
-import Control.Applicative
-import Data.List
 import Complexity.Graphs
 import Complexity.Utilities
 import Complexity.Parsers
 import Complexity.MathUtilities
 import Complexity.CharacterModels
-import Complexity.MatrixUtilities
 import Complexity.Types
-import qualified Numeric.LinearAlgebra as NLA
+-- import Debug.Trace
 
 -- | writeTCM takes model structure (name, alphabet, matrix) and writes file 
 -- creates filename from stub and character name
 writeTCMFile :: String -> String -> (String, [String], [[Double]]) -> IO()
-writeTCMFile unitType stub (charName, alphabet, tcmMatrix) =
+writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
     let outFileName = stub ++ charName ++ "." ++ unitType ++ ".tcm"
-        alphString = concatMap (++ " ") alphabet
+        alphString = concatMap (++ " ") localAlphabet
         matrixString = matrix2String tcmMatrix
         tcmString = alphString ++ "\n" ++ matrixString
     in
@@ -119,12 +115,12 @@ main =
         hPutStrLn stderr ("Softwired Graph -> Tree complexity: " ++ show graph2DisplayTreeComplexity)
         
         --calculate and output Bit TCMs for each character change model for complexity calculations
-        let tcmList = fmap (makeTCM log2 . fst) charInfo
-        mapM_ (writeTCMFile "bit" stub) tcmList
+        let tcmListBit = fmap (makeTCM log2 . fst) charInfo
+        mapM_ (writeTCMFile "bit" stub) tcmListBit
 
         --calculate and output Nat TCMs for each character change model for likelihood calculations
-        let tcmList = fmap (makeTCM logE . fst) charInfo
-        mapM_ (writeTCMFile "nat" stub) tcmList
+        let tcmListE = fmap (makeTCM logE . fst) charInfo
+        mapM_ (writeTCMFile "nat" stub) tcmListE
 
         let (aic, bic) = getAICBIC charInfo 0 0
         putStrLn ("Akaike Information adjustment : " ++ show aic)
@@ -132,7 +128,10 @@ main =
 
         --Calculate complexity of Character Model Components
         let characterProgram = makeProgramStringCharacters (fmap fst charInfo)
-        let (characterShannonBits, characterHuffmanLengthBits, characterHuffmanBitRep) = getInformationContent characterProgram
+        
+        -- if want to show huffman representation otherwise don't need.
+        -- let (characterShannonBits, characterHuffmanLengthBits, characterHuffmanBitRep) = getInformationContent characterProgram
+        let (characterShannonBits, characterHuffmanLengthBits, _) = getInformationContent characterProgram
         writeFile (stub ++ ".blockModels.hs") characterProgram
 
         let characterModelComplexity = characterShannonBits
@@ -144,14 +143,14 @@ main =
         let modelSpecificationComplexity = fromIntegral (length charInfo) * logBase 2.0 (fromIntegral $ length charInfo)
         hPutStrLn stderr ("Character model switching complexity: " ++ show modelSpecificationComplexity)
         let charNumComplexity = sum $ fmap (logBase 2.0 . fromIntegral) (snd <$> characterModelList machineConfig)
-        let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
+        let characterNumber = fromIntegral $ sum $ snd <$> characterModelList machineConfig
         hPutStrLn stderr ("Character number : " ++ show characterNumber)
         hPutStrLn stderr ("Character number complexity: " ++ show charNumComplexity)
 
         -- display tree could be at most 2^r but is limited by the number of 'blocks' or characters that could
         ----follow individual display trees so the number of characters (take smaller of two), 
         ----but still need 'r' bits to encoding which display tree
-        let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
+        -- let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
         let softWiredFactor = displayTreeSwitchingComplexity + (min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber * graph2DisplayTreeComplexity)
         hPutStrLn stderr ("Softwire complexity factor: " ++ show softWiredFactor)
 

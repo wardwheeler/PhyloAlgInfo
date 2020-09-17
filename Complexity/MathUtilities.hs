@@ -44,14 +44,14 @@ Good symbolic integrator https://www.integral-calculator.com/
 
 module Complexity.MathUtilities where
 
-import Data.List
-import Debug.Trace
-import Complexity.Parsers
+-- import Complexity.Parsers
 import Complexity.Types
-import Complexity.Constants
+-- import Complexity.Constants
+-- import Debug.Trace
 
 -- | factorial is naive recursive calculation of factorials
 -- Double is more stable numerically
+factorial :: (Eq a, Num a) => a -> a
 factorial 0 = 1
 factorial 1 = 1
 factorial n = n * factorial (n - 1)
@@ -70,9 +70,11 @@ baseE iterations counter =
 -- counter set to 0, curValue set to 0.0
 -- (1+ (x/n))^n
 -- this is a problem--causes issues
-expE :: Double -> Int -> Int -> Double
-expE exponent iterations counter =
-  exp exponent
+-- expE :: Double -> Int -> Int -> Double
+-- expE exponentLocal iterations counter =
+expE :: Double -> Double
+expE exponentLocal =
+  exp exponentLocal
   {-
   if counter == fixedPrecision then 0 
   else  
@@ -85,9 +87,9 @@ expE exponent iterations counter =
   -}
 
 -- | expX2Y exponentiation general x^y via e^(y * log x)
-expX2Y :: Double -> Double -> Int -> Double
-expX2Y base exponent iterations =
-  base ** exponent
+expX2Y :: Double -> Double -> Double
+expX2Y base exponentLocal =
+  base ** exponentLocal
   {-
   expE (exponent * (logE base iterations 0 0)) iterations 0
   -}
@@ -95,14 +97,16 @@ expX2Y base exponent iterations =
 -- | power take a base and positive integer exponent and returns value
 -- this for use in expE calculation  initialized with counter value of 0
 power :: Double -> Int -> Int -> Double
-power base exponent counter
-  | exponent == 0 = 1.0
-  | exponent == counter = 1
+power base exponentLocal counter
+  | exponentLocal == 0 = 1.0
+  | exponentLocal == counter = 1
   | otherwise =
-      base * power base exponent (counter + 1)
+      base * power base exponentLocal (counter + 1)
 
+
+{-Unused args hit trigger warning but are needed so functions can be passed alternately-}
 -- | log2 is logarithm base 2 defined in terms of Taylor series for log base e 
--- 2 unbused args dso same as LogE for functional argument use
+-- 2 unused args do same as LogE for functional argument use
 log2 :: Double -> Int-> Int -> Double -> Double
 log2 value iterations blah bleh = logE value iterations 0 0.0 / logE 2.0 iterations 0 0.0
 
@@ -127,14 +131,14 @@ logE value iterations counter curValue = log value
 -- goes 0 to N (not n-1) 
 gammaFun :: Double -> Int -> Int -> Double -> Double
 gammaFun value iterations counter curValue =
-  if counter > iterations then factorial (fromIntegral iterations) * expX2Y (fromIntegral iterations) value iterations/ curValue
+  if counter > iterations then factorial (fromIntegral iterations) * expX2Y (fromIntegral iterations) value / curValue
   else gammaFun value iterations (counter + 1) (curValue * (value + fromIntegral counter))
 
 -- | gammaPDF returns probbaility of given argument based on inputs and parameters assumes alpha=beta
 -- hence only 1 gamma parameter 
 gammaPDF :: Double -> Int -> Double -> Double -> Double
 gammaPDF alpha iterations interval rVal  =
-  let result = interval * expX2Y alpha alpha iterations * expX2Y rVal (alpha - 1) iterations * expE (-1 * alpha * rVal) iterations 0 / gammaFun alpha iterations 0 1
+  let result = interval * expX2Y alpha alpha  * expX2Y rVal (alpha - 1)  * expE (-1 * alpha * rVal) / gammaFun alpha iterations 0 1
   in
   --trace ("alpha " ++ (show alpha) ++ " iterations " ++ (show iterations) ++ " interval " ++ (show interval) ++ " rVal " ++ (show rVal) ++ " => " ++ (show result)) 
   result
@@ -191,8 +195,10 @@ discreteGamma alpha numClasses maxRate iterations rectangles
       --trace ("\nLast = " ++ (show $ last adjustedCDFList) ++ "\nSum = " ++ (show $ sum rProbList))
       rNormalized
 
+
+{-Extra arguments are to maintain same types for these two functions so can be used as alternate paramters to function later -}
 -- | getUniformPdf gets pdf on interval [0,maxValue]
--- the time and iteratgion arguemens are ignored-- there to nake like exponential
+-- the time and iteration arguemens are ignored-- there to nake like exponential
 getUniformPdf :: Double -> Int -> Double -> Double
 getUniformPdf  maxValue iterations time = 1 / maxValue
 
@@ -200,6 +206,6 @@ getUniformPdf  maxValue iterations time = 1 / maxValue
 getExponentialPdf ::  Double -> Int -> Double -> Double
 getExponentialPdf  lambda iterations time =
   -- lambda * exp (-1 * lambda * time)
-  lambda * expE (-1 * lambda * time) iterations 0
+  lambda * expE (-1 * lambda * time) -- iterations 0
 
 

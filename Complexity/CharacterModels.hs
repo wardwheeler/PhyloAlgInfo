@@ -52,11 +52,10 @@ module Complexity.CharacterModels
   ,  getAICBIC
   )  where
 
-import Debug.Trace
 import Control.Applicative
 import Data.List
 import Complexity.MathUtilities
-import Complexity.Parsers
+-- import Complexity.Parsers
 import Complexity.CodeStrings
 import Complexity.Types
 import Complexity.Constants
@@ -64,25 +63,41 @@ import Complexity.GTRExt
 import Complexity.MatrixUtilities
 import Complexity.Utilities
 import Complexity.IntegratedModels
+-- import Debug.Trace
+
 
 
 -- |list of functions required by Neyman models, special cases to reduce code size for special cases
 -- can union lists to write the ones (and only ones) needed
+neymanUniformDependencies :: [String]
 neymanUniformDependencies = [headString,tailString,concatString,makeTCMBitsString, neymanUniformString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString, lastString]
+
+neymanExponentialDependencies :: [String]
 neymanExponentialDependencies = [headString,tailString,concatString,makeTCMBitsString, neymanExponentialString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString, foldlString, lastString]
 
+neymanUniformWithKDependencies :: [String]
 neymanUniformWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanUniformMatrixString, neymanUniformWithKString] ++ modifierDependencies ++ gammaDependencies
+
+neymanExponentialWithKDependencies :: [String]
 neymanExponentialWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanExponentialMatrixString, neymanExponentialWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
+
+neymanGeneralWithKDependencies :: [String]
 neymanGeneralWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanGeneralMatrixString, neymanGeneralWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
 
 -- | these are for local GTR functions
 -- assuming the functions will recieve a good Q matrix
+gtrDependencies :: [String]
 gtrDependencies = [makeGTRMatrixLocalString, makeGTRLogMatrixString, split2MatrixString, regularizeRString, makeQString, addDiagValuesString, invertMatrixString, adjustSymString, adjustDiagString, getLogMatrixString, addMatricesString, integrateGTRMatrixWithKString, determinantNumericalString, cofactorTMatrixString, takeWhileString, getCofactor1String, getRowString, removeColumnString, removeRowAndColumnString, isPosRString, lastString, tailString, logEString, matrix2StringString, log2String, zipString] ++ qrDependencies ++ numericalIntegrationDependencies
 
+{-
+gtrUniformDependencies :: [String]
 gtrUniformDependencies = [getUniformPdfString]
-gtrExponentialDependencies = [getExponentialPdfString, expEString, powerString, maximumString]
 
--- | dpependencies for 4-state DNA models
+gtrExponentialDependencies :: [String]
+gtrExponentialDependencies = [getExponentialPdfString, expEString, powerString, maximumString]
+-}
+
+-- | dependencies for 4-state DNA models
 {-
 f81Dependencies = [makeGTRLogMatrixString,makeF81String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
 k80Dependencies = [makeGTRLogMatrixString,makeK80String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
@@ -90,30 +105,56 @@ hKY85Dependencies = [makeGTRLogMatrixString,makeHKY85String, integrateGTRMatrixW
 f84Dependencies = [makeGTRLogMatrixString,makeF84String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
 tN93Dependencies = [makeGTRLogMatrixString,makeTN93String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
 -}
+
+f81ExponentialDependencies :: [String]
 f81ExponentialDependencies = [f81ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+k80ExponentialDependencies :: [String]
 k80ExponentialDependencies = [k80ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+hky85ExponentialDependencies :: [String]
 hky85ExponentialDependencies = [hky85ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+f84ExponentialDependencies :: [String]
 f84ExponentialDependencies = [f84ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+tn93ExponentialDependencies :: [String]
 tn93ExponentialDependencies = [tn93ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
 
+f81UniformDependencies :: [String]
 f81UniformDependencies = [f81UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+k80UniformDependencies :: [String]
 k80UniformDependencies = [k80UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+hky85UniformDependencies :: [String]
 hky85UniformDependencies = [hky85UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+f84UniformDependencies :: [String]
 f84UniformDependencies = [f84UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+
+tn93UniformDependencies :: [String]
 tn93UniformDependencies = [tn93UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
 
 -- | QR factorization dependencies 
+qrDependencies :: [String]
 qrDependencies = [qrFactorizationString,  getDiagValuesString,  qrDecompositionString,  matrixMultiplyString,  concatString,  fmapString,  lengthString,  absString,  foldlString,  getHouseholderListString, transposeMatrixString,  getHouseholderString,  padOutMinorString,  makeMatrixMinorString,  makeDiagMatrixString,  takeString,  dropString,  zipWithString,  getColumnVectorString,  makeEVectorString,  euclidNormString,  matrixMultiplyScalarString,  subtractMatricesString,  normalizeColumnVectorString,  headString,  replicateString,  makeDiagRowString,  normalizeVectorString,  sqrtString,  getRowsString,  getElementString, getDiagValuesString, minimumString, maximumString, expEString, powerString]
 
 -- | dependencies for numerical integration
+numericalIntegrationDependencies :: [String]
 numericalIntegrationDependencies = [trapezoidIntegrationString, makeGTRLogMatrixString, replicateString, fmapString, split2MatrixString,integrateGTRMatrixWithKString, foldlString, addMatricesString, adjustDiagString, getLogMatrixString, getPijString]
 
+{-
 -- | dependencier for log transforms
+log2Dependencies :: [String]
 log2Dependencies = [log2String, logEString, powerString]
+-}
 
 -- adding in rate modifiers dependencies to this
+modifierDependencies :: [String]
 modifierDependencies = [getModifierListSmallString]
 
+gammaDependencies :: [String]
 gammaDependencies = [gammaFunString, expX2YString, getNTilesString, gammaPDFString, cumulativeSumString, discreteGammaString, replicateString, fmapString, factorialString, logEString, expEString, powerString, foldlString]
 
 -- | getModelList take a list of character models and returns the dependency list for all models
@@ -258,6 +299,7 @@ makeDependenciesString inList =
         in
         first ++ makeDependenciesString (tail inList)
 
+{-
 -- | pairList2String takes list of pairs and makes into string for argument ot rate modifiers
 -- in neymanGeneralWithK 
 pairList2String :: (Show a, Show b) => String -> [(a,b)] -> String
@@ -271,7 +313,9 @@ pairList2String start inList =
         pairList2String (start ++ this) (tail inList)
     else
         pairList2String (start ++ "," ++ this) (tail inList)
+-}
 
+{-
 -- | getModifierListSmall like getModifier list but paired down forvuse in minimmal code
 getModifierListSmall :: Int -> Double -> Int -> Int -> Double -> Int -> [(Double, Double)]
 getModifierListSmall invariant theta gamma nClasses alpha iterations
@@ -285,6 +329,7 @@ getModifierListSmall invariant theta gamma nClasses alpha iterations
       zip gammaWeightList gammaFracList
     else
       zip (0 : fmap (* (1/ (1 - theta))) gammaWeightList) (theta : fmap (* (1 - theta)) gammaFracList)
+-}
 
 -- | getInfo takes CharacterModel type and ertuns field as a tuple
 getInfo :: CharacterModel -> (String, [String], (Distribution, [DistributionParameter]), 
@@ -293,12 +338,14 @@ getInfo charInfo =
   (characterName charInfo, alphabet charInfo, branchLength charInfo, rateModifiers charInfo, changeModel 
     charInfo, precision charInfo, charLength charInfo)
 
+{-
 -- | getModifierList take charInfo and returns rate modifier list
 getModifierList :: CharacterModel -> [(DistributionParameter, DistributionParameter)]
 getModifierList charInfo =
   let (_, _,_, tcmRateModifiers,_,iterations, _) = getInfo charInfo
   in
   getModifiers tcmRateModifiers iterations
+-}
 
 -- | getModifierParams gets params for sending to getModifierListSmall
 getModifierParams :: [(Modifier, [DistributionParameter])] -> (Int, Double, Int, Int, Double)
@@ -335,9 +382,9 @@ makeCharacterModelsString :: [CharacterModel] -> Int -> Bool-> Bool -> String
 makeCharacterModelsString charModelList counter areRateModifiers areBothDistributions =
     if null charModelList then []
     else
-       let (tcmName, tcmAlphabet,(branchDist, branchParams), tcmRateModifiers,(tcmChangeModel, tcmQ, tcmP, modelParams),tcmPrecision, _) = getInfo $ head charModelList
+       let (_, tcmAlphabet,(branchDist, branchParams), tcmRateModifiers,(tcmChangeModel, tcmQ, tcmP, modelParams),tcmPrecision, _) = getInfo $ head charModelList
            (a,b,c,d,e) = getModifierParams tcmRateModifiers
-           weightString = pairList2String "[" (getModifierListSmall a b c d e tcmPrecision)
+           -- weightString = pairList2String "[" (getModifierListSmall a b c d e tcmPrecision)
            maximumTime = getEndTime branchDist (head branchParams)
        in
        --trace (show (getModifierListSmall a b c d e tcmPrecision)) (
@@ -509,7 +556,7 @@ makeTCM logType charInfo =
       if tcmChangeModel == GTR then
         let (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
-            (eigenValueList2, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
+            -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
         in
         (tcmName, tcmAlphabet, logMatrix)
       else
@@ -560,10 +607,10 @@ getAICBIC charInfoPairList aicCounter bicCounter =
   else
     let charInfo = fst $ head charInfoPairList
         numThisBlockType = fromIntegral $ snd $ head charInfoPairList
-        tcmAlphabet = alphabet charInfo
-        (branchDist, branchParams) = branchLength charInfo
+        -- tcmAlphabet = alphabet charInfo
+        (_, branchParams) = branchLength charInfo
         tcmRateModifiers = rateModifiers charInfo
-        (tcmChangeModel, tcmQ, tcmP, modelParams) = changeModel charInfo
+        (tcmChangeModel, _, tcmP, _) = changeModel charInfo
         lnLength = log $ fromIntegral $ charLength charInfo * numThisBlockType
         branchParamNumber = fromIntegral $ length branchParams
         rateModParamNumber = fromIntegral $ getRateParams tcmRateModifiers 0 --fromIntegral $ sum $ fmap length $ fmap snd tcmRateModifiers
@@ -613,7 +660,7 @@ makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
 -- and returning teh log matrix for TCM file creation
 makeGTRLogMatrix ::  (Double -> Int-> Int -> Double -> Double) -> String -> [Double] -> [[Double]] -> [[Double]] -> Int ->  Double -> Double -> Int -> Distribution -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix logType lastAlphElement eigenValueList uMatrix uInvMatrix alphSize probDistParam maxValue iterations distribution modifiers =
-  let zeroMatrix = replicate alphSize $ replicate alphSize 0.0
+  let -- zeroMatrix = replicate alphSize $ replicate alphSize 0.0
       probMatrixList  = fmap (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
@@ -628,7 +675,7 @@ makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double
 makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelParams piVector modifiers =
   let lastAlphElement = "T"
       alphSize = 4
-      zeroMatrix = replicate alphSize $ replicate alphSize 0.0
+      -- zeroMatrix = replicate alphSize $ replicate alphSize (0.0 :: Double)
       probMatrixList  = fmap (modelFunction modelParams piVector probDistParam iterations) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in

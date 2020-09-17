@@ -44,7 +44,7 @@ module Complexity.Utilities
 
 import Data.List
 import Data.Compression.Huffman
-import Complexity.Constants
+-- import Complexity.Constants
 import Numeric.LinearAlgebra
 
 -- | occurencesInList counts occurences elements in list--makes result double so can divide later

@@ -39,14 +39,14 @@ module Complexity.GTRExt
   ) where
 
 import Data.List
-import Debug.Trace
 import Numeric.LinearAlgebra
-import Complexity.MathUtilities
-import Complexity.Types hiding (Matrix, Vector)
+-- import Complexity.MathUtilities
+-- import Complexity.Types hiding (Matrix, Vector)
 import Complexity.Utilities
-import Complexity.Constants
+-- import Complexity.Constants
 import Prelude hiding ((<>))
 import Complexity.MatrixUtilities
+-- import Debug.Trace
 
 -- | makeGTRMatrixExt makes GTR matricx using external LAPACK/BLAS libraries
 -- and returning eigen values, vectors and vector matrix inversion
