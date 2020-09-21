@@ -36,6 +36,10 @@ Portability :  portable (I hope)
 module Complexity.CodeStrings where
 
 import Complexity.Constants
+
+--Ingeneral, function names are letter number and intrernal variable are letters only
+-- exception \aG, \bG, cG, dG for \aGraph etc since 10 \a functions
+
 --remove prelude stuff for production
 --only for debugging
 programStartString :: String
@@ -43,43 +47,43 @@ programStartString="module Main where\n"  --import Debug.Trace\n"
 
 recursivePrintString :: String
 recursivePrintString = "\
-\p a b=\n\
+\p0 a b=\n\
 \  if null b then putStr a\n\
 \  else\n\
 \    let ((c,d):e)=b\n\
-\    in p(a++(show c++\" \"++show d++\"\\n\")) e\n"
+\    in p0(a++(show c++\" \"++show d++\"\\n\")) e\n"
 
 programStartStringGraph :: String
 programStartStringGraph = "module Main where\n"++recursivePrintString
 
 getSingletonEdgesString :: String
 getSingletonEdgesString = "\
-\a b c =\n\
+\aG b c =\n\
 \  if c==0 then []\n\
-\  else (2*b,2*b+1):a(b+1)(c-1)\n"
+\  else (2*b,2*b+1):aG(b+1)(c-1)\n"
 
 minimalTreesString :: String
 minimalTreesString ="\
-\b a c d=\n\
+\bG a c d=\n\
 \  if (d<2)||(c==0) then []\n\
-\  else [(a,a+1),(a,a+2)]++b(a+3)(c-2)(d-1)\n"
+\  else [(a,a+1),(a,a+2)]++bG(a+3)(c-2)(d-1)\n"
 
 fullTreeString :: String
 fullTreeString = "\
-\c a b d\n\
+\cG a b d\n\
 \  | d==0=[]\n\
-\  | a=[(b+2,b),(b+2,b+1)]++c False (b+2)(d-2)\n\
-\  | otherwise=[(b+2,b),(b+2,b+1)]++c False (b+2)(d-1)\n"
+\  | a=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-2)\n\
+\  | otherwise=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-1)\n"
 
 addEdgeString :: String
 addEdgeString = "\
-\d a ((e,f):(g,h):i) c =\n\
+\dG a ((e,f):(g,h):i) c =\n\
 \  if c==0 then (e,f):(g,h):i\n\
 \  else\n\
 \    let j=a\n\
 \        k=a+1\n\
 \        l=i++[(j,k),(e,j),(j,f),(g,k),(k,h)]\n\
-\    in d(a+2) l (c-1)\n"
+\    in dG(a+2) l (c-1)\n"
 
 factorialString :: String
 factorialString="\
@@ -91,15 +95,15 @@ factorialString="\
 --power base exponent counter =
 powerString :: String
 powerString="\
-\p b x c\n\
+\p1 b x c\n\
 \ | x==0=1\n\
 \ | x==c=1\n\
-\ | otherwise=b*(p b x(c+1))\n"
+\ | otherwise=b*(p1 b x(c+1))\n"
 {-
-\p b x c=\n\
+\p1 b x c=\n\
 \  if x==0 then 1\n\
 \  else if x==c then 1\n\
-\  else b*(p b x (c+1))\n"
+\  else b*(p1 b x (c+1))\n"
 -}
 
 --expE :: Double -> Int -> Int -> Double
@@ -107,12 +111,12 @@ powerString="\
 -- This needs alot of iterations to behave well--100 for sure
 -- Is n^2 due to use of factorial could be made linear
 -- by saving previous factorial value and just mulgtipolying 
--- the use of p also makes n^2--same preocedure--need a new value to pass
+-- the use of p1 also makes n^2--same preocedure--need a new value to pass
 expEString :: String
 expEString="\
 \e x i c=\n\
 \  if c=="++ fixedPrecisionString ++" then 0\n\
-\  else ((p x c 0)/(f$fromIntegral c))+e x i (c+1)\n"
+\  else ((p1 x c 0)/(f$fromIntegral c))+e x i (c+1)\n"
 
 {-
 --  \e x i c=exp x\n"   test with library
@@ -126,7 +130,7 @@ logEString  :: String
 logEString="\
 \l v i c w=\n\
 \  if c==i then 2*w\n\
-\  else l v i (c+1) (w+((p ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
+\  else l v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
 
 --log2 :: Double -> Int-> Int -> Double -> Double 
 --log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
@@ -181,9 +185,9 @@ neymanExponentialString="\
 
 -- |this passes function of Neyman Uniform or NeymanExponential as argument 
 -- f is functino, n=alpabet size, a is branch distribution param, p is precision integer, 
+-- \c :: (Int -> Double -> Int -> (Double, Double)) -> Int -> Double -> Int -> String -> [[Double]]\n\
 makeTCMBitsString :: String
 makeTCMBitsString="\
-\c :: (Int -> Double -> Int -> (Double, Double)) -> Int -> Double -> Int -> String -> [[Double]]\n\
 \c f n a p s=\n\
 \  let (d,e)=f n a p\n\
 \  in m n (-1*b d p 0 0)(-1*b e p 0 0) 0 s\n"
