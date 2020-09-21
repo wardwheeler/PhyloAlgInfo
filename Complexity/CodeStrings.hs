@@ -39,6 +39,7 @@ import Complexity.Constants
 
 --Ingeneral, function names are letter number and intrernal variable are letters only
 -- exception \aG, \bG, cG, dG for \aGraph etc since 10 \a functions
+-- \fM for \fModel when 0-9 used as fopr graph ones above
 
 --remove prelude stuff for production
 --only for debugging
@@ -87,9 +88,9 @@ addEdgeString = "\
 
 factorialString :: String
 factorialString="\
-\f 0=1\n\
-\f 1=1\n\
-\f n=n*f (n-1)\n"
+\fM 0=1\n\
+\fM 1=1\n\
+\fM n=n*fM (n-1)\n"
 
 --power :: Double -> Int -> Int -> Double
 --power base exponent counter =
@@ -114,9 +115,9 @@ powerString="\
 -- the use of p1 also makes n^2--same preocedure--need a new value to pass
 expEString :: String
 expEString="\
-\e x i c=\n\
+\e0 x i c=\n\
 \  if c=="++ fixedPrecisionString ++" then 0\n\
-\  else ((p1 x c 0)/(f$fromIntegral c))+e x i (c+1)\n"
+\  else ((p1 x c 0)/(fM$fromIntegral c))+e0 x i (c+1)\n"
 
 {-
 --  \e x i c=exp x\n"   test with library
@@ -128,33 +129,33 @@ expEString="\
 --logE value iterations counter curValue =
 logEString  :: String
 logEString="\
-\l v i c w=\n\
+\l0 v i c w=\n\
 \  if c==i then 2*w\n\
-\  else l v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
+\  else l0 v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
 
 --log2 :: Double -> Int-> Int -> Double -> Double 
 --log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
 log2String :: String
 log2String="\
-\b v i c w=(l v i 0 0)/(l 2 i 0 0)\n"
+\b0 v i c w=(l0 v i 0 0)/(l0 2 i 0 0)\n"
 
 -- start with 0
--- \r :: Int -> a -> Int -> [a]\n\ 
+-- \r0 :: Int -> a -> Int -> [a]\n\ 
 replicateString :: String
 replicateString="\
-\r n v c=\n\
+\r0 n v c=\n\
 \  if n==c then []\n\
-\  else v:r n v (c+1)\n"
+\  else v:r0 n v (c+1)\n"
 
 --makeSimpleMatrix :: Int -> Double -> Double -> Int -> String -> [[Double]]
 --makeSimpleMatrix size diag nondiag rowCounter lastElement =
 -- \m :: Int -> Double -> Double -> Int -> String -> [[Double]]\n\
 makeMatrixString :: String
 makeMatrixString="\
-\m s d n c e\n\
+\m0 s d n c e\n\
 \ | s==c=[]\n\
-\ | (e/=\"-\")||(c<s-1)=((r c n 0)++[d]++(r(s-c-1)n 0)):m s d n(c+1)e\n\
-\ | otherwise=[(r c n 0)++[0]]\n"
+\ | (e/=\"-\")||(c<s-1)=((r0 c n 0)++[d]++(r0(s-c-1)n 0)):m0 s d n(c+1)e\n\
+\ | otherwise=[(r0 c n 0)++[0]]\n"
 {-
 \m s d n c e=\n\
 \  if s==c then []\n\
@@ -164,15 +165,15 @@ makeMatrixString="\
 
 fmapString :: String
 fmapString="\
-\g f l =\n\
+\gM f l =\n\
 \  if null l then []\n\
-\  else f (a5 l) : g f (a6 l)\n"
+\  else f (a5 l) : gM f (a6 l)\n"
 
 matrix2StringString :: String
 matrix2StringString="\
-\s m=\n\
+\s0 m=\n\
 \  if null m then \"\\n\"\n\
-\  else (a4 $ g (++ \" \") $ g show $ a5 m)++\"\\n\"++s (a6 m)\n"
+\  else (a4 $ gM (++ \" \") $ gM show $ a5 m)++\"\\n\"++s0 (a6 m)\n"
 
 neymanUniformString :: String
 neymanUniformString="\
@@ -209,12 +210,12 @@ sndString="\
 makeNeymanGeneralMatrixString :: String
 makeNeymanGeneralMatrixString="\
 \n r l a p o s=\n\
-\  let k=g(j r l a p)o\n\
-\      q=c3(+)0$g h k\n\
-\      c=c3(+)0$g i k\n\
-\      e=(-1)*b q p 0 0\n\
-\      f=(-1)*b c p 0 0\n\
-\  in m l e f 0 s\n"
+\  let k=gM(j r l a p)o\n\
+\      q=c3(+)0$gM h k\n\
+\      c=c3(+)0$gM i k\n\
+\      e=(-1)*b0 q p 0 0\n\
+\      f=(-1)*b0 c p 0 0\n\
+\  in m0 l e f 0 s\n"
 
 -- inner part of Neym,ena general--get the pii/pij for weight and fractions
 -- d=0  is "uniform" distribution
@@ -225,7 +226,7 @@ neymanGeneralWithKString ="\
 \ | w<" ++ epsilonString ++ "=(f,0)\n\
 \ | d==0=\n\
 \   let r1=fromIntegral r\n\
-\       b=(e(-1 *a*w)i 0)\n\
+\       b=(e0(-1 *a*w)i 0)\n\
 \       l=((b+(a*w)-1)/(a*w*r1))\n\
 \       m=1-((r1-1)*l)\n\
 \   in (f*m,f*l)\n\
@@ -258,11 +259,11 @@ discreteGammaString="\
 \  else\n\
 \    let b=n*e\n\
 \        v=m/(fromIntegral b)\n\
-\        z=(k(r b v 0)0)\n\
-\        c=k(g(t a i v)z)0\n\
-\        j=g(+(1-(a3 c)))c\n\
+\        z=(k(r0 b v 0)0)\n\
+\        c=k(gM(t a i v)z)0\n\
+\        j=gM(+(1-(a3 c)))c\n\
 \        s=w n j z 1 True\n\
-\    in g(*((fromIntegral n)/(c3(+)0 s)))s\n"
+\    in gM(*((fromIntegral n)/(c3(+)0 s)))s\n"
 
 -- \k :: [Double] -> Double -> [Double]\n\
 cumulativeSumString :: String
@@ -274,7 +275,7 @@ cumulativeSumString="\
 -- \t :: Double -> Int -> Double -> Double -> Double\n\
 gammaPDFString :: String
 gammaPDFString="\
-\t a i l r=l*(q a a i)*(q r(a-1)i)*(e(-1*a*r)i 0)/(v a i 0 1)\n"
+\t a i l r=l*(q a a i)*(q r(a-1)i)*(e0(-1*a*r)i 0)/(v a i 0 1)\n"
 
 -- \w :: Int -> [Double] -> [Double] -> Int -> Bool-> [Double]\n\
 getNTilesString :: String
@@ -295,13 +296,13 @@ getNTilesString ="\
 -- maybe replace with expE when used
 expX2YString :: String
 expX2YString="\
-\q a x i=e(x*(l a i 0 0))i 0\n"
+\q a x i=e0(x*(l0 a i 0 0))i 0\n"
 
 -- \v :: Double -> Int -> Int -> Double -> Double\n\
 gammaFunString :: String
 gammaFunString="\
 \v u i c l=\n\
-\  if c>i then (f$fromIntegral i)*(q(fromIntegral i)u i)/l\n\
+\  if c>i then (fM$fromIntegral i)*(q(fromIntegral i)u i)/l\n\
 \  else v u i(c+1)(l*(u+(fromIntegral c)))\n"
 
 -- \a :: Int -> Double -> Int -> (Double, Double) -> (Double, Double)\n\
@@ -335,10 +336,10 @@ getModifierListSmallString="\
 \ | v==1 && h==0=[(0,t),(1/(1-t),1-t)]\n\
 \ | otherwise=\n\
 \    let w=x a n 10.0 i(n*i)\n\
-\        f=r n(1.0/(fromIntegral n))0\n\
+\        f=r0 n(1.0/(fromIntegral n))0\n\
 \    in\n\
 \    if t==0 then a2 w f else\n\
-\    a2(0:(g(*(1/(1-t)))w))(t:(g(*(1-t))f))\n"
+\    a2(0:(gM(*(1/(1-t)))w))(t:(gM(*(1-t))f))\n"
 {-
 \a1 v t h n a i=\n\
 \  if v==0 && h==0 then [(1,1)]\n\
@@ -407,7 +408,7 @@ transposeMatrixString :: String
 transposeMatrixString="\
 \b7 a=\n\
 \ if null$a5 a then []\n\
-\ else g a5 a:b7(g a6 a)\n"
+\ else gM a5 a:b7(gM a6 a)\n"
 
 absString :: String
 absString="\
@@ -502,7 +503,7 @@ getPijString :: String
 getPijString="\
 \e7 a b c d f g h i=\n\
 \ if f==d5 0 b then 0\n\
-\ else (e((a!!f)*d)i 0*((b!!g)!!f)*((c!!f)!!h))+e7 a b c d(f+1)g h i\n"
+\ else (e0((a!!f)*d)i 0*((b!!g)!!f)*((c!!f)!!h))+e7 a b c d(f+1)g h i\n"
 
 -- \removeColumn :: Int -> [[a]] -> [[a]]\n\
 removeColumnString :: String
@@ -525,7 +526,7 @@ matrixMultiplyScalarString :: String
 matrixMultiplyScalarString="\
 \d8 a b=\n\
 \ if null b then []\n\
-\ else g(a *)(a5 b):d8 a(a6 b)\n"
+\ else gM(a *)(a5 b):d8 a(a6 b)\n"
 
 -- \d7 :: [[Double]] -> Double\n\
 determinantNumericalString :: String
@@ -542,7 +543,7 @@ getCofactor1String :: String
 getCofactor1String="\
 \f2 a b =\n\
 \ if (a>(d5 0$a5 b)) then 0\n\
-\ else (((a5 b)!!(a-1))*(p(-1)(1+a)0)*(d7(e9 a(a6 b))))+f2(a+1)b\n"
+\ else (((a5 b)!!(a-1))*(p1(-1)(1+a)0)*(d7(e9 a(a6 b))))+f2(a+1)b\n"
 
 -- \d6 :: [[Double]] -> Int -> [[Double]]\n\
 cofactorTMatrixString :: String
@@ -558,12 +559,12 @@ getUniformPdfString ="\
 
 -- numerical issue?
 -- a*exp (-1*a*c)\n"
--- g0[a*(e(-1 *a*c)b 0)]0\n"
+-- gM[a*(e(-1 *a*c)b 0)]0\n"
 -- \h1 a b c=a*(e(-1*a*c)b 0)\n"
 -- \getExponentialPdf ::  Double -> Int -> Double -> Double\n\
 getExponentialPdfString :: String
 getExponentialPdfString="\
-\h1 a b c=a*(e(-1*a*c)b 0)\n"
+\h1 a b c=a*(e0(-1*a*c)b 0)\n"
 
 -- \f7 :: (a -> Bool) -> [a] -> [a]\n\
 takeWhileString :: String
@@ -584,7 +585,7 @@ regularizeRString :: String
 regularizeRString="\
 \b1 a=\n\
 \ let b=fromIntegral $ d5 0 a\n\
-\ in g(g(*((((b*b)-b)/2)/(c3(+)0(g(c3(+)0)(g(f7(>0))a))))))a\n"
+\ in gM(gM(*((((b*b)-b)/2)/(c3(+)0(gM(c3(+)0)(gM(f7(>0))a))))))a\n"
 
 -- need to start witgh 0 as first arg
 -- \d3 :: Int -> Int -> [a] -> [a]\n\
@@ -661,13 +662,13 @@ getRowString :: String
 getRowString= "\
 \f3 a b c=\n\
 \ if b>(d5 0$a5 c) then []\n\
-\ else (p(-1)(b+a)0)*(d7$f0 b a c):f3 a(b+1)c\n"
+\ else (p1(-1)(b+a)0)*(d7$f0 b a c):f3 a(b+1)c\n"
 
 -- /f9 :: Double -> Int -> Int -> Double
 -- value iterations counter (start at 0)
 sqrtString :: String
 sqrtString="\
-\f9 x i c=e(0.5*l x i c 0)i c\n"
+\f9 x i c=e0(0.5*l0 x i c 0)i c\n"
 
 -- \g0 ::(Ord a) => [a] -> a -> a\n\
 maximumString :: String
@@ -701,7 +702,7 @@ normalizeVectorWithSignString="\
 \b8 i a=\n\
 \ let s=f9(c3(+)0$e5(*)a a)i 0\n\
 \ in\n\
-\ if g0(a6 a)(a5 a)>=(c8$g1(a6 a)(a5 a)) then g(/s)a\n\
+\ if g0(a6 a)(a5 a)>=(c8$g1(a6 a)(a5 a)) then gM(/s)a\n\
 \ else g(/(-1 *s))a\n"
 
 -- \g2 :: (a -> Bool) -> [a] -> [a]\n\
@@ -756,7 +757,7 @@ qrFactorizationString="\
 \     l=a4 a\n\
 \     m=a4 n\n\
 \ in\n\
-\ if (((c3(+)0$g c8$e5(-)l m)/fromIntegral (d5 0 a * d5 0 a))<" ++ epsilonString ++ ") || (c<" ++ maxIterationsString ++ ") then (q,r,o)\n\
+\ if (((c3(+)0$gM c8$e5(-)l m)/fromIntegral (d5 0 a * d5 0 a))<" ++ epsilonString ++ ") || (c<" ++ maxIterationsString ++ ") then (q,r,o)\n\
 \ else h3 n o (c+1)i\n"
 
 -- \h5 :: [[Double]] -> Int -> [Double]\n\
@@ -777,7 +778,7 @@ getDiagValuesString="\
 qrDecompositionString :: String
 qrDecompositionString="\
 \h4 a i=\n\
-\ let c=g b7(h6 a a(d5 0 a)0 i)\n\
+\ let c=gM b7(h6 a a(d5 0 a)0 i)\n\
 \     d=c3 h2(a5 c)(a6 c)\n\
 \ in (d,h2(b7 d)a)\n"
 
@@ -816,12 +817,12 @@ padOutMinorString="\
 \   else\n\
 \     let r=d-m\n\
 \         l=i6 d 1\n\
-\     in d3 0 r l++e5(++)(g(d3 0 r)$d4 0 r l)a\n"
+\     in d3 0 r l++e5(++)(gM(d3 0 r)$d4 0 r l)a\n"
 
 -- \i0 :: Int -> Int -> [[Double]] -> [[Double]]\n\
 makeMatrixMinorString :: String
 makeMatrixMinorString="\
-\i0 r c a=g(d4 0(c+1))(d4 0(r+1)a)\n"
+\i0 r c a=gM(d4 0(c+1))(d4 0(r+1)a)\n"
 
 -- \i6 :: Int -> Double -> [[Double]]\n\
 makeDiagMatrixString :: String
@@ -831,12 +832,12 @@ makeDiagMatrixString="\
 -- \i2 :: Int -> [[Double]] -> [[Double]]\n\
 getColumnVectorString :: String
 getColumnVectorString="\
-\i2 c a=g(:[])$g(!!c)a\n"
+\i2 c a=gM(:[])$gM(!!c)a\n"
 
 -- \i1 :: Int -> Int -> Double -> [Double]\n\
 makeEVectorString :: String
 makeEVectorString="\
-\i1 d p v=r p 0 0++[v]++r(d-p-1)0 0\n"
+\i1 d p v=r0 p 0 0++[v]++r0(d-p-1)0 0\n"
 
 -- \i4 :: [[Double]] -> [[Double]] -> [[Double]]\n\
 subtractMatricesString :: String
@@ -848,14 +849,14 @@ subtractMatricesString="\
 -- \i5 :: [[Double]] -> Int -> [[Double]]\n\
 normalizeColumnVectorString :: String
 normalizeColumnVectorString="\
-\i5 c i=g(:[])(i8(a4 c)i)\n"
+\i5 c i=gM(:[])(i8(a4 c)i)\n"
 
 -- \i7 :: Int -> Double -> Int -> [[Double]]\n\
 makeDiagRowString :: String
 makeDiagRowString="\
 \i7 d v c=\n\
 \ if c==d then []\n\
-\ else (r c 0 0++[v]++r(d-c-1)0 0):i7 d v(c+1)\n"
+\ else (r0 c 0 0++[v]++r0(d-c-1)0 0):i7 d v(c+1)\n"
 
 -- \h7 :: Int -> Int -> Int -> [[Double]] -> [[Double]] -> [[Double]]\n\
 getRowsString :: String
@@ -869,12 +870,12 @@ getElementString :: String
 getElementString="\
 \i9 a c b d e=\n\
 \ if c==b then []\n\
-\ else c3(+)0(e5(*)(d!!a)(g(!!c)e)):i9 a(c+1)b d e\n"
+\ else c3(+)0(e5(*)(d!!a)(gM(!!c)e)):i9 a(c+1)b d e\n"
 
 -- \i8 :: [Double] -> Int -> [Double]\n\
 normalizeVectorString :: String
 normalizeVectorString="\
-\i8 a i=g(/i3 a i)a\n"
+\i8 a i=gM(/i3 a i)a\n"
 
 -- \i3 :: [Double] -> Int -> Double\n\
 euclidNormString :: String
@@ -911,15 +912,15 @@ makeGTRLogMatrixString :: String
 makeGTRLogMatrixString="\
 \c1 l m e u v a p x i d f=\n\
 \ let a=d5 0 e\n\
-\     y=b2 a$c5(c3 c4(r a(r a 0.0 0)0)(g(b2 a)$g(c2 e u v 0 0 p x i a d)f))0 0\n\
-\  in b2 a$g(*(-1))$c7 l(c6 y y 0)a m 0 0 i\n"
+\     y=b2 a$c5(c3 c4(r0 a(r0 a 0.0 0)0)(gM(b2 a)$gM(c2 e u v 0 0 p x i a d)f))0 0\n\
+\  in b2 a$gM(*(-1))$c7 l(c6 y y 0)a m 0 0 i\n"
 
 -- \makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]) -> Double -> Int -> [Double] -> [Double] -> [(Double, Double)] -> [[Double]]\n
 makeGTRLogMatrix4StateString :: String
 makeGTRLogMatrix4StateString="\
 \j1 l m p i o q f=\n\
-\ let y= b2 4 $ c5 (c3 c4(r 4(r 4 0.0 0)0)(g(m o q p i)f)) 0 0\n\
-\ in b2 4$g(* (-1))$c7 l(c6 y y 0)4 \"T\" 0 0 i\n"
+\ let y= b2 4 $ c5 (c3 c4(r0 4(r0 4 0.0 0)0)(gM(m o q p i)f)) 0 0\n\
+\ in b2 4$gM(* (-1))$c7 l(c6 y y 0)4 \"T\" 0 0 i\n"
 
 -- \c7 :: (Double -> Int-> Int -> Double -> Double) -> [[Double]] -> Int -> String -> Int -> Int -> Int -> [Double]\n\
 getLogMatrixString :: String
@@ -1006,10 +1007,10 @@ tn93UniformWithKString="\
 \     d1=pT/pY\n\
 \     d2=pA/pR\n\
 \     d3=pC/pY\n\
-\     ebkm=e(b*w*x)i 0\n\
-\     enbkm=e(-1*b*w*x)i 0\n\
-\     enf1km=e(-1*f1*w*x)i 0\n\
-\     enf2km=e(-1*f2*w*x)i 0\n\
+\     ebkm=e0(b*w*x)i 0\n\
+\     enbkm=e0(-1*b*w*x)i 0\n\
+\     enf1km=e0(-1*f1*w*x)i 0\n\
+\     enf2km=e0(-1*f2*w*x)i 0\n\
 \     bkmfactor=(enbkm+((b*w*x)-1))/(b*w*x)\n\
 \     p00=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)+(b*d0)))-(c0*f1)))-(b*d0*enf1km))/(b*f1*w*x)\n\
 \     p01=pC*bkmfactor\n\
@@ -1090,10 +1091,10 @@ f84UniformWithKString="\
 \     d1=pT/pY\n\
 \     d2=pA/pR\n\
 \     d3=pC/pY\n\
-\     ebkm=e(b*w*x)i 0\n\
-\     enbkm=e(-1*b*w*x)i 0\n\
-\     enf1km=e(-1*f1*w*x)i 0\n\
-\     enf2km=e(-1*f2*w*x)i 0\n\
+\     ebkm=e0(b*w*x)i 0\n\
+\     enbkm=e0(-1*b*w*x)i 0\n\
+\     enf1km=e0(-1*f1*w*x)i 0\n\
+\     enf2km=e0(-1*f2*w*x)i 0\n\
 \     bkmfactor=(enbkm+((b*w*x)-1))/(b*w*x)\n\
 \     p00=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)+(b*d0)))-(c0*f1)))-(b*d0*enf1km))/(b*f1*w*x)\n\
 \     p01=pC*bkmfactor\n\

@@ -391,8 +391,8 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
        if tcmChangeModel == K80 || tcmChangeModel == F81 || tcmChangeModel == HKY85 || tcmChangeModel == F84 || tcmChangeModel == TN93 then
         let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
             modelFunctionName = get4StateModelName tcmChangeModel branchDist
-            outString = ("  putStr (s$j1 b " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " w" ++ show counter ++ ")\n")
-            outString2 = ("  putStr (s$j1 b " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " [(1,1)] " ++ ")\n")
+            outString = ("  putStr (s0$j1 b0 " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " w" ++ show counter ++ ")\n")
+            outString2 = ("  putStr (s0$j1 b0 " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " [(1,1)] " ++ ")\n")
         in
         if fst (head tcmRateModifiers) == None then outString2 ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
         else letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
@@ -402,65 +402,65 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
             distFunction = getDistString branchDist
         in
         if fst (head tcmRateModifiers) == None then
-          let outString = ("  putStr (s$c1 b " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " [(1,1)]" ++ ")\n")
+          let outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " [(1,1)]" ++ ")\n")
           in
           eigenString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
         else
           let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-              outString = ("  putStr (s$c1 b " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " w" ++ show counter ++ ")\n")
+              outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " w" ++ show counter ++ ")\n")
           in
           letString ++ eigenString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
        else if tcmChangeModel == Neyman then
          -- change to generated in code
          if fst (head tcmRateModifiers) == None && not areRateModifiers then
            if branchDist == Uniform then
-             let outString = ("  putStr (s$c u " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+             let outString = ("  putStr (s0$c u " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
              in
              outString ++ makeCharacterModelsString (tail charModelList) counter areRateModifiers areBothDistributions
            else
-             let outString = ("  putStr (s$c y " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+             let outString = ("  putStr (s0$c y " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
              in
              outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
          else if fst (head tcmRateModifiers) == None && areRateModifiers then -- there are rateModifiers in other charcater blocks
             if not areBothDistributions then -- only a single branch distribution so use only specific function
                if branchDist == Uniform then
-               let outString = ("  putStr (s$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList) counter areRateModifiers areBothDistributions
              else
-               let outString = ("  putStr (s$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
             else -- there are both uniform and exponential distributions so use general function
               if branchDist == Uniform then
-               let outString = ("  putStr (s$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList) counter areRateModifiers areBothDistributions
              else
-               let outString = ("  putStr (s$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
          else --has rate modifiers in this character block
            if not areBothDistributions then --only a single branch distribution so use only specific function
               if branchDist == Uniform then
                let  letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                    outString = ("  putStr (s$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+                    outString = ("  putStr (s0$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
              else
                let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                   outString = ("  putStr (s$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+                   outString = ("  putStr (s0$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList)  (counter + 1) areRateModifiers areBothDistributions
            else -- there are both uniform and exponential distributions so use general function
              if branchDist == Uniform then
                let  letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                    outString = ("  putStr (s$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+                    outString = ("  putStr (s0$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
              else
                let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                   outString = ("  putStr (s$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+                   outString = ("  putStr (s0$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList)  (counter + 1) areRateModifiers areBothDistributions
        else error "Character model not implemented"
