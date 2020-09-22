@@ -70,92 +70,72 @@ import Complexity.IntegratedModels
 -- |list of functions required by Neyman models, special cases to reduce code size for special cases
 -- can union lists to write the ones (and only ones) needed
 neymanUniformDependencies :: [String]
-neymanUniformDependencies = [headString,tailString,concatString,makeTCMBitsString, neymanUniformString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString, lastString]
+neymanUniformDependencies = [headString,tailString,concatString, makeTCMBitsString, neymanUniformString, factorialString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString]
 
 neymanExponentialDependencies :: [String]
-neymanExponentialDependencies = [headString,tailString,concatString,makeTCMBitsString, neymanExponentialString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString, foldlString, lastString]
+neymanExponentialDependencies = [headString,tailString,concatString, makeTCMBitsString, neymanExponentialString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString]
 
 neymanUniformWithKDependencies :: [String]
-neymanUniformWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanUniformMatrixString, neymanUniformWithKString] ++ modifierDependencies ++ gammaDependencies
+neymanUniformWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, factorialString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanUniformMatrixString, neymanUniformWithKString] ++ modifierDependencies ++ gammaDependencies
 
 neymanExponentialWithKDependencies :: [String]
-neymanExponentialWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanExponentialMatrixString, neymanExponentialWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
+neymanExponentialWithKDependencies = [headString,tailString,concatString, lastString, getModifierListSmallString, zipString, fstString, sndString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanExponentialMatrixString, neymanExponentialWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
 
 neymanGeneralWithKDependencies :: [String]
-neymanGeneralWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanGeneralMatrixString, neymanGeneralWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
+neymanGeneralWithKDependencies = [headString,tailString,concatString,lastString, getModifierListSmallString, zipString, fstString, sndString, factorialString, expEString, powerString, log2String, logEString, replicateString, makeMatrixString, matrix2StringString, fmapString] ++ [makeNeymanGeneralMatrixString, neymanGeneralWithKString, foldlString] ++ modifierDependencies ++ gammaDependencies
 
 -- | these are for local GTR functions
 -- assuming the functions will recieve a good Q matrix
 gtrDependencies :: [String]
-gtrDependencies = [makeGTRMatrixLocalString, makeGTRLogMatrixString, split2MatrixString, regularizeRString, makeQString, addDiagValuesString, invertMatrixString, adjustSymString, adjustDiagString, getLogMatrixString, addMatricesString, integrateGTRMatrixWithKString, determinantNumericalString, cofactorTMatrixString, takeWhileString, getCofactor1String, getRowString, removeColumnString, removeRowAndColumnString, isPosRString, lastString, tailString, logEString, matrix2StringString, log2String, zipString] ++ qrDependencies ++ numericalIntegrationDependencies
+gtrDependencies = [makeGTRMatrixLocalString, makeGTRLogMatrixString, split2MatrixString, regularizeRString, makeQString, addDiagValuesString, invertMatrixString, adjustSymString, adjustDiagString, getLogMatrixString, addMatricesString, integrateGTRMatrixWithKString, determinantNumericalString, cofactorTMatrixString, takeWhileString, getCofactor1String, getRowString, removeColumnString, removeRowAndColumnString, isPosRString, lastString, tailString, logEString, matrix2StringString, log2String] ++ qrDependencies ++ numericalIntegrationDependencies
 
-{-
-gtrUniformDependencies :: [String]
-gtrUniformDependencies = [getUniformPdfString]
-
-gtrExponentialDependencies :: [String]
-gtrExponentialDependencies = [getExponentialPdfString, expEString, powerString, maximumString]
--}
-
--- | dependencies for 4-state DNA models
-{-
-f81Dependencies = [makeGTRLogMatrixString,makeF81String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
-k80Dependencies = [makeGTRLogMatrixString,makeK80String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
-hKY85Dependencies = [makeGTRLogMatrixString,makeHKY85String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
-f84Dependencies = [makeGTRLogMatrixString,makeF84String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
-tN93Dependencies = [makeGTRLogMatrixString,makeTN93String, integrateGTRMatrixWithKString, addMatricesString, adjustSymString, adjustDiagString, getLogMatrixString, trapezoidIntegrationString, getPijString, split2MatrixString, zipWithString, lengthString, takeString, dropString]
--}
+fourStateSequenceModelDependencies :: [String]
+fourStateSequenceModelDependencies = [fmapString, headString, tailString, split2MatrixString, adjustSymString, foldlString, addMatricesString, replicateString, getLogMatrixString, adjustDiagString, takeString, dropString, lengthString, zipWithString, matrix2StringString, log2String, powerString, concatString, logEString]
 
 f81ExponentialDependencies :: [String]
-f81ExponentialDependencies = [f81ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+f81ExponentialDependencies = [f81ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 k80ExponentialDependencies :: [String]
-k80ExponentialDependencies = [k80ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+k80ExponentialDependencies = [k80ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 hky85ExponentialDependencies :: [String]
-hky85ExponentialDependencies = [hky85ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+hky85ExponentialDependencies = [hky85ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 f84ExponentialDependencies :: [String]
-f84ExponentialDependencies = [f84ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+f84ExponentialDependencies = [f84ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies 
 
 tn93ExponentialDependencies :: [String]
-tn93ExponentialDependencies = [tn93ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+tn93ExponentialDependencies = [tn93ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 f81UniformDependencies :: [String]
-f81UniformDependencies = [f81UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+f81UniformDependencies = [f81UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
 k80UniformDependencies :: [String]
-k80UniformDependencies = [k80UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+k80UniformDependencies = [k80UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
 hky85UniformDependencies :: [String]
-hky85UniformDependencies = [hky85UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+hky85UniformDependencies = [hky85UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
 f84UniformDependencies :: [String]
-f84UniformDependencies = [f84UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+f84UniformDependencies = [f84UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
 tn93UniformDependencies :: [String]
-tn93UniformDependencies = [tn93UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString]
+tn93UniformDependencies = [tn93UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
 -- | QR factorization dependencies 
 qrDependencies :: [String]
-qrDependencies = [qrFactorizationString,  getDiagValuesString,  qrDecompositionString,  matrixMultiplyString,  concatString,  fmapString,  lengthString,  absString,  foldlString,  getHouseholderListString, transposeMatrixString,  getHouseholderString,  padOutMinorString,  makeMatrixMinorString,  makeDiagMatrixString,  takeString,  dropString,  zipWithString,  getColumnVectorString,  makeEVectorString,  euclidNormString,  matrixMultiplyScalarString,  subtractMatricesString,  normalizeColumnVectorString,  headString,  replicateString,  makeDiagRowString,  normalizeVectorString,  sqrtString,  getRowsString,  getElementString, getDiagValuesString, minimumString, maximumString, expEString, powerString]
+qrDependencies = [qrFactorizationString,  getDiagValuesString,  qrDecompositionString,  matrixMultiplyString,  concatString,  fmapString,  lengthString,  absString,  foldlString,  getHouseholderListString, transposeMatrixString,  getHouseholderString,  padOutMinorString,  makeMatrixMinorString,  makeDiagMatrixString,  takeString,  dropString,  zipWithString,  getColumnVectorString,  makeEVectorString,  euclidNormString,  matrixMultiplyScalarString,  subtractMatricesString,  normalizeColumnVectorString,  headString,  replicateString,  makeDiagRowString,  normalizeVectorString,  sqrtString,  getRowsString,  getElementString, getDiagValuesString, factorialString, expEString, powerString]
 
 -- | dependencies for numerical integration
 numericalIntegrationDependencies :: [String]
 numericalIntegrationDependencies = [trapezoidIntegrationString, makeGTRLogMatrixString, replicateString, fmapString, split2MatrixString,integrateGTRMatrixWithKString, foldlString, addMatricesString, adjustDiagString, getLogMatrixString, getPijString]
-
-{-
--- | dependencier for log transforms
-log2Dependencies :: [String]
-log2Dependencies = [log2String, logEString, powerString]
--}
 
 -- adding in rate modifiers dependencies to this
 modifierDependencies :: [String]
 modifierDependencies = [getModifierListSmallString]
 
 gammaDependencies :: [String]
-gammaDependencies = [gammaFunString, expX2YString, getNTilesString, gammaPDFString, cumulativeSumString, discreteGammaString, replicateString, fmapString, factorialString, logEString, expEString, powerString, foldlString]
+gammaDependencies = [gammaFunString, expX2YString, getNTilesString, gammaPDFString, cumulativeSumString, discreteGammaString, replicateString, fmapString, factorialString, logEString, factorialString, expEString, powerString, foldlString, zipString, lastString]
 
 -- | getModelList take a list of character models and returns the dependency list for all models
 -- combined --nub used later to rtemove dups.
@@ -208,14 +188,16 @@ getModelList charModelList areModifiers areBothDistributions =
       else error "Too many (>2) rate modifiers"
     --Other Models (GTR 4-state)
     else
-      let modelDependencies = getDependencies chModel dist (fst Control.Applicative.<$> rateModifiers firstModel)
+      let modelDependencies = getDependencies chModel dist (fst <$> rateModifiers firstModel)
       in
       modelDependencies ++ getModelList (tail charModelList) areModifiers areBothDistributions
 
 -- | getDependencies takes a model, distibution, and rate modifiers klist and retuirns dependency list
+-- only GTR for sitribution because others are already baked in--no numerical integration
 getDependencies :: MarkovModel -> Distribution -> [Modifier] -> [String]
 getDependencies modelType distribution modifierList =
-  getModelDep modelType distribution ++ getDistDep distribution ++ getModList modifierList
+  if (modelType == GTR) then getModelDep modelType distribution ++ getDistDep distribution ++ getModList modifierList
+  else getModelDep modelType distribution ++ getModList modifierList
 
 -- | getModelDep takes model and returns dependency list
 getModelDep :: MarkovModel -> Distribution -> [String]
@@ -389,36 +371,36 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
        in
        --trace (show (getModifierListSmall a b c d e tcmPrecision)) (
        if tcmChangeModel == K80 || tcmChangeModel == F81 || tcmChangeModel == HKY85 || tcmChangeModel == F84 || tcmChangeModel == TN93 then
-        let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+        let letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
             modelFunctionName = get4StateModelName tcmChangeModel branchDist
-            outString = ("  putStr (s0$j1 b0 " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " w" ++ show counter ++ ")\n")
+            outString = ("  putStr (s0$j1 b0 " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " wC" ++ show counter ++ ")\n")
             outString2 = ("  putStr (s0$j1 b0 " ++ modelFunctionName ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show modelParams ++ " " ++ show tcmP++ " [(1,1)] " ++ ")\n")
         in
         if fst (head tcmRateModifiers) == None then outString2 ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
         else letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
        
        else if tcmChangeModel == GTR then
-        let eigenString = ("  let (z" ++ show counter ++ ",u" ++ show counter ++ ",i" ++ show counter ++ ") = a0 " ++ show (length tcmAlphabet) ++ " " ++ show tcmQ ++ " " ++ show tcmP ++ show tcmPrecision ++ "\n")
+        let eigenString = ("  let (zC" ++ show counter ++ ",uC" ++ show counter ++ ",iC" ++ show counter ++ ") = a0 " ++ show (length tcmAlphabet) ++ " " ++ show tcmQ ++ " " ++ show tcmP ++ show tcmPrecision ++ "\n")
             distFunction = getDistString branchDist
         in
         if fst (head tcmRateModifiers) == None then
-          let outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " [(1,1)]" ++ ")\n")
+          let outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " zC" ++ show counter ++ " uC" ++ show counter ++ " iC" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " [(1,1)]" ++ ")\n")
           in
           eigenString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
         else
-          let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-              outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " z" ++ show counter ++ " u" ++ show counter ++ " i" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " w" ++ show counter ++ ")\n")
+          let letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+              outString = ("  putStr (s0$c1 b0 " ++ show (last tcmAlphabet) ++ " zC" ++ show counter ++ " uC" ++ show counter ++ " iC" ++ show counter ++ " " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show maximumTime ++ " " ++ show tcmPrecision ++ " " ++ distFunction ++ " wC" ++ show counter ++ ")\n")
           in
           letString ++ eigenString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
        else if tcmChangeModel == Neyman then
          -- change to generated in code
          if fst (head tcmRateModifiers) == None && not areRateModifiers then
            if branchDist == Uniform then
-             let outString = ("  putStr (s0$c u " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+             let outString = ("  putStr (s0$c9 u0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
              in
              outString ++ makeCharacterModelsString (tail charModelList) counter areRateModifiers areBothDistributions
            else
-             let outString = ("  putStr (s0$c y " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+             let outString = ("  putStr (s0$c9 y0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " " ++ show (last tcmAlphabet) ++ ")\n")
              in
              outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
          else if fst (head tcmRateModifiers) == None && areRateModifiers then -- there are rateModifiers in other charcater blocks
@@ -433,34 +415,34 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
                outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
             else -- there are both uniform and exponential distributions so use general function
               if branchDist == Uniform then
-               let outString = ("  putStr (s0$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$n0 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList) counter areRateModifiers areBothDistributions
              else
-               let outString = ("  putStr (s0$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
+               let outString = ("  putStr (s0$n0 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " [(1,1)] " ++ show (last tcmAlphabet) ++ ")\n")
                in
                outString ++ makeCharacterModelsString (tail charModelList)  counter areRateModifiers areBothDistributions
          else --has rate modifiers in this character block
            if not areBothDistributions then --only a single branch distribution so use only specific function
               if branchDist == Uniform then
-               let  letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                    outString = ("  putStr (s0$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+               let  letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+                    outString = ("  putStr (s0$a7 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " wC" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
              else
-               let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                   outString = ("  putStr (s0$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+               let letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+                   outString = ("  putStr (s0$a8 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " wC" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList)  (counter + 1) areRateModifiers areBothDistributions
            else -- there are both uniform and exponential distributions so use general function
              if branchDist == Uniform then
-               let  letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                    outString = ("  putStr (s0$n 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+               let  letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+                    outString = ("  putStr (s0$n0 0 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " wC" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
              else
-               let letString = ("  let w" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
-                   outString = ("  putStr (s0$n 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " w" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
+               let letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
+                   outString = ("  putStr (s0$n0 1 " ++ show (length tcmAlphabet) ++ " " ++ show (head branchParams) ++ " " ++ show tcmPrecision ++ " wC" ++ show counter ++ " " ++ show (last tcmAlphabet) ++ ")\n")
                in
                letString ++ outString ++ makeCharacterModelsString (tail charModelList)  (counter + 1) areRateModifiers areBothDistributions
        else error "Character model not implemented"
@@ -652,7 +634,7 @@ makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
       -- make symmetrical
       pMatrixSym =  split2Matrix alphSize $ adjustSym pMatrix 0 0
       pMatrixAdjusted = adjustDiag pMatrixSym pMatrixSym 0
-      logMatrix = split2Matrix alphSize $ (* (-1)) Control.Applicative.<$> getLogMatrix logType pMatrixAdjusted alphSize lastAlphElement 0 0 iterations
+      logMatrix = split2Matrix alphSize $ (* (-1)) <$> getLogMatrix logType pMatrixAdjusted alphSize lastAlphElement 0 0 iterations
   in
   logMatrix
 

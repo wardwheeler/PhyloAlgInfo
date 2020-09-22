@@ -133,8 +133,9 @@ logEString="\
 \  if c==i then 2*w\n\
 \  else l0 v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
 
---log2 :: Double -> Int-> Int -> Double -> Double 
---log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
+-- log2 :: Double -> Int-> Int -> Double -> Double 
+-- log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
+-- the 'c' and 'w' params are not used but there for function as parame with logE
 log2String :: String
 log2String="\
 \b0 v i c w=(l0 v i 0 0)/(l0 2 i 0 0)\n"
@@ -177,29 +178,29 @@ matrix2StringString="\
 
 neymanUniformString :: String
 neymanUniformString="\
-\u n a i=((a-((((fromIntegral n)-1))*(((e (-1*a) i 0)-1))))/((fromIntegral n)*a),(a-1+(e (-1*a) i 0))/((fromIntegral n)*a))\n"
+\u0 n a i=((a-((((fromIntegral n)-1))*(((e0 (-1*a) i 0)-1))))/((fromIntegral n)*a),(a-1+(e0 (-1*a) i 0))/((fromIntegral n)*a))\n"
 
 --p argument here is ignored by exponential
 neymanExponentialString :: String
 neymanExponentialString="\
-\y n a p=((1+(a*(fromIntegral n)))/((a+1)*(fromIntegral n)),1/((a+1)*(fromIntegral n)))\n" 
+\y0 n a p=((1+(a*(fromIntegral n)))/((a+1)*(fromIntegral n)),1/((a+1)*(fromIntegral n)))\n" 
 
 -- |this passes function of Neyman Uniform or NeymanExponential as argument 
 -- f is functino, n=alpabet size, a is branch distribution param, p is precision integer, 
--- \c :: (Int -> Double -> Int -> (Double, Double)) -> Int -> Double -> Int -> String -> [[Double]]\n\
+-- \c9 :: (Int -> Double -> Int -> (Double, Double)) -> Int -> Double -> Int -> String -> [[Double]]\n\
 makeTCMBitsString :: String
 makeTCMBitsString="\
-\c f n a p s=\n\
+\c9 f n a p s=\n\
 \  let (d,e)=f n a p\n\
-\  in m n (-1*b d p 0 0)(-1*b e p 0 0) 0 s\n"
+\  in m0 n (-1*b0 d p 0 0)(-1*b0 e p 0 0) 0 s\n"
 
 fstString :: String
 fstString="\
-\h(a,b)=a\n"
+\hM(a,_)=a\n"
 
 sndString :: String
 sndString="\
-\i(a,b)=b\n"
+\iM(_,b)=b\n"
 
 -- | does the fmap/sum operation over multiple pii/pij for weights if [(1,1)]
 -- same as simple Neyman functions
@@ -209,10 +210,10 @@ sndString="\
 -- \n :: Int -> Int -> Double -> Int ->  [(Double, Double)] -> String -> [[Double]]\n\
 makeNeymanGeneralMatrixString :: String
 makeNeymanGeneralMatrixString="\
-\n r l a p o s=\n\
-\  let k=gM(j r l a p)o\n\
-\      q=c3(+)0$gM h k\n\
-\      c=c3(+)0$gM i k\n\
+\n0 r l a p o s=\n\
+\  let k=gM(jM r l a p)o\n\
+\      q=c3(+)0$gM hM k\n\
+\      c=c3(+)0$gM iM k\n\
 \      e=(-1)*b0 q p 0 0\n\
 \      f=(-1)*b0 c p 0 0\n\
 \  in m0 l e f 0 s\n"
@@ -222,7 +223,7 @@ makeNeymanGeneralMatrixString="\
 -- \j :: Int -> Int -> Double -> Int -> (Double, Double) -> (Double, Double)\n\
 neymanGeneralWithKString :: String
 neymanGeneralWithKString ="\
-\j d r a i (w, f)\n\
+\jM d r a i (w, f)\n\
 \ | w<" ++ epsilonString ++ "=(f,0)\n\
 \ | d==0=\n\
 \   let r1=fromIntegral r\n\
@@ -254,33 +255,33 @@ neymanGeneralWithKString ="\
 -- \x :: Double -> Int -> Double -> Int -> Int -> [Double]\n\
 discreteGammaString :: String
 discreteGammaString="\
-\x a n m i e=\n\
+\x0 a n m i e=\n\
 \  if n==1 then [1]\n\
 \  else\n\
 \    let b=n*e\n\
 \        v=m/(fromIntegral b)\n\
-\        z=(k(r0 b v 0)0)\n\
-\        c=k(gM(t a i v)z)0\n\
+\        z=(k2(r0 b v 0)0)\n\
+\        c=k2(gM(t0 a i v)z)0\n\
 \        j=gM(+(1-(a3 c)))c\n\
-\        s=w n j z 1 True\n\
+\        s=w0 n j z 1 True\n\
 \    in gM(*((fromIntegral n)/(c3(+)0 s)))s\n"
 
--- \k :: [Double] -> Double -> [Double]\n\
+-- \k2:: [Double] -> Double -> [Double]\n\
 cumulativeSumString :: String
 cumulativeSumString="\
-\k(a:c)b=\n\
+\k2(a:c)b=\n\
 \  if null c then [b+a]\n\
-\  else (b+a):k c(b+a)\n"
+\  else (b+a):k2 c(b+a)\n"
 
 -- \t :: Double -> Int -> Double -> Double -> Double\n\
 gammaPDFString :: String
 gammaPDFString="\
-\t a i l r=l*(q a a i)*(q r(a-1)i)*(e0(-1*a*r)i 0)/(v a i 0 1)\n"
+\t0 a i l r=l*(q0 a a i)*(q0 r(a-1)i)*(e0(-1*a*r)i 0)/(v0 a i 0 1)\n"
 
--- \w :: Int -> [Double] -> [Double] -> Int -> Bool-> [Double]\n\
+-- \w0 :: Int -> [Double] -> [Double] -> Int -> Bool-> [Double]\n\
 getNTilesString :: String
 getNTilesString ="\
-\w c d g t o=\n\
+\w0 c d g t o=\n\
 \  if null d then []\n\
 \  else\n\
 \      let f=a5 d\n\
@@ -288,31 +289,31 @@ getNTilesString ="\
 \          v=(fromIntegral t)/(2*(fromIntegral c))\n\
 \      in\n\
 \      if f>=v then\n\
-\        if o then e:w c(a6 d)(a6 g)(t+1)False\n\
-\        else w c(a6 d)(a6 g)(t+1)True\n\
-\      else w c(a6 d)(a6 g)t o\n"
+\        if o then e:w0 c(a6 d)(a6 g)(t+1)False\n\
+\        else w0 c(a6 d)(a6 g)(t+1)True\n\
+\      else w0 c(a6 d)(a6 g)t o\n"
 
 -- \q :: Double -> Double -> Int -> Double\n\
 -- maybe replace with expE when used
 expX2YString :: String
 expX2YString="\
-\q a x i=e0(x*(l0 a i 0 0))i 0\n"
+\q0 a x i=e0(x*(l0 a i 0 0))i 0\n"
 
--- \v :: Double -> Int -> Int -> Double -> Double\n\
+-- \v0 :: Double -> Int -> Int -> Double -> Double\n\
 gammaFunString :: String
 gammaFunString="\
-\v u i c l=\n\
-\  if c>i then (fM$fromIntegral i)*(q(fromIntegral i)u i)/l\n\
-\  else v u i(c+1)(l*(u+(fromIntegral c)))\n"
+\v0 u i c l=\n\
+\  if c>i then (fM$fromIntegral i)*(q0(fromIntegral i)u i)/l\n\
+\  else v0 u i(c+1)(l*(u+(fromIntegral c)))\n"
 
--- \a :: Int -> Double -> Int -> (Double, Double) -> (Double, Double)\n\
+-- \a9 :: Int -> Double -> Int -> (Double, Double) -> (Double, Double)\n\
 neymanUniformWithKString :: String
 neymanUniformWithKString="\
-\a r c i(w,f)=\n\
+\a9 r c i(w,f)=\n\
 \  if w<" ++ epsilonString ++ " then (f,0)\n\
 \  else\n\
 \    let r1=fromIntegral r\n\
-\        b=(e(-1*c*w)i 0)\n\
+\        b=(e0(-1*c*w)i 0)\n\
 \        l=((b+(c*w)-1)/(c*w*r1))\n\
 \        m=1-((r1-1)*l)\n\
 \     in (f*m,f*l)\n"
@@ -320,7 +321,7 @@ neymanUniformWithKString="\
 -- \z :: Int -> Double -> Int -> (Double, Double) -> (Double, Double)\n\
 neymanExponentialWithKString :: String
 neymanExponentialWithKString="\
-\z r a i(w,f)=\n\
+\z0 r a i(w,f)=\n\
 \  if w<" ++ epsilonString ++ " then (f,0)\n\
 \  else\n\
 \    let r1=fromIntegral r\n\
@@ -335,7 +336,7 @@ getModifierListSmallString="\
 \ | v==0 && h==0=[(1,1)]\n\
 \ | v==1 && h==0=[(0,t),(1/(1-t),1-t)]\n\
 \ | otherwise=\n\
-\    let w=x a n 10.0 i(n*i)\n\
+\    let w=x0 a n 10.0 i(n*i)\n\
 \        f=r0 n(1.0/(fromIntegral n))0\n\
 \    in\n\
 \    if t==0 then a2 w f else\n\
@@ -385,23 +386,23 @@ tailString="\
 makeNeymanUniformMatrixString :: String
 makeNeymanUniformMatrixString="\
 \a7 l j p o s=\n\
-\  let k=g(a l j p)o\n\
-\      q=c3(+)0$g h k\n\
-\      c=c3(+)0$g i k\n\
-\      e=(-1)*b q p 0 0\n\
-\      f=(-1)*b c p 0 0\n\
-\  in m l e f 0 s\n"
+\  let k=gM(a9 l j p)o\n\
+\      q=c3(+)0$gM hM k\n\
+\      c=c3(+)0$gM iM k\n\
+\      e=(-1)*b0 q p 0 0\n\
+\      f=(-1)*b0 c p 0 0\n\
+\  in m0 l e f 0 s\n"
 
 -- \a8 :: Int -> Double -> Int ->  [(Double, Double)] -> String -> [[Double]]\n\
 makeNeymanExponentialMatrixString :: String
 makeNeymanExponentialMatrixString="\
 \a8 l j p o s=\n\
-\  let k=g(z l j p)o\n\
-\      q=c3(+)0$g h k\n\
-\      c=c3(+)0$g i k\n\
-\      e=(-1)*b q p 0 0\n\
-\      f=(-1)*b c p 0 0\n\
-\  in m l e f 0 s\n"
+\  let k=gM(z0 l j p)o\n\
+\      q=c3(+)0$gM hM k\n\
+\      c=c3(+)0$gM iM k\n\
+\      e=(-1)*b0 q p 0 0\n\
+\      f=(-1)*b0 c p 0 0\n\
+\  in m0 l e f 0 s\n"
 
 --- \b7 :: [[Double]] -> [[Double]]\n\
 transposeMatrixString :: String
@@ -466,13 +467,7 @@ integrateGTRMatrixWithKString="\
 \ | e==i=c2 a b c(d+1)0 f g h i j(k,l)\n\
 \ | k<" ++ epsilonString ++ "=0:(c2 a b c d(e+1)f g h i j(k,l))\n\
 \ | otherwise=(l*(e6 e7 j a b c d e f 2.0 h 0 k)):(c2 a b c d(e+1)f g h i j(k,l))\n"
-{-
-\c2 a b c d e f g h i j(k,l)=\n\
-\ if d==i then []\n\
-\ else if e==i then c2 a b c(d+1)0 f g h i j(k,l)\n\
-\ else if k<" ++ epsilonString ++ " then 0:(c2 a b c d(e+1)f g h i j(k,l))\n\
-\ else (l*(e6 e7 j a b c d e f " ++ maxTimeString ++ " h 0 k)):(c2 a b c d(e+1)f g h i j(k,l))\n"
--}
+
 
 -- \c5 :: [[Double]] -> Int -> Int -> [Double]\n\ 
 adjustSymString :: String
@@ -703,7 +698,7 @@ normalizeVectorWithSignString="\
 \ let s=f9(c3(+)0$e5(*)a a)i 0\n\
 \ in\n\
 \ if g0(a6 a)(a5 a)>=(c8$g1(a6 a)(a5 a)) then gM(/s)a\n\
-\ else g(/(-1 *s))a\n"
+\ else gM(/(-1 *s))a\n"
 
 -- \g2 :: (a -> Bool) -> [a] -> [a]\n\
 filterString :: String
@@ -911,8 +906,7 @@ makeGTRMatrixLocalString="\
 makeGTRLogMatrixString :: String
 makeGTRLogMatrixString="\
 \c1 l m e u v a p x i d f=\n\
-\ let a=d5 0 e\n\
-\     y=b2 a$c5(c3 c4(r0 a(r0 a 0.0 0)0)(gM(b2 a)$gM(c2 e u v 0 0 p x i a d)f))0 0\n\
+\ let y=b2 a$c5(c3 c4(r0 a(r0 a 0.0 0)0)(gM(b2 a)$gM(c2 e u v 0 0 p x i a d)f))0 0\n\
 \  in b2 a$gM(*(-1))$c7 l(c6 y y 0)a m 0 0 i\n"
 
 -- \makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]) -> Double -> Int -> [Double] -> [Double] -> [(Double, Double)] -> [[Double]]\n
@@ -950,6 +944,12 @@ trapezoidIntegrationString="\
 \      t=fromIntegral c*l\n\
 \  in (l*((f e u v(t*k)0 r j i*s p i t)+(f e u v((t*k)+l)0 r j i*s p i (t+l)))/2)+e6 f s e u v r j p x i(c+1)k\n"
 
+
+{-
+The variable names iwth letter nymber and the 'l' like k2l are to avoid name shadowing with functions.
+some simpler models have unused parasm to allow for function as parameter
+-}
+
 -- \tn93ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
 tn93ExponentialWithKString :: String
 tn93ExponentialWithKString="\
@@ -958,35 +958,35 @@ tn93ExponentialWithKString="\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     f1=(pY*a+pR*b)\n\
-\     f2=(pR*c+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     m2=x*x\n\
+\     f1l=(pY*a+pR*b)\n\
+\     f2l=(pR*c+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     m2l=x*x\n\
 \     km=x*w\n\
-\     k2=w*w\n\
-\     p00=(((d0+c0+pA)*m2)+((((c0+pA)*f1)+(b*d0)+(pA *b))*km)+(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     k2l=w*w\n\
+\     p00=(((d0l+c0l+pA)*m2l)+((((c0l+pA)*f1l)+(b*d0l)+(pA *b))*km)+(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p01=pC*b*w/(x+(b*w))\n\
-\     p02=(-1)*(((d0-c2-pG)*m2)+(((((-1*c2)-pG)*f1)+(b*d0)-(pG *b))*km)-(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p02=(-1)*(((d0l-c2l-pG)*m2l)+(((((-1*c2l)-pG)*f1l)+(b*d0l)-(pG *b))*km)-(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p03=pT*b*w/(x+(b*w))\n\
 \     p10=pA*b*w/(x+(b*w))\n\
-\     p11=(((d1+c1+pC)*m2)+((((c1+pC)*f2)+(b*d1)+(pC *b))*km)+(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p11=(((d1l+c1l+pC)*m2l)+((((c1l+pC)*f2l)+(b*d1l)+(pC *b))*km)+(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p12=pG*b*w/(x+(b*w))\n\
-\     p13=(-1)*(((d1-c3-pT)*m2)+(((((-1*c3)-pT)*f2)+(b*d1)-(pT *b))*km)-(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
-\     p20=(-1)*(((d2-c0-pA)*m2)+(((((-1*c0)-pA)*f1)+(b*d2)-(pA *b))*km)-(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p13=(-1)*(((d1l-c3l-pT)*m2l)+(((((-1*c3l)-pT)*f2l)+(b*d1l)-(pT *b))*km)-(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
+\     p20=(-1)*(((d2l-c0l-pA)*m2l)+(((((-1*c0l)-pA)*f1l)+(b*d2l)-(pA *b))*km)-(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p21=pC*b*w/(x+(b*w))\n\
-\     p22=(((d2+c2+pG)*m2)+((((c2+pG)*f1)+(b*d2)+(pG *b))*km)+(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p22=(((d2l+c2l+pG)*m2l)+((((c2l+pG)*f1l)+(b*d2l)+(pG *b))*km)+(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p23=pT*b*w/(x+(b*w))\n\
 \     p30=pA*b*w/(x+(b*w))\n\
-\     p31=(-1)*(((d3-c1-pC)*m2)+(((((-1*c1)-pC)*f2)+(b*d3)-(pC *b))*km)-(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p31=(-1)*(((d3l-c1l-pC)*m2l)+(((((-1*c1l)-pC)*f2l)+(b*d3l)-(pC *b))*km)-(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p32=pG*b*w/(x+(b*w))\n\
-\     p33=(((d3+c3+pT)*m2)+((((c3+pT)*f2)+(b*d3)+(pT *b))*km)+(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p33=(((d3l+c3l+pT)*m2l)+((((c3l+pT)*f2l)+(b*d3l)+(pT *b))*km)+(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \tn93UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
@@ -997,37 +997,37 @@ tn93UniformWithKString="\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     f1=(pY*a+pR*b)\n\
-\     f2=(pR*c+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
+\     f1l=(pY*a+pR*b)\n\
+\     f2l=(pR*c+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
 \     ebkm=e0(b*w*x)i 0\n\
 \     enbkm=e0(-1*b*w*x)i 0\n\
-\     enf1km=e0(-1*f1*w*x)i 0\n\
-\     enf2km=e0(-1*f2*w*x)i 0\n\
+\     enf1lkm=e0(-1*f1l*w*x)i 0\n\
+\     enf2lkm=e0(-1*f2l*w*x)i 0\n\
 \     bkmfactor=(enbkm+((b*w*x)-1))/(b*w*x)\n\
-\     p00=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)+(b*d0)))-(c0*f1)))-(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p00=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)+(b*d0l)))-(c0l*f1l)))-(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p01=pC*bkmfactor\n\
-\     p02=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)-(b*d0)))-(c2*f1)))+(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p02=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)-(b*d0l)))-(c2l*f1l)))+(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p03=pT*bkmfactor\n\
 \     p10=pA*bkmfactor\n\
-\     p11=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)+(b*d1)))-(c1*f2)))-(b*d1*enf2km))/(b*f2*w*x)\n\
+\     p11=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)+(b*d1l)))-(c1l*f2l)))-(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
 \     p12=pG*bkmfactor\n\
-\     p13=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)-(b*d1)))-(c3*f2)))+(b*d1*enf2km))/(b*f2*w*x)\n\
-\     p20=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)-(b*d2)))-(c0*f1)))+(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p13=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)-(b*d1l)))-(c3l*f2l)))+(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
+\     p20=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)-(b*d2l)))-(c0l*f1l)))+(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p21=pC*bkmfactor\n\
-\     p22=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)+(b*d2)))-(c2*f1)))-(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p22=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)+(b*d2l)))-(c2l*f1l)))-(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p23=pG*bkmfactor\n\
 \     p30=pA*bkmfactor\n\
-\     p31=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)-(b*d3)))-(c1*f2)))+(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p31=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)-(b*d3l)))-(c1l*f2l)))+(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \     p32=pG*bkmfactor\n\
-\     p33=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)+(b*d3)))-(c3*f2)))-(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p33=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)+(b*d3l)))-(c3l*f2l)))-(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \f84ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
@@ -1040,35 +1040,35 @@ f84ExponentialWithKString="\
 \     pY=pC+pT\n\
 \     a=(1+(p/pY))*b\n\
 \     c=(1+(p/pR))*b\n\
-\     f1=(pY*a+pR*b)\n\
-\     f2=(pR*c+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     m2=x*x\n\
+\     f1l=(pY*a+pR*b)\n\
+\     f2l=(pR*c+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     m2l=x*x\n\
 \     km=x*w\n\
-\     k2=w*w\n\
-\     p00=(((d0+c0+pA)*m2)+((((c0+pA)*f1)+(b*d0)+(pA *b))*km)+(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     k2l=w*w\n\
+\     p00=(((d0l+c0l+pA)*m2l)+((((c0l+pA)*f1l)+(b*d0l)+(pA *b))*km)+(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p01=pC*b*w/(x+(b*w))\n\
-\     p02=(-1)*(((d0-c2-pG)*m2)+(((((-1*c2)-pG)*f1)+(b*d0)-(pG *b))*km)-(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p02=(-1)*(((d0l-c2l-pG)*m2l)+(((((-1*c2l)-pG)*f1l)+(b*d0l)-(pG *b))*km)-(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p03=pT*b*w/(x+(b*w))\n\
 \     p10=pA*b*w/(x+(b*w))\n\
-\     p11=(((d1+c1+pC)*m2)+((((c1+pC)*f2)+(b*d1)+(pC *b))*km)+(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p11=(((d1l+c1l+pC)*m2l)+((((c1l+pC)*f2l)+(b*d1l)+(pC *b))*km)+(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p12=pG*b*w/(x+(b*w))\n\
-\     p13=(-1)*(((d1-c3-pT)*m2)+(((((-1*c3)-pT)*f2)+(b*d1)-(pT *b))*km)-(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
-\     p20=(-1)*(((d2-c0-pA)*m2)+(((((-1*c0)-pA)*f1)+(b*d2)-(pA *b))*km)-(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p13=(-1)*(((d1l-c3l-pT)*m2l)+(((((-1*c3l)-pT)*f2l)+(b*d1l)-(pT *b))*km)-(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
+\     p20=(-1)*(((d2l-c0l-pA)*m2l)+(((((-1*c0l)-pA)*f1l)+(b*d2l)-(pA *b))*km)-(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p21=pC*b*w/(x+(b*w))\n\
-\     p22=(((d2+c2+pG)*m2)+((((c2+pG)*f1)+(b*d2)+(pG *b))*km)+(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p22=(((d2l+c2l+pG)*m2l)+((((c2l+pG)*f1l)+(b*d2l)+(pG *b))*km)+(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p23=pT*b*w/(x+(b*w))\n\
 \     p30=pA*b*w/(x+(b*w))\n\
-\     p31=(-1)*(((d3-c1-pC)*m2)+(((((-1*c1)-pC)*f2)+(b*d3)-(pC *b))*km)-(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p31=(-1)*(((d3l-c1l-pC)*m2l)+(((((-1*c1l)-pC)*f2l)+(b*d3l)-(pC *b))*km)-(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p32=pG*b*w/(x+(b*w))\n\
-\     p33=(((d3+c3+pT)*m2)+((((c3+pT)*f2)+(b*d3)+(pT *b))*km)+(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p33=(((d3l+c3l+pT)*m2l)+((((c3l+pT)*f2l)+(b*d3l)+(pT *b))*km)+(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \f84UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
@@ -1081,37 +1081,37 @@ f84UniformWithKString="\
 \     pY=pC+pT\n\
 \     a=(1+(p/pY))*b\n\
 \     c=(1+(p/pR))*b\n\
-\     f1=(pY*a+pR*b)\n\
-\     f2=(pR*c+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
+\     f1l=(pY*a+pR*b)\n\
+\     f2l=(pR*c+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
 \     ebkm=e0(b*w*x)i 0\n\
 \     enbkm=e0(-1*b*w*x)i 0\n\
-\     enf1km=e0(-1*f1*w*x)i 0\n\
-\     enf2km=e0(-1*f2*w*x)i 0\n\
+\     enf1lkm=e0(-1*f1l*w*x)i 0\n\
+\     enf2lkm=e0(-1*f2l*w*x)i 0\n\
 \     bkmfactor=(enbkm+((b*w*x)-1))/(b*w*x)\n\
-\     p00=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)+(b*d0)))-(c0*f1)))-(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p00=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)+(b*d0l)))-(c0l*f1l)))-(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p01=pC*bkmfactor\n\
-\     p02=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)-(b*d0)))-(c2*f1)))+(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p02=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)-(b*d0l)))-(c2l*f1l)))+(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p03=pT*bkmfactor\n\
 \     p10=pA*bkmfactor\n\
-\     p11=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)+(b*d1)))-(c1*f2)))-(b*d1*enf2km))/(b*f2*w*x)\n\
+\     p11=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)+(b*d1l)))-(c1l*f2l)))-(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
 \     p12=pG*bkmfactor\n\
-\     p13=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)-(b*d1)))-(c3*f2)))+(b*d1*enf2km))/(b*f2*w*x)\n\
-\     p20=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)-(b*d2)))-(c0*f1)))+(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p13=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)-(b*d1l)))-(c3l*f2l)))+(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
+\     p20=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)-(b*d2l)))-(c0l*f1l)))+(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p21=pC*bkmfactor\n\
-\     p22=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)+(b*d2)))-(c2*f1)))-(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p22=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)+(b*d2l)))-(c2l*f1l)))-(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p23=pG*bkmfactor\n\
 \     p30=pA*bkmfactor\n\
-\     p31=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)-(b*d3)))-(c1*f2)))+(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p31=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)-(b*d3l)))-(c1l*f2l)))+(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \     p32=pG*bkmfactor\n\
-\     p33=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)+(b*d3)))-(c3*f2)))-(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p33=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)+(b*d3l)))-(c3l*f2l)))-(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \hky85ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
@@ -1122,35 +1122,35 @@ hky85ExponentialWithKString="\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     f1=(pY*h+pR*b)\n\
-\     f2=(pR*h+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     m2=x*x\n\
+\     f1l=(pY*h+pR*b)\n\
+\     f2l=(pR*h+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     m2l=x*x\n\
 \     km=x*w\n\
-\     k2=w*w\n\
-\     p00=(((d0+c0+pA)*m2)+((((c0+pA)*f1)+(b*d0)+(pA *b))*km)+(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     k2l=w*w\n\
+\     p00=(((d0l+c0l+pA)*m2l)+((((c0l+pA)*f1l)+(b*d0l)+(pA *b))*km)+(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p01=pC*b*w/(x+(b*w))\n\
-\     p02=(-1)*(((d0-c2-pG)*m2)+(((((-1*c2)-pG)*f1)+(b*d0)-(pG *b))*km)-(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p02=(-1)*(((d0l-c2l-pG)*m2l)+(((((-1*c2l)-pG)*f1l)+(b*d0l)-(pG *b))*km)-(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p03=pT*b*w/(x+(b*w))\n\
 \     p10=pA*b*w/(x+(b*w))\n\
-\     p11=(((d1+c1+pC)*m2)+((((c1+pC)*f2)+(b*d1)+(pC *b))*km)+(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p11=(((d1l+c1l+pC)*m2l)+((((c1l+pC)*f2l)+(b*d1l)+(pC *b))*km)+(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p12=pG*b*w/(x+(b*w))\n\
-\     p13=(-1)*(((d1-c3-pT)*m2)+(((((-1*c3)-pT)*f2)+(b*d1)-(pT *b))*km)-(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
-\     p20=(-1)*(((d2-c0-pA)*m2)+(((((-1*c0)-pA)*f1)+(b*d2)-(pA *b))*km)-(pA*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p13=(-1)*(((d1l-c3l-pT)*m2l)+(((((-1*c3l)-pT)*f2l)+(b*d1l)-(pT *b))*km)-(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
+\     p20=(-1)*(((d2l-c0l-pA)*m2l)+(((((-1*c0l)-pA)*f1l)+(b*d2l)-(pA *b))*km)-(pA*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p21=pC*b*w/(x+(b*w))\n\
-\     p22=(((d2+c2+pG)*m2)+((((c2+pG)*f1)+(b*d2)+(pG *b))*km)+(pG*b*f1*k2))/((x+(b*w))*(x+(f1*w)))\n\
+\     p22=(((d2l+c2l+pG)*m2l)+((((c2l+pG)*f1l)+(b*d2l)+(pG *b))*km)+(pG*b*f1l*k2l))/((x+(b*w))*(x+(f1l*w)))\n\
 \     p23=pT*b*w/(x+(b*w))\n\
 \     p30=pA*b*w/(x+(b*w))\n\
-\     p31=(-1)*(((d3-c1-pC)*m2)+(((((-1*c1)-pC)*f2)+(b*d3)-(pC *b))*km)-(pC*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p31=(-1)*(((d3l-c1l-pC)*m2l)+(((((-1*c1l)-pC)*f2l)+(b*d3l)-(pC *b))*km)-(pC*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \     p32=pG*b*w/(x+(b*w))\n\
-\     p33=(((d3+c3+pT)*m2)+((((c3+pT)*f2)+(b*d3)+(pT *b))*km)+(pT*b*f2*k2))/((x+(b*w))*(x+(f2*w)))\n\
+\     p33=(((d3l+c3l+pT)*m2l)+((((c3l+pT)*f2l)+(b*d3l)+(pT *b))*km)+(pT*b*f2l*k2l))/((x+(b*w))*(x+(f2l*w)))\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \hky85UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
@@ -1161,144 +1161,144 @@ hky85UniformWithKString="\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     f1=(pY*h+pR*b)\n\
-\     f2=(pR*h+pY*b)\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     ebkm=e(b*w*x)i 0\n\
-\     enbkm=e(-1*b*w*x)i 0\n\
-\     enf1km=e(-1*f1*w*x)i 0\n\
-\     enf2km=e(-1*f2*w*x)i 0\n\
+\     f1l=(pY*h+pR*b)\n\
+\     f2l=(pR*h+pY*b)\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     ebkm=e0(b*w*x)i 0\n\
+\     enbkm=e0(-1*b*w*x)i 0\n\
+\     enf1lkm=e0(-1*f1l*w*x)i 0\n\
+\     enf2lkm=e0(-1*f2l*w*x)i 0\n\
 \     bkmfactor=(enbkm+((b*w*x)-1))/(b*w*x)\n\
-\     p00=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)+(b*d0)))-(c0*f1)))-(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p00=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)+(b*d0l)))-(c0l*f1l)))-(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p01=pC*bkmfactor\n\
-\     p02=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)-(b*d0)))-(c2*f1)))+(b*d0*enf1km))/(b*f1*w*x)\n\
+\     p02=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)-(b*d0l)))-(c2l*f1l)))+(b*d0l*enf1lkm))/(b*f1l*w*x)\n\
 \     p03=pT*bkmfactor\n\
 \     p10=pA*bkmfactor\n\
-\     p11=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)+(b*d1)))-(c1*f2)))-(b*d1*enf2km))/(b*f2*w*x)\n\
+\     p11=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)+(b*d1l)))-(c1l*f2l)))-(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
 \     p12=pG*bkmfactor\n\
-\     p13=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)-(b*d1)))-(c3*f2)))+(b*d1*enf2km))/(b*f2*w*x)\n\
-\     p20=((enbkm*((ebkm*((pA*b*f1*w*x)+(c0*f1)-(b*d2)))-(c0*f1)))+(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p13=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)-(b*d1l)))-(c3l*f2l)))+(b*d1l*enf2lkm))/(b*f2l*w*x)\n\
+\     p20=((enbkm*((ebkm*((pA*b*f1l*w*x)+(c0l*f1l)-(b*d2l)))-(c0l*f1l)))+(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p21=pC*bkmfactor\n\
-\     p22=((enbkm*((ebkm*((pG*b*f1*w*x)+(c2*f1)+(b*d2)))-(c2*f1)))-(b*d2*enf1km))/(b*f1*w*x)\n\
+\     p22=((enbkm*((ebkm*((pG*b*f1l*w*x)+(c2l*f1l)+(b*d2l)))-(c2l*f1l)))-(b*d2l*enf1lkm))/(b*f1l*w*x)\n\
 \     p23=pG*bkmfactor\n\
 \     p30=pA*bkmfactor\n\
-\     p31=((enbkm*((ebkm*((pC*b*f2*w*x)+(c1*f2)-(b*d3)))-(c1*f2)))+(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p31=((enbkm*((ebkm*((pC*b*f2l*w*x)+(c1l*f2l)-(b*d3l)))-(c1l*f2l)))+(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \     p32=pG*bkmfactor\n\
-\     p33=((enbkm*((ebkm*((pT*b*f2*w*x)+(c3*f2)+(b*d3)))-(c3*f2)))-(b*d3*enf2km))/(b*f2*w*x)\n\
+\     p33=((enbkm*((ebkm*((pT*b*f2l*w*x)+(c3l*f2l)+(b*d3l)))-(c3l*f2l)))-(b*d3l*enf2lkm))/(b*f2l*w*x)\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \f81ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
 f81ExponentialWithKString :: String
 f81ExponentialWithKString="\
-\j8 blah [pA,pC,pG,pT] x i (w,k)=\n\
+\j8 z [pA,pC,pG,pT] x i (w,k)=\n\
 \ if w<" ++ epsilonString ++ " then [[k,0,0,0],[0,k,0,0],[0,0,k,0],[0,0,0,k]]\n\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     m2=x*x\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     m2l=x*x\n\
 \     km=x*w\n\
-\     k2=w*w\n\
-\     p00=(((d0+c0+pA)*m2)+((((c0+pA))+d0+pA)*km)+(pA*k2))/((x+w)*(x+w))\n\
+\     k2l=w*w\n\
+\     p00=(((d0l+c0l+pA)*m2l)+((((c0l+pA))+d0l+pA)*km)+(pA*k2l))/((x+w)*(x+w))\n\
 \     p01=pC*w/(x+w)\n\
-\     p02=(-1)*(((d0-c2-pG)*m2)+(((((-1*c2)-pG))+d0-pG)*km)-(pG*k2))/((x+w)*(x+w))\n\
+\     p02=(-1)*(((d0l-c2l-pG)*m2l)+(((((-1*c2l)-pG))+d0l-pG)*km)-(pG*k2l))/((x+w)*(x+w))\n\
 \     p03=pT*w/(x+w)\n\
 \     p10=pA*w/(x+w)\n\
-\     p11=(((d1+c1+pC)*m2)+((((c1+pC))+d1+pC)*km)+(pC*k2))/((x+w)*(x+w))\n\
+\     p11=(((d1l+c1l+pC)*m2l)+((((c1l+pC))+d1l+pC)*km)+(pC*k2l))/((x+w)*(x+w))\n\
 \     p12=pG*w/(x+w)\n\
-\     p13=(-1)*(((d1-c3-pT)*m2)+(((((-1*c3)-pT))+d1-pT)*km)-(pT*k2))/((x+w)*(x+w))\n\
-\     p20=(-1)*(((d2-c0-pA)*m2)+(((((-1*c0)-pA))+(d2)-pA)*km)-(pA*k2))/((x+w)*(x+w))\n\
+\     p13=(-1)*(((d1l-c3l-pT)*m2l)+(((((-1*c3l)-pT))+d1l-pT)*km)-(pT*k2l))/((x+w)*(x+w))\n\
+\     p20=(-1)*(((d2l-c0l-pA)*m2l)+(((((-1*c0l)-pA))+(d2l)-pA)*km)-(pA*k2l))/((x+w)*(x+w))\n\
 \     p21=pC*w/(x+w)\n\
-\     p22=(((d2+c2+pG)*m2)+((((c2+pG))+(d2)+pG)*km)+(pG*k2))/((x+w)*(x+w))\n\
+\     p22=(((d2l+c2l+pG)*m2l)+((((c2l+pG))+(d2l)+pG)*km)+(pG*k2l))/((x+w)*(x+w))\n\
 \     p23=pT*w/(x+w)\n\
 \     p30=pA*w/(x+w)\n\
-\     p31=(-1)*(((d3-c1-pC)*m2)+(((((-1*c1)-pC))+(d3)-pC)*km)-(pC*k2))/((x+w)*(x+w))\n\
+\     p31=(-1)*(((d3l-c1l-pC)*m2l)+(((((-1*c1l)-pC))+(d3l)-pC)*km)-(pC*k2l))/((x+w)*(x+w))\n\
 \     p32=pG*w/(x+w)\n\
-\     p33=(((d3+c3+pT)*m2)+((((c3+pT))+(d3)+pT)*km)+(pT*k2))/((x+w)*(x+w))\n\
+\     p33=(((d3l+c3l+pT)*m2l)+((((c3l+pT))+(d3l)+pT)*km)+(pT*k2l))/((x+w)*(x+w))\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \f81UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
 f81UniformWithKString :: String
 f81UniformWithKString="\
-\j9 blah [pA,pC,pG,pT] x i (w,k)=\n\
+\j9 z [pA,pC,pG,pT] x i (w,k)=\n\
 \ if w<" ++ epsilonString ++ " then [[k,0,0,0],[0,k,0,0],[0,0,k,0],[0,0,0,k]]\n\
 \ else\n\
 \ let pR=pA+pG\n\
 \     pY=pC+pT\n\
-\     c0=pA*pY/pR\n\
-\     c1=pC*pR/pY\n\
-\     c2=pG*pY/pR\n\
-\     c3=pT*pR/pY\n\
-\     d0=pG/pR\n\
-\     d1=pT/pY\n\
-\     d2=pA/pR\n\
-\     d3=pC/pY\n\
-\     ebkm=e(w*x)i 0\n\
-\     enbkm=e(-1*w*x)i 0\n\
-\     enf1km=e(-1*w*x)i 0\n\
-\     enf2km=e(-1*w*x)i 0\n\
+\     c0l=pA*pY/pR\n\
+\     c1l=pC*pR/pY\n\
+\     c2l=pG*pY/pR\n\
+\     c3l=pT*pR/pY\n\
+\     d0l=pG/pR\n\
+\     d1l=pT/pY\n\
+\     d2l=pA/pR\n\
+\     d3l=pC/pY\n\
+\     ebkm=e0(w*x)i 0\n\
+\     enbkm=e0(-1*w*x)i 0\n\
+\     enf1lkm=e0(-1*w*x)i 0\n\
+\     enf2lkm=e0(-1*w*x)i 0\n\
 \     bkmfactor=(enbkm+((w*x)-1))/(w*x)\n\
-\     p00=((enbkm*((ebkm*((pA*w*x)+(c0)+d0))-(c0)))-(d0*enf1km))/(w*x)\n\
+\     p00=((enbkm*((ebkm*((pA*w*x)+(c0l)+d0l))-(c0l)))-(d0l*enf1lkm))/(w*x)\n\
 \     p01=pC*bkmfactor\n\
-\     p02=((enbkm*((ebkm*((pG*w*x)+(c2)-d0))-(c2)))+(d0*enf1km))/(w*x)\n\
+\     p02=((enbkm*((ebkm*((pG*w*x)+(c2l)-d0l))-(c2l)))+(d0l*enf1lkm))/(w*x)\n\
 \     p03=pT*bkmfactor\n\
 \     p10=pA*bkmfactor\n\
-\     p11=((enbkm*((ebkm*((pC*w*x)+(c1)+d1))-(c1)))-(d1*enf2km))/(w*x)\n\
+\     p11=((enbkm*((ebkm*((pC*w*x)+(c1l)+d1l))-(c1l)))-(d1l*enf2lkm))/(w*x)\n\
 \     p12=pG*bkmfactor\n\
-\     p13=((enbkm*((ebkm*((pT*w*x)+(c3)-d1))-(c3)))+(d1*enf2km))/(w*x)\n\
-\     p20=((enbkm*((ebkm*((pA*w*x)+(c0)-(d2)))-(c0)))+(d2*enf1km))/(w*x)\n\
+\     p13=((enbkm*((ebkm*((pT*w*x)+(c3l)-d1l))-(c3l)))+(d1l*enf2lkm))/(w*x)\n\
+\     p20=((enbkm*((ebkm*((pA*w*x)+(c0l)-(d2l)))-(c0l)))+(d2l*enf1lkm))/(w*x)\n\
 \     p21=pC*bkmfactor\n\
-\     p22=((enbkm*((ebkm*((pG*w*x)+(c2)+(d2)))-(c2)))-(d2*enf1km))/(w*x)\n\
+\     p22=((enbkm*((ebkm*((pG*w*x)+(c2l)+(d2l)))-(c2l)))-(d2l*enf1lkm))/(w*x)\n\
 \     p23=pG*bkmfactor\n\
 \     p30=pA*bkmfactor\n\
-\     p31=((enbkm*((ebkm*((pC*w*x)+(c1)-(d3)))-(c1)))+(d3*enf2km))/(w*x)\n\
+\     p31=((enbkm*((ebkm*((pC*w*x)+(c1l)-(d3l)))-(c1l)))+(d3l*enf2lkm))/(w*x)\n\
 \     p32=pG*bkmfactor\n\
-\     p33=((enbkm*((ebkm*((pT*w*x)+(c3)+(d3)))-(c3)))-(d3*enf2km))/(w*x)\n\
+\     p33=((enbkm*((ebkm*((pT*w*x)+(c3l)+(d3l)))-(c3l)))-(d3l*enf2lkm))/(w*x)\n\
 \ in d8 k [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]\n"
 
 -- \k80ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
 k80ExponentialWithKString :: String
 k80ExponentialWithKString="\
-\k0 [h, b] blah x i (w,k)=\n\
+\k0 [h, b] z x i (w,k)=\n\
 \ if w<" ++ epsilonString ++ " then [[k,0,0,0],[0,k,0,0],[0,0,k,0],[0,0,0,k]]\n\
 \ else\n\
 \ let f=(h +b)/2\n\
 \     c=0.25\n\
 \     d=0.5\n\
-\     m2=x*x\n\
+\     m2l=x*x\n\
 \     km=x*w\n\
-\     k2=w*w\n\
+\     k2l=w*w\n\
 \     o=0.25*b*w/(x+(b*w))\n\
-\     p=(((d+c+0.25)*m2)+((((c+0.25)*f)+(b*d)+(0.25 *b))*km)+(0.25*b*f*k2))/((x+(b*w))*(x+(f*w)))\n\
-\     m=(-1)*(((d-c-0.25)*m2)+(((((-1*c)-0.25)*f)+(b*d)-(0.25*b))*km)-(0.25*b*f*k2))/((x+(b*w))*(x+(f*w)))\n\
+\     p=(((d+c+0.25)*m2l)+((((c+0.25)*f)+(b*d)+(0.25 *b))*km)+(0.25*b*f*k2l))/((x+(b*w))*(x+(f*w)))\n\
+\     m=(-1)*(((d-c-0.25)*m2l)+(((((-1*c)-0.25)*f)+(b*d)-(0.25*b))*km)-(0.25*b*f*k2l))/((x+(b*w))*(x+(f*w)))\n\
 \ in d8 k [[p,o,m,o],[o,p,o,m],[m,o,p,o],[o,m,o,p]]\n"
 
 -- \k80UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]\n\
 k80UniformWithKString :: String
 k80UniformWithKString="\
-\k1 [h, b] blah x i (w,k)=\n\
+\k1 [h, b] z x i (w,k)=\n\
 \ if w<" ++ epsilonString ++ " then [[k,0,0,0],[0,k,0,0],[0,0,k,0],[0,0,0,k]]\n\
 \ else\n\
 \ let f=(h +b)/2\n\
 \     c=0.25\n\
 \     d=0.5\n\
-\     ebkm=e(b*w*x)i 0\n\
-\     enbkm=e(-1*b*w*x)i 0\n\
-\     enfkm=e(-1*f*w*x)i 0\n\
+\     ebkm=e0(b*w*x)i 0\n\
+\     enbkm=e0(-1*b*w*x)i 0\n\
+\     enfkm=e0(-1*f*w*x)i 0\n\
 \     o=0.25*(enbkm+((b*w*x)-1))/(b*w*x)\n\
 \     p=((enbkm*((ebkm*((0.25*b*f*w*x)+(c*f)+(b*d)))-(c*f)))-(b*d*enfkm))/(b*f*w*x)\n\
 \     m=((enbkm*((ebkm*((0.25*b*f*w*x)+(c*f)-(b*d)))-(c*f)))+(b*d*enfkm))/(b*f*w*x)\n\
