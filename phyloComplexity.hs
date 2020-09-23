@@ -1,18 +1,18 @@
 {- |
 Module      :  Kolmogorov (algorithmic) complexity of overall machine
-Description :  Program reads input file with m,achine configuration and 
+Description :  Program reads input file with m,achine configuration and
                determines Kolmnogorov Complexity of Graph and Character models
 Copyright   :  (c) 2018-2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -26,7 +26,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -37,17 +37,17 @@ Portability :  portable (I hope)
 
 module Main where
 
-import System.IO
-import System.Environment
-import Complexity.Graphs
-import Complexity.Utilities
-import Complexity.Parsers
-import Complexity.MathUtilities
-import Complexity.CharacterModels
-import Complexity.Types
+import           Complexity.CharacterModels
+import           Complexity.Graphs
+import           Complexity.MathUtilities
+import           Complexity.Parsers
+import           Complexity.Types
+import           Complexity.Utilities
+import           System.Environment
+import           System.IO
 -- import Debug.Trace
 
--- | writeTCM takes model structure (name, alphabet, matrix) and writes file 
+-- | writeTCM takes model structure (name, alphabet, matrix) and writes file
 -- creates filename from stub and character name
 writeTCMFile :: String -> String -> (String, [String], [[Double]]) -> IO()
 writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
@@ -83,7 +83,7 @@ main =
         --putStrLn ("\tCharacter configurations: " ++ show charInfo)
 
         --Calculate complexity of Graph Component
-        -- based on number of edges |E| * 2 (for vertex specification) * log |V| (for number of bits required to specify largest vertex index).  
+        -- based on number of edges |E| * 2 (for vertex specification) * log |V| (for number of bits required to specify largest vertex index).
         let graphProgram = makeProgramStringGraph (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
         let (graphShannonBits, graphHuffmanLengthBits, graphHuffmanBitRep) = getInformationContent graphProgram
 
@@ -109,11 +109,11 @@ main =
         ---- network edges come in pairs (specification of phylogenetic graph) so need to delete r/2 edges to make a tree
         ---- each edge is defined by 2 vertices hence, r * log |V| conversion cost multiplied by number of display trees
         ---- 2^r upper bound on number of display trees
-        -- number of vertices in phylogenetic graph 
+        -- number of vertices in phylogenetic graph
         let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
         let graph2DisplayTreeComplexity = fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
         hPutStrLn stderr ("Softwired Graph -> Tree complexity: " ++ show graph2DisplayTreeComplexity)
-        
+
         --calculate and output Bit TCMs for each character change model for complexity calculations
         let tcmListBit = fmap (makeTCM log2 . fst) charInfo
         mapM_ (writeTCMFile "bit" stub) tcmListBit
@@ -128,7 +128,7 @@ main =
 
         --Calculate complexity of Character Model Components
         let characterProgram = makeProgramStringCharacters (fmap fst charInfo)
-        
+
         -- if want to show huffman representation otherwise don't need.
         -- let (characterShannonBits, characterHuffmanLengthBits, characterHuffmanBitRep) = getInformationContent characterProgram
         let (characterShannonBits, characterHuffmanLengthBits, _) = getInformationContent characterProgram
@@ -137,9 +137,9 @@ main =
         let characterModelComplexity = characterShannonBits
         hPutStrLn stderr ("Shannon bits of character program: " ++ show characterShannonBits)
         hPutStrLn stderr ("Huffman bits of character program: " ++ show characterHuffmanLengthBits)
-        --Calaculate Complexity of model switching over Character Components 
+        --Calaculate Complexity of model switching over Character Components
         --Need to read from MachineModel
-        --Need to add the log number of characters for each  
+        --Need to add the log number of characters for each
         let modelSpecificationComplexity = fromIntegral (length charInfo) * logBase 2.0 (fromIntegral $ length charInfo)
         hPutStrLn stderr ("Character model switching complexity: " ++ show modelSpecificationComplexity)
         let charNumComplexity = sum $ fmap (logBase 2.0 . fromIntegral) (snd <$> characterModelList machineConfig)
@@ -148,7 +148,7 @@ main =
         hPutStrLn stderr ("Character number complexity: " ++ show charNumComplexity)
 
         -- display tree could be at most 2^r but is limited by the number of 'blocks' or characters that could
-        ----follow individual display trees so the number of characters (take smaller of two), 
+        ----follow individual display trees so the number of characters (take smaller of two),
         ----but still need 'r' bits to encoding which display tree
         -- let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
         let softWiredFactor = displayTreeSwitchingComplexity + (min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber * graph2DisplayTreeComplexity)

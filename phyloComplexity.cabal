@@ -1,7 +1,7 @@
 cabal-version:  2.2
 build-type:     Simple
 
-name:           machinecomplexity
+name:           phyloComplexity
 version:        0.1.0.0
 --description:    Please see the README on GitHub at <https://github.com/wardwheeler/PhyloAlgInfo#readme>
 --homepage:       https://github.com/wardwheeler/PhyloAlgInfo#readme
@@ -12,9 +12,9 @@ version:        0.1.0.0
 --license:        BSD3
 --license-file:   LICENSE
 
-executable machineComplexity
+executable phyloComplexity
 
-  main-is: machineComplexity.hs
+  main-is: phyloComplexity.hs
 
   ghc-options:  -Wall
                 -Wincomplete-patterns
