@@ -1,17 +1,17 @@
 {- |
-Module      :  MathUtilities 
+Module      :  MathUtilities
 Description :  mathematical utuilities for calculating Kolmnogorov Complexity
 Copyright   :  (c) 2018 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -44,9 +44,7 @@ Good symbolic integrator https://www.integral-calculator.com/
 
 module Complexity.MathUtilities where
 
--- import Complexity.Parsers
-import Complexity.Types
--- import Complexity.Constants
+import           Complexity.Types
 -- import Debug.Trace
 
 -- | factorial is naive recursive calculation of factorials
@@ -58,7 +56,7 @@ factorial n = n * factorial (n - 1)
 
 
 -- | baseE is naive calcultions of 'e' base of natural logorithms
--- take numbr of iterations, counter set to 0, curValue set to 0.0 
+-- take numbr of iterations, counter set to 0, curValue set to 0.0
 baseE :: Int -> Int -> Double
 baseE iterations counter =
   if counter == iterations then 0
@@ -66,9 +64,10 @@ baseE iterations counter =
     --trace (show (factorial counter) ++ " " ++ show curValue ++ " ")
     (1.0 / fromIntegral (factorial counter)) + baseE iterations (counter + 1) --(fromIntegral $ factorial counter)))
 
+{- Two versions becuase of precision issues in several functions-}
 
--- | expE naive claculation of 'e^x' exponent of natural logorithm
--- can be used to calcilaue value of 'e' with 1 as exponent
+-- | expE naive calculation of 'e^x' exponent of natural logorithm
+-- can be used to calculate value of 'e' with 1 as exponent
 -- counter set to 0, curValue set to 0.0
 -- (1+ (x/n))^n
 -- this is a problem--causes issues
@@ -78,13 +77,13 @@ expE :: Double -> Double
 expE exponentLocal =
   exp exponentLocal
   {-
-  if counter == fixedPrecision then 0 
-  else  
+  if counter == fixedPrecision then 0
+  else
     ((power exponent counter 0) / (fromIntegral (factorial counter))) + expE exponent iterations (counter + 1)
-  
+
   --trace (show $ power (1+(1/(fromIntegral 1000))) 1000 0)
   power (1+(exponent/(fromIntegral fixedPrecision))) fixedPrecision 0
- -} 
+ -}
 
 -- | expX2Y exponentiation general x^y via e^(y * log x)
 expX2Y :: Double -> Double -> Double
@@ -106,19 +105,19 @@ power base exponentLocal counter
 
 
 {-Unused args hit trigger warning but are needed so functions can be passed alternately-}
--- | log2 is logarithm base 2 defined in terms of Taylor series for log base e 
+-- | log2 is logarithm base 2 defined in terms of Taylor series for log base e
 -- 2 unused args do same as LogE for functional argument use
 log2 :: Double -> Int-> Int -> Double -> Double
 log2 value iterations blah bleh = logE value iterations 0 0.0 / logE 2.0 iterations 0 0.0
 
--- | Taylor series for natural logorithm, value >= 0 
+-- | Taylor series for natural logorithm, value >= 0
 --- counter set to 0, curValue set to 0.0
 logE :: Double -> Int -> Int -> Double -> Double
 logE value iterations counter curValue = log value
   {-
   if value < 0 then error "logE arg must be > 0"
   else if counter == iterations then 2.0 * curValue
-  else  
+  else
     let factor = 1 + (2 * counter)
         newValue = (power ((value - 1.0) / (value + 1.0)) factor 0) / (fromIntegral factor)
     in
@@ -129,19 +128,19 @@ logE value iterations counter curValue = log value
 -- from https://www.csie.ntu.edu.tw/~b89089/link/gammaFunction.pdf
 -- Gamma a = lim (n-> infty) (n!n^a)/(a(a+1)...(a+n))_
 -- counter starts at 0, curValue 1
--- goes 0 to N (not n-1) 
+-- goes 0 to N (not n-1)
 gammaFun :: Double -> Int -> Int -> Double -> Double
 gammaFun value iterations counter curValue =
   if counter > iterations then factorial (fromIntegral iterations) * expX2Y (fromIntegral iterations) value / curValue
   else gammaFun value iterations (counter + 1) (curValue * (value + fromIntegral counter))
 
 -- | gammaPDF returns probbaility of given argument based on inputs and parameters assumes alpha=beta
--- hence only 1 gamma parameter 
+-- hence only 1 gamma parameter
 gammaPDF :: Double -> Int -> Double -> Double -> Double
 gammaPDF alpha iterations interval rVal  =
   let result = interval * expX2Y alpha alpha  * expX2Y rVal (alpha - 1)  * expE (-1 * alpha * rVal) / gammaFun alpha iterations 0 1
   in
-  --trace ("alpha " ++ (show alpha) ++ " iterations " ++ (show iterations) ++ " interval " ++ (show interval) ++ " rVal " ++ (show rVal) ++ " => " ++ (show result)) 
+  --trace ("alpha " ++ (show alpha) ++ " iterations " ++ (show iterations) ++ " interval " ++ (show interval) ++ " rVal " ++ (show rVal) ++ " => " ++ (show result))
   result
 
 -- | cumulativeSum sums using gamma PDF

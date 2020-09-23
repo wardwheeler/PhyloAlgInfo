@@ -1,17 +1,17 @@
 {- |
-Module      :  Utilities 
+Module      :  Utilities
 Description :  Functions to generate(algorithmic) complexity of objects
-Copyright   :  (c) 2018 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -42,10 +42,10 @@ module Complexity.Utilities
   ,  ppMatrix
   )  where
 
-import Data.List
-import Data.Compression.Huffman
+import           Data.Compression.Huffman
+import           Data.List
 -- import Complexity.Constants
-import Numeric.LinearAlgebra
+import           Numeric.LinearAlgebra
 
 -- | occurencesInList counts occurences elements in list--makes result double so can divide later
 occurencesInList :: Eq a => [a] -> a -> Double
@@ -108,7 +108,7 @@ getHuffman inString =
     --trace (ppCode huffCodes)
     (length bitList, bitString)
 
--- | getInformation takes a program string and returns Shannon and Huffman bits and Huffman binary program. 
+-- | getInformation takes a program string and returns Shannon and Huffman bits and Huffman binary program.
 getInformationContent :: String -> (Double, Int, String)
 getInformationContent programString =
   if null programString then error "Empty program in getInformation"
@@ -117,7 +117,7 @@ getInformationContent programString =
     in
     (getShannon programString, huffBits, huffBinary)
 
--- | split2Matrix takes alist and splits after n elements to make it a list of lists 
+-- | split2Matrix takes alist and splits after n elements to make it a list of lists
 split2Matrix :: Int -> [Double] -> [[Double]]
 split2Matrix lengthPieces inList
   | null inList = []

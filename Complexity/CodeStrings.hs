@@ -1,17 +1,17 @@
 {- |
-Module      :  CodeStrings 
-Description :  Strings for generated minimal Haskell code--functions for Algorithmic (Kolmogorov) complexity 
+Module      :  CodeStrings
+Description :  Strings for generated minimal Haskell code--functions for Algorithmic (Kolmogorov) complexity
 Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -35,7 +35,7 @@ Portability :  portable (I hope)
 -}
 module Complexity.CodeStrings where
 
-import Complexity.Constants
+import           Complexity.Constants
 
 --In general, function names are letter number and internal variable are letters only
 -- exception \aG, \bG, cG, dG for \aGraph etc since 10 \a functions
@@ -111,7 +111,7 @@ powerString="\
 --expE exponent iterations counter =
 -- This needs alot of iterations to behave well--100 for sure
 -- Is n^2 due to use of factorial could be made linear
--- by saving previous factorial value and just mulgtipolying 
+-- by saving previous factorial value and just mulgtipolying
 -- the use of p1 also makes n^2--same preocedure--need a new value to pass
 expEString :: String
 expEString="\
@@ -133,7 +133,7 @@ logEString="\
 \  if c==i then 2*w\n\
 \  else l0 v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
 
--- log2 :: Double -> Int-> Int -> Double -> Double 
+-- log2 :: Double -> Int-> Int -> Double -> Double
 -- log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
 -- the 'c' and 'w' params are not used but there for function as parame with logE
 log2String :: String
@@ -141,7 +141,7 @@ log2String="\
 \b0 v i c w=(l0 v i 0 0)/(l0 2 i 0 0)\n"
 
 -- start with 0
--- \r0 :: Int -> a -> Int -> [a]\n\ 
+-- \r0 :: Int -> a -> Int -> [a]\n\
 replicateString :: String
 replicateString="\
 \r0 n v c=\n\
@@ -183,10 +183,10 @@ neymanUniformString="\
 --p argument here is ignored by exponential
 neymanExponentialString :: String
 neymanExponentialString="\
-\y0 n a p=((1+(a*(fromIntegral n)))/((a+1)*(fromIntegral n)),1/((a+1)*(fromIntegral n)))\n" 
+\y0 n a p=((1+(a*(fromIntegral n)))/((a+1)*(fromIntegral n)),1/((a+1)*(fromIntegral n)))\n"
 
--- |this passes function of Neyman Uniform or NeymanExponential as argument 
--- f is functino, n=alpabet size, a is branch distribution param, p is precision integer, 
+-- |this passes function of Neyman Uniform or NeymanExponential as argument
+-- f is functino, n=alpabet size, a is branch distribution param, p is precision integer,
 -- \c9 :: (Int -> Double -> Int -> (Double, Double)) -> Int -> Double -> Int -> String -> [[Double]]\n\
 makeTCMBitsString :: String
 makeTCMBitsString="\
@@ -205,7 +205,7 @@ sndString="\
 -- | does the fmap/sum operation over multiple pii/pij for weights if [(1,1)]
 -- same as simple Neyman functions
 --makeNeymanMatrix :: (Double -> Int-> Int -> Double -> Double) ->  Distribution -> Int -> DistributionParameter -> Int ->  [(Double, Double)] -> [[Double]]
---makeNeymanMatrix logType distribution cbetSize cParam iterations modifiers 
+--makeNeymanMatrix logType distribution cbetSize cParam iterations modifiers
 -- codes in log2 unlike general cde that passes log type
 -- \n :: Int -> Int -> Double -> Int ->  [(Double, Double)] -> String -> [[Double]]\n\
 makeNeymanGeneralMatrixString :: String
@@ -364,7 +364,7 @@ zipString="\
 lastString :: String
 lastString="\
 \a3(a:b)=\n\
-\  if null b then a\n\ 
+\  if null b then a\n\
 \  else a3 b\n"
 
 -- \a4 :: [[a]] -> [a]\n\
@@ -458,7 +458,7 @@ foldlString="\
 \ if null b then a\n\
 \ else c3 f(f a$a5 b)(a6 b)\n"
 
--- \c2 :: [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> (Double -> Int -> Double -> Double) -> (Double, Double) -> [Double]\n\ 
+-- \c2 :: [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> (Double -> Int -> Double -> Double) -> (Double, Double) -> [Double]\n\
 --2.0 is maxTime--should be String
 integrateGTRMatrixWithKString :: String
 integrateGTRMatrixWithKString="\
@@ -469,19 +469,19 @@ integrateGTRMatrixWithKString="\
 \ | otherwise=(l*(e6 e7 j a b c d e f 2.0 h 0 k)):(c2 a b c d(e+1)f g h i j(k,l))\n"
 
 
--- \c5 :: [[Double]] -> Int -> Int -> [Double]\n\ 
+-- \c5 :: [[Double]] -> Int -> Int -> [Double]\n\
 adjustSymString :: String
 adjustSymString="\
 \c5 a b c=\n\
 \ let e=c5 a b(c+1)\n\
 \ in\n\
-\ if b==d5 0 a then []\n\ 
-\ else if c==d5 0 a then c5 a(b+1)0\n\ 
-\ else if c==b then ((a!!b)!!c):e\n\ 
-\ else\n\ 
-\  let d=((a!!b)!!c+(a!!c)!!b)/2\n\ 
-\  in\n\ 
-\  if d>0 then d:e\n\ 
+\ if b==d5 0 a then []\n\
+\ else if c==d5 0 a then c5 a(b+1)0\n\
+\ else if c==b then ((a!!b)!!c):e\n\
+\ else\n\
+\  let d=((a!!b)!!c+(a!!c)!!b)/2\n\
+\  in\n\
+\  if d>0 then d:e\n\
 \  else " ++ epsilonString ++ ":e\n"
 
 -- \c6 :: [[Double]] -> [[Double]] -> Int -> [[Double]]\n\
@@ -821,7 +821,7 @@ padOutMinorString="\
 \ else\n\
 \   let m=d5 0 a\n\
 \   in\n\
-\   if m==d then a\n\ 
+\   if m==d then a\n\
 \   else\n\
 \     let r=d-m\n\
 \         l=i6 d 1\n\

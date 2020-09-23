@@ -1,17 +1,17 @@
 {- |
-Module      :  IntegratedModels 
-Description :  Analytically integrated models -functions for Algorithmic (Kolmogorov) complexity 
-Copyright   :  (c) 2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+Module      :  IntegratedModels
+Description :  Analytically integrated models -functions for Algorithmic (Kolmogorov) complexity
+Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -37,10 +37,10 @@ Used symbolic integrator https://www.integral-calculator.com/
 -}
 module Complexity.IntegratedModels where
 
-import Complexity.Types
-import Complexity.MathUtilities
-import Complexity.MatrixUtilities
-import Complexity.Constants
+import           Complexity.Constants
+import           Complexity.MathUtilities
+import           Complexity.MatrixUtilities
+import           Complexity.Types
 -- import Debug.Trace
 
 
@@ -54,14 +54,12 @@ neymanUniformWithK r a iterations (kWeight, kFraction) =
     if kWeight < epsilon  then (kFraction, 0.0)
     else
         let r1 = fromIntegral r
-            eak = expE (-1 * a * kWeight) 
+            eak = expE (-1 * a * kWeight)
             --pii throws some NaN fir invarants
             pii = ((((eak + 1) * (r1 -1)) + (a * kWeight))/(a * kWeight * r1))
             pij = ((eak + (a * kWeight) - 1)/(a * kWeight * r1))
             pii2 = 1 - ((r1 -1) * pij)
-            --pij2 = (1 - pii) / (r1 -1)
         in
-        --trace ("U:" ++ (show kFraction) ++ " " ++ (show kWeight) ++ " " ++ (show pii2) ++ " " ++ (show pij))
         (kFraction * pii2, kFraction * pij)
 
 
@@ -80,7 +78,6 @@ neymanExponentialWithK r a (kWeight, kFraction) =
             pij = (kWeight / (r1 * (kWeight + a)))
             pii2 = 1 - ((r1 -1) * pij)
         in
-        --trace ("E:" ++ (show kFraction) ++ " " ++ (show kWeight) ++ " " ++ (show pii) ++ " " ++ (show pij))
         (kFraction * pii2, kFraction * pij)
 
 
@@ -91,8 +88,8 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
   | kWeight < epsilon = (kFraction, 0.0)
   | distribution == Uniform =
         let r1 = fromIntegral r
-            eak = expE (-1 * a * kWeight) 
-            --pii throws some NaN fir invarants
+            eak = expE (-1 * a * kWeight)
+            --pii throws some NaN for invarants
             pij = (eak + (a * kWeight) - 1)/(a * kWeight * r1)
             pii = 1 - ((r1 -1) * pij)
         in
@@ -112,7 +109,7 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
 -- takes alphabetsize and uniform parameter [0.alpha] and iterations for expE function
 neymanUniform :: Int -> Double -> Int -> (Double, Double)
 neymanUniform alphabetSize alpha iterations =
-    let pii = (alpha - ((fromIntegral alphabetSize - 1) * (expE (-1 * alpha) ) - 1)) / (fromIntegral alphabetSize * alpha)
+    let pii = (alpha - ((fromIntegral alphabetSize - 1) * expE (-1 * alpha) - 1)) / (fromIntegral alphabetSize * alpha)
         pij = (alpha - 1 + expE (-1 * alpha) ) / (fromIntegral alphabetSize * alpha)
     in
     (pii, pij)
@@ -132,7 +129,7 @@ neymanExponential alphabetSize alpha =
 
 
 -- | TN93 model with exponential branch length distributions following Yang (2005) rates alpha1 for T<>C, alpha2 A<>G, and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- other 4-states models are simplifications
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
@@ -173,11 +170,10 @@ tn93ExponentialWithK [alpha1, alpha2, beta] [pA, pC, pG, pT] expParam iterations
         p33 = (((d3Row + c3Column + pT) * m2) + ((((c3Column + pT) * f2)+(beta * d3Row)+(pT *beta)) * km) + (pT * beta * f2 * k2)) / ((expParam + (beta*kWeight)) * (expParam + (f2*kWeight)))
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix:" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | TN93 model with exponential branch length distributions following Yang (2005) rates alpha1 for T<>C, alpha2 A<>G, and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- other 4-states models are simplifications
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
@@ -197,10 +193,10 @@ tn93UniformWithK [alpha1, alpha2, beta] [pA, pC, pG, pT] expParam iterations (kW
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) 
-        enbkm = expE (-1 * beta * kWeight * expParam) 
-        enf1km = expE (-1 * f1 * kWeight * expParam) 
-        enf2km = expE (-1 * f2 * kWeight * expParam) 
+        ebkm = expE (beta * kWeight * expParam)
+        enbkm = expE (-1 * beta * kWeight * expParam)
+        enf1km = expE (-1 * f1 * kWeight * expParam)
+        enf2km = expE (-1 * f2 * kWeight * expParam)
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -220,11 +216,10 @@ tn93UniformWithK [alpha1, alpha2, beta] [pA, pC, pG, pT] expParam iterations (kW
         p33 = ((enbkm * ((ebkm * ((pT * beta * f2 * kWeight * expParam) + (c3Column * f2) + (beta * d3Row))) - (c3Column * f2))) - (beta * d3Row * enf2km)) / (beta * f2 * kWeight * expParam)
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix :\n" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | F84 model with exponential branch length distributions following Yang (2005) rates alpha1 for T<>C, alpha2 A<>G, and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 f84ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 f84ExponentialWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
@@ -265,11 +260,10 @@ f84ExponentialWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight,
         p33 = (((d3Row + c3Column + pT) * m2) + ((((c3Column + pT) * f2)+(beta * d3Row)+(pT *beta)) * km) + (pT * beta * f2 * k2)) / ((expParam + (beta*kWeight)) * (expParam + (f2*kWeight)))
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix:" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | F84 model with exponential branch length distributions following Yang (2005) rates alphpC for T<>C, alphpG A<>G, and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- other 4-states models are simplifications
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
@@ -291,10 +285,10 @@ f84UniformWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFr
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) 
-        enbkm = expE (-1 * beta * kWeight * expParam) 
-        enf1km = expE (-1 * f1 * kWeight * expParam) 
-        enf2km = expE (-1 * f2 * kWeight * expParam) 
+        ebkm = expE (beta * kWeight * expParam)
+        enbkm = expE (-1 * beta * kWeight * expParam)
+        enf1km = expE (-1 * f1 * kWeight * expParam)
+        enf2km = expE (-1 * f2 * kWeight * expParam)
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -314,11 +308,10 @@ f84UniformWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFr
         p33 = ((enbkm * ((ebkm * ((pT * beta * f2 * kWeight * expParam) + (c3Column * f2) + (beta * d3Row))) - (c3Column * f2))) - (beta * d3Row * enf2km)) / (beta * f2 * kWeight * expParam)
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix :\n" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | HKY85 model with exponential branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 hky85ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 hky85ExponentialWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
@@ -357,11 +350,10 @@ hky85ExponentialWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeigh
         p33 = (((d3Row + c3Column + pT) * m2) + ((((c3Column + pT) * f2)+(beta * d3Row)+(pT *beta)) * km) + (pT * beta * f2 * k2)) / ((expParam + (beta*kWeight)) * (expParam + (f2*kWeight)))
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix:" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | HKY85 model with exponential branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- other 4-states models are simplifications
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
@@ -381,10 +373,10 @@ hky85UniformWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, k
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (beta * kWeight * expParam) 
-        enbkm = expE (-1 * beta * kWeight * expParam) 
-        enf1km = expE (-1 * f1 * kWeight * expParam) 
-        enf2km = expE (-1 * f2 * kWeight * expParam) 
+        ebkm = expE (beta * kWeight * expParam)
+        enbkm = expE (-1 * beta * kWeight * expParam)
+        enf1km = expE (-1 * f1 * kWeight * expParam)
+        enf2km = expE (-1 * f2 * kWeight * expParam)
         bkmfactor = (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * beta * f1 * kWeight * expParam) + (c0Column * f1) + (beta * d0Row))) - (c0Column * f1))) - (beta * d0Row * enf1km)) / (beta * f1 * kWeight * expParam)
         p01 = pC * bkmfactor
@@ -404,11 +396,10 @@ hky85UniformWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, k
         p33 = ((enbkm * ((ebkm * ((pT * beta * f2 * kWeight * expParam) + (c3Column * f2) + (beta * d3Row))) - (c3Column * f2))) - (beta * d3Row * enf2km)) / (beta * f2 * kWeight * expParam)
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix :\n" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | f81 model with exponential branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 f81ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 f81ExponentialWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
@@ -445,11 +436,10 @@ f81ExponentialWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFractio
         p33 = (((d3Row + c3Column + pT) * m2) + (((c3Column + pT)+d3Row+pT) * km) + (pT * k2)) / ((expParam + kWeight) * (expParam + kWeight))
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix:" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | HKY85 model with exponential branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- other 4-states models are simplifications
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
@@ -467,10 +457,10 @@ f81UniformWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
         d1Row = pT/pY
         d2Row = pA/pR
         d3Row = pC/pY
-        ebkm = expE (kWeight * expParam) 
-        enbkm = expE (-1 * kWeight * expParam) 
-        enf1km = expE (-1 * kWeight * expParam) 
-        enf2km = expE (-1 * kWeight * expParam) 
+        ebkm = expE (kWeight * expParam)
+        enbkm = expE (-1 * kWeight * expParam)
+        enf1km = expE (-1 * kWeight * expParam)
+        enf2km = expE (-1 * kWeight * expParam)
         bkmfactor = (enbkm + ((kWeight * expParam) - 1)) / (kWeight * expParam)
         p00 = ((enbkm * ((ebkm * ((pA * kWeight * expParam) + c0Column + d0Row)) - c0Column)) - (d0Row * enf1km)) / (kWeight * expParam)
         p01 = pC * bkmfactor
@@ -490,11 +480,10 @@ f81UniformWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
         p33 = ((enbkm * ((ebkm * ((pT * kWeight * expParam) + c3Column + d3Row)) - c3Column)) - (d3Row * enf2km)) / (kWeight * expParam)
         probIntegratesMatrix = [[p00,p01,p02,p03],[p10,p11,p12,p13],[p20,p21,p22,p23],[p30,p31,p32,p33]]
     in
-    --trace ("Prob Matrix :\n" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | K80 model with exponential branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 k80ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 k80ExponentialWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
@@ -514,11 +503,10 @@ k80ExponentialWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) 
                                 [minusFactor,offDiagFactor,plusFactor,offDiagFactor],
                                 [offDiagFactor,minusFactor,offDiagFactor,plusFactor]]
     in
-    --trace ("Prob Matrix:" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix
 
 -- | K80 model with uniform branch length distributions following Yang (2005) rates alpha transition and Beta for transversion
--- matrices reorderd (and eigenvalues) 
+-- matrices reorderd (and eigenvalues)
 -- this is uniform branch length model with 'k' for raet factor (1, 1) if all same etc)
 k80UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 k80UniformWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
@@ -527,9 +515,9 @@ k80UniformWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
     let f = (alpha +beta)/2
         cColumn = 0.25
         dRow = 0.5
-        ebkm = expE (beta * kWeight * expParam) 
-        enbkm = expE (-1 * beta * kWeight * expParam) 
-        enfkm = expE (-1 * f * kWeight * expParam) 
+        ebkm = expE (beta * kWeight * expParam)
+        enbkm = expE (-1 * beta * kWeight * expParam)
+        enfkm = expE (-1 * f * kWeight * expParam)
         offDiagFactor = 0.25 * (enbkm + ((beta * kWeight * expParam) - 1)) / (beta * kWeight * expParam)
         plusFactor = ((enbkm * ((ebkm * ((0.25 * beta * f * kWeight * expParam) + (cColumn * f) + (beta * dRow))) - (cColumn * f))) - (beta * dRow * enfkm)) / (beta * f * kWeight * expParam)
         minusFactor = ((enbkm * ((ebkm * ((0.25 * beta * f * kWeight * expParam) + (cColumn * f) - (beta * dRow))) - (cColumn * f))) + (beta * dRow * enfkm)) / (beta * f * kWeight * expParam)
@@ -538,5 +526,4 @@ k80UniformWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
                                 [minusFactor,offDiagFactor,plusFactor,offDiagFactor],
                                 [offDiagFactor,minusFactor,offDiagFactor,plusFactor]]
     in
-    --trace ("Prob Matrix :\n" ++ ppMatrix probIntegratesMatrix)
     matrixMultiplyScalar kFraction probIntegratesMatrix

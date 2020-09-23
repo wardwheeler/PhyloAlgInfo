@@ -2,7 +2,7 @@
 Module      :  Kolmogorov (algorithmic) complexity of overall machine
 Description :  Program reads input file with m,achine configuration and
                determines Kolmnogorov Complexity of Graph and Character models
-Copyright   :  (c) 2018-2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 
 Redistribution and use in source and binary forms, with or without

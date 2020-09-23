@@ -1,17 +1,17 @@
 {- |
-Module      :  CharacterModels for Algorithmic (Kolmogorov) complexity 
+Module      :  CharacterModels for Algorithmic (Kolmogorov) complexity
 Description :  Functions to generate(algorithmic) complexity of character change models
 Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -52,17 +52,17 @@ module Complexity.CharacterModels
   ,  getAICBIC
   )  where
 
-import Control.Applicative
-import Data.List
-import Complexity.MathUtilities
+import           Complexity.MathUtilities
+import           Control.Applicative
+import           Data.List
 -- import Complexity.Parsers
-import Complexity.CodeStrings
-import Complexity.Types
-import Complexity.Constants
-import Complexity.GTRExt
-import Complexity.MatrixUtilities
-import Complexity.Utilities
-import Complexity.IntegratedModels
+import           Complexity.CodeStrings
+import           Complexity.Constants
+import           Complexity.GTRExt
+import           Complexity.IntegratedModels
+import           Complexity.MatrixUtilities
+import           Complexity.Types
+import           Complexity.Utilities
 -- import Debug.Trace
 
 
@@ -102,7 +102,7 @@ hky85ExponentialDependencies :: [String]
 hky85ExponentialDependencies = [hky85ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 f84ExponentialDependencies :: [String]
-f84ExponentialDependencies = [f84ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies 
+f84ExponentialDependencies = [f84ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
 
 tn93ExponentialDependencies :: [String]
 tn93ExponentialDependencies = [tn93ExponentialWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ fourStateSequenceModelDependencies
@@ -122,7 +122,7 @@ f84UniformDependencies = [f84UniformWithKString, matrixMultiplyScalarString, mak
 tn93UniformDependencies :: [String]
 tn93UniformDependencies = [tn93UniformWithKString, matrixMultiplyScalarString, makeGTRLogMatrix4StateString] ++ [expEString, factorialString] ++ fourStateSequenceModelDependencies
 
--- | QR factorization dependencies 
+-- | QR factorization dependencies
 qrDependencies :: [String]
 qrDependencies = [qrFactorizationString,  getDiagValuesString,  qrDecompositionString,  matrixMultiplyString,  concatString,  fmapString,  lengthString,  absString,  foldlString,  getHouseholderListString, transposeMatrixString,  getHouseholderString,  padOutMinorString,  makeMatrixMinorString,  makeDiagMatrixString,  takeString,  dropString,  zipWithString,  getColumnVectorString,  makeEVectorString,  euclidNormString,  matrixMultiplyScalarString,  subtractMatricesString,  normalizeColumnVectorString,  headString,  replicateString,  makeDiagRowString,  normalizeVectorString,  sqrtString,  getRowsString,  getElementString, getDiagValuesString, factorialString, expEString, powerString]
 
@@ -196,14 +196,14 @@ getModelList charModelList areModifiers areBothDistributions =
 -- only GTR for sitribution because others are already baked in--no numerical integration
 getDependencies :: MarkovModel -> Distribution -> [Modifier] -> [String]
 getDependencies modelType distribution modifierList =
-  if (modelType == GTR) then getModelDep modelType distribution ++ getDistDep distribution ++ getModList modifierList
+  if modelType == GTR then getModelDep modelType distribution ++ getDistDep distribution ++ getModList modifierList
   else getModelDep modelType distribution ++ getModList modifierList
 
 -- | getModelDep takes model and returns dependency list
 getModelDep :: MarkovModel -> Distribution -> [String]
 getModelDep modelType distribution
   | modelType == GTR =  gtrDependencies
-  | modelType == K80 =  
+  | modelType == K80 =
                         if distribution == Exponential then k80ExponentialDependencies
                         else k80UniformDependencies
   | modelType == F81 =
@@ -220,7 +220,7 @@ getModelDep modelType distribution
                        else tn93UniformDependencies
   | otherwise = error ("Markov model " ++ show modelType ++ " not implemented")
 
--- | getDistDep take sdistrinbution and returns dependencies 
+-- | getDistDep take sdistrinbution and returns dependencies
 getDistDep :: Distribution -> [String]
 getDistDep distribution
   | distribution == Uniform = [getUniformPdfString]
@@ -233,8 +233,8 @@ getModList modList =
   let first = head modList
   in
   if first == None then []
-  else if (length modList == 2 || first == Invariant) || (first == Gamma) then 
-    modifierDependencies ++ gammaDependencies 
+  else if (length modList == 2 || first == Invariant) || (first == Gamma) then
+    modifierDependencies ++ gammaDependencies
   else error ("Rate modifiers list " ++ show modList ++ " has unimplemented modifier(s)")
 
 
@@ -244,8 +244,7 @@ scanModifiers charList =
   not (null charList) &&
   let first =  fst $ head $ rateModifiers $ head charList
   in
-  if first /= None then True
-  else scanModifiers (tail charList)
+  first /= None || scanModifiers (tail charList)
 
 -- | scanDistributions checks to see whether both Uniform and Exponential are used
 -- really for Neyman to see if use general or specific versions of model
@@ -281,53 +280,12 @@ makeDependenciesString inList =
         in
         first ++ makeDependenciesString (tail inList)
 
-{-
--- | pairList2String takes list of pairs and makes into string for argument ot rate modifiers
--- in neymanGeneralWithK 
-pairList2String :: (Show a, Show b) => String -> [(a,b)] -> String
-pairList2String start inList =
-  if null inList then start ++ "]"
-  else
-    let (c,d) = head inList
-        this = "(" ++ show c ++ "," ++ show d ++ ")"
-    in
-    if start == "[" then
-        pairList2String (start ++ this) (tail inList)
-    else
-        pairList2String (start ++ "," ++ this) (tail inList)
--}
-
-{-
--- | getModifierListSmall like getModifier list but paired down forvuse in minimmal code
-getModifierListSmall :: Int -> Double -> Int -> Int -> Double -> Int -> [(Double, Double)]
-getModifierListSmall invariant theta gamma nClasses alpha iterations
-  | invariant == 0 && gamma == 0 = [(1,1)]
-  | invariant == 1 && gamma == 0 = [(0, theta), (1 / (1 - theta),1 - theta)]
-  | otherwise = -- gamma == 1
-    let gammaWeightList = discreteGamma alpha nClasses maxGammaRate iterations (nClasses * iterations)
-        gammaFracList = replicate nClasses (1.0 / fromIntegral nClasses)
-    in
-    if theta == 0 then
-      zip gammaWeightList gammaFracList
-    else
-      zip (0 : fmap (* (1/ (1 - theta))) gammaWeightList) (theta : fmap (* (1 - theta)) gammaFracList)
--}
-
 -- | getInfo takes CharacterModel type and ertuns field as a tuple
-getInfo :: CharacterModel -> (String, [String], (Distribution, [DistributionParameter]), 
+getInfo :: CharacterModel -> (String, [String], (Distribution, [DistributionParameter]),
   [(Modifier, [DistributionParameter])], (MarkovModel, RMatrix, PiVector, [ModelParameter]), Int, Int)
-getInfo charInfo = 
-  (characterName charInfo, alphabet charInfo, branchLength charInfo, rateModifiers charInfo, changeModel 
+getInfo charInfo =
+  (characterName charInfo, alphabet charInfo, branchLength charInfo, rateModifiers charInfo, changeModel
     charInfo, precision charInfo, charLength charInfo)
-
-{-
--- | getModifierList take charInfo and returns rate modifier list
-getModifierList :: CharacterModel -> [(DistributionParameter, DistributionParameter)]
-getModifierList charInfo =
-  let (_, _,_, tcmRateModifiers,_,iterations, _) = getInfo charInfo
-  in
-  getModifiers tcmRateModifiers iterations
--}
 
 -- | getModifierParams gets params for sending to getModifierListSmall
 getModifierParams :: [(Modifier, [DistributionParameter])] -> (Int, Double, Int, Int, Double)
@@ -369,7 +327,6 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
            -- weightString = pairList2String "[" (getModifierListSmall a b c d e tcmPrecision)
            maximumTime = getEndTime branchDist (head branchParams)
        in
-       --trace (show (getModifierListSmall a b c d e tcmPrecision)) (
        if tcmChangeModel == K80 || tcmChangeModel == F81 || tcmChangeModel == HKY85 || tcmChangeModel == F84 || tcmChangeModel == TN93 then
         let letString = ("  let wC" ++ show counter ++ "=a1 " ++ show a ++ " " ++ show b ++ " " ++ show c ++ " " ++ show d ++ " " ++ show e ++ " " ++ show tcmPrecision ++ "\n")
             modelFunctionName = get4StateModelName tcmChangeModel branchDist
@@ -378,7 +335,7 @@ makeCharacterModelsString charModelList counter areRateModifiers areBothDistribu
         in
         if fst (head tcmRateModifiers) == None then outString2 ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
         else letString ++ outString ++ makeCharacterModelsString (tail charModelList) (counter + 1) areRateModifiers areBothDistributions
-       
+
        else if tcmChangeModel == GTR then
         let eigenString = ("  let (zC" ++ show counter ++ ",uC" ++ show counter ++ ",iC" ++ show counter ++ ") = a0 " ++ show (length tcmAlphabet) ++ " " ++ show tcmQ ++ " " ++ show tcmP ++ show tcmPrecision ++ "\n")
             distFunction = getDistString branchDist
@@ -523,7 +480,7 @@ get4StateModelName modelType distribution
 
 -- | makeTCM takes unit function (logE or Log2) model type, branch model (and param(s)), and alphabet to create TCMs for POY/PCG
 -- the values will be log2/e (depending on input function) of integrated probabilitites  of change (pij)
--- the "name" string is returned for filename purposes 
+-- the "name" string is returned for filename purposes
 makeTCM :: (Double -> Int-> Int -> Double -> Double) -> CharacterModel -> (String, [String], [[Double]])
 makeTCM logType charInfo =
     let (tcmName, tcmAlphabet,(branchDist, branchParams), tcmRateModifiers,(tcmChangeModel, tcmR, tcmP, modelParams),tcmPrecision, _) = getInfo charInfo
@@ -547,7 +504,7 @@ makeTCM logType charInfo =
         in
         (tcmName, tcmAlphabet, logMatrix)
 
--- | makeSimpleMatrix takes values for diagonal and non-diagnoal and row/column size and returns 
+-- | makeSimpleMatrix takes values for diagonal and non-diagnoal and row/column size and returns
 -- square matrix
 makeSimpleMatrix :: Int -> Double -> Double -> Int -> String -> [[Double]]
 makeSimpleMatrix size diag nondiag rowCounter lastElement=
@@ -560,7 +517,7 @@ makeSimpleMatrix size diag nondiag rowCounter lastElement=
         else [first ++ [0]]
 
 -- | getRateParams returns teh total number of rate parameters but adjuting for the convention
--- of not including the number of classes as a parameer for discrete gamma 
+-- of not including the number of classes as a parameer for discrete gamma
 getRateParams :: [(Modifier, [DistributionParameter])] -> Int -> Int
 getRateParams rateModList acc =
   if null rateModList then acc
@@ -571,17 +528,17 @@ getRateParams rateModList acc =
     if modifier == Gamma then getRateParams (tail rateModList) (acc + 1)
     else getRateParams (tail rateModList) (acc + length (snd first))
 
--- | getAICBIC takes list of character models and returns Akaike and 
+-- | getAICBIC takes list of character models and returns Akaike and
 -- Bayesian Information Content (AIC, BIC) values
 -- AIC = -2 * |P|; BIC = \Sum_{models} ln (charLength * numchars of type) * |P_{model}|
 -- initialted with 0 0
 -- length = 1 for static--mutiplying by number of block characters
--- since branches are not estimated, but a distribution, the tre "edge" 
+-- since branches are not estimated, but a distribution, the tre "edge"
 -- paramter number is only that of its distibution (e.g. 1 for exponential)
 -- not the 2n-1 (n leaves) typical of a tree
 -- if GTR rates nromalized to 1 and symetrical 5 parameters for DNA (n^2 -n)/2 -1 in gebneral for
 -- alphabet size of n
--- For discrete gamma including 2 parameters (alpha, number classes). Looks like some only 
+-- For discrete gamma including 2 parameters (alpha, number classes). Looks like some only
 -- say there is one parameter, since only alpha is estimated although number of classes is specified.
 getAICBIC :: [(CharacterModel, Int)] -> Double -> Double -> (Double, Double)
 getAICBIC charInfoPairList aicCounter bicCounter =
@@ -613,7 +570,7 @@ getAICBIC charInfoPairList aicCounter bicCounter =
     else if tcmChangeModel == HKY85 || tcmChangeModel == F84 then
       let curAIC = 4 + paramCounter
       in
-      getAICBIC (tail charInfoPairList) (curAIC + aicCounter) ((lnLength * curAIC) + bicCounter) 
+      getAICBIC (tail charInfoPairList) (curAIC + aicCounter) ((lnLength * curAIC) + bicCounter)
     else if tcmChangeModel == TN93 then
       let curAIC = 5 + paramCounter
       in
@@ -628,7 +585,7 @@ getAICBIC charInfoPairList aicCounter bicCounter =
 
 -- | makeLogMatrix takes the probMatrix List and converts to logMatrix for return
 makeLogMatrix :: (Double -> Int-> Int -> Double -> Double) -> String -> Int -> Int -> [[[Double]]]-> [[Double]]
-makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList = 
+makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
   let zeroMatrix = replicate alphSize $ replicate alphSize 0.0
       pMatrix = foldl' addMatrices  zeroMatrix probMatrixList
       -- make symmetrical
@@ -646,24 +603,21 @@ makeGTRLogMatrix logType lastAlphElement eigenValueList uMatrix uInvMatrix alphS
       probMatrixList  = fmap (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
-  --trace ("modifiers :" ++ show modifiers ++ "\nprob matrices\n" ++ show probMatrixList ++ "\n" ++ show pMatrix ++ "\n" ++ show pMatrixSym)
-  --trace ("Integrated Prob matrix " ++ show probMatrixList ++ "->" ++ show pMatrix ++ "->" ++ show pMatrixAdjusted) 
   logMatrix
 
 -- | makeGTRLogMatrix4State is a general version of makeTCM taing arguments for all of 4-state model
 -- and returning the log matrix for TCM file creation
--- uses the integrated model versions 
+-- uses the integrated model versions
 makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]) -> Double -> Int -> [Double] -> [Double] -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelParams piVector modifiers =
   let lastAlphElement = "T"
       alphSize = 4
-      -- zeroMatrix = replicate alphSize $ replicate alphSize (0.0 :: Double)
       probMatrixList  = fmap (modelFunction modelParams piVector probDistParam iterations) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
   logMatrix
 
--- | getLogMatrix takes the logType of each element, (n-1)(n-1) <- 0 if 
+-- | getLogMatrix takes the logType of each element, (n-1)(n-1) <- 0 if
 -- last alphbet element is "-"
 getLogMatrix :: (Double -> Int-> Int -> Double -> Double) -> [[Double]] -> Int -> String -> Int -> Int -> Int -> [Double]
 getLogMatrix logType aMatrix alphSize lastElement iRow jColumn iterations
@@ -697,13 +651,12 @@ integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix iRow jColumn probDistP
       else
         let value = trapezoidIntegration pijFun getExponentialPdf eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxTime iterations 0 kWeight
         in
-        -- trace ("integrateGTRMatrixWithK " ++ show iRow ++ " " ++ show jColumn)
         (kFraction * value) : integrateGTRMatrixWithK  eigenValueList uMatrix uInvMatrix iRow (jColumn + 1) probDistParam maxValue iterations alphabetSize distribution (kWeight, kFraction)
   else error ("Distribution " ++ show distribution ++ " is not implemented")
   -- )
 
--- | getModifiers takes rate modifier information (invariant, gamma) and retirns a list 
--- of rate class pairs of class weight and class fraction 
+-- | getModifiers takes rate modifier information (invariant, gamma) and retirns a list
+-- of rate class pairs of class weight and class fraction
 getModifiers :: [(Modifier, [DistributionParameter])] -> Int -> [(Double, Double)]
 getModifiers tcmRateModifiers iterations
   | length tcmRateModifiers == 1 =

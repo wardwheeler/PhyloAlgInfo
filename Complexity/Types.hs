@@ -1,17 +1,17 @@
 {- |
-Module      :  Types 
+Module      :  Types
 Description :  Types used by complexity functions
 Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -45,7 +45,7 @@ type PolynomialList = [Double]
 type PolyMatrix = [[PolynomialList]]
 
 -- | Overall machine model including Graph and charcater models (with number of chars for models)
-data MachineModel = MachineModel { machineName :: String
+data MachineModel = MachineModel { machineName        :: String
                                  , graphSpecification :: GraphModel
                                  , characterModelList :: [(CharacterModel, Int)]
                                  } deriving (Show, Eq)
@@ -63,11 +63,11 @@ data CharacterModel = CharacterModel { characterName  :: String
                                      } deriving (Show, Eq)
 
 -- | Informatnio to determine Graph Complexity
-data GraphModel = GraphModel { graphName        :: String
-                             , numLeaves        :: Int
-                             , numRoots         :: Int
-                             , numSingletons    :: Int
-                             , numNetworkEdges  :: Int
+data GraphModel = GraphModel { graphName       :: String
+                             , numLeaves       :: Int
+                             , numRoots        :: Int
+                             , numSingletons   :: Int
+                             , numNetworkEdges :: Int
                              } deriving (Show, Eq)
 
 -- | data types for machine  Graph model and charcaterBlockModel
@@ -75,7 +75,7 @@ data GraphModel = GraphModel { graphName        :: String
 --    deriving (Show, Eq)
 
 -- | Data type for rate modifiers such as gamma and invariant sites
-data Modifier = Gamma | Invariant | None 
+data Modifier = Gamma | Invariant | None
   deriving (Show, Eq)
 
 -- | Edge length distributions

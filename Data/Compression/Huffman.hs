@@ -1,5 +1,5 @@
 {-
-Module from: 
+Module from:
 http://hackage.haskell.org/package/huffman-1.0.1/docs/Data-Compression-Huffman.html
 modified to work with newer versino of Containers
 -}
@@ -14,11 +14,12 @@ module Data.Compression.Huffman
   , ppCode
   ) where
 
-import Data.List (intercalate)
-import Control.Arrow (first, second)
+import           Control.Arrow                 (first, second)
+import           Data.List                     (intercalate)
 import qualified Data.PriorityQueue.FingerTree as PQ
-import           Data.Sequence  (ViewL((:<), EmptyL), (|>), viewl)
-import qualified Data.Sequence as S
+import           Data.Sequence                 (ViewL ((:<), EmptyL), viewl,
+                                                (|>))
+import qualified Data.Sequence                 as S
 
 data Bit = Zero | One
   deriving Eq
@@ -44,7 +45,7 @@ huffman = build . prepare
        Nothing -> Empty
        Just ((w,x), pq') ->
          case PQ.minViewWithKey pq' of
-           Nothing -> x
+           Nothing             -> x
            Just ((w',y), pq'') -> build $ PQ.insert (w+w') (Node x y) pq''
 
 
@@ -57,9 +58,9 @@ huffmanSorted = build S.empty . prepare
    dequeue s t =
      case (viewl s, viewl t) of
        (EmptyL, EmptyL)    -> Nothing
-       (EmptyL, (x :< ts)) -> Just (x,s,ts)
-       ((x :< ss), EmptyL) -> Just (x,ss,t)
-       (((x,w) :< ss), ((y,w') :< ts))
+       (EmptyL, x :< ts) -> Just (x,s,ts)
+       (x :< ss, EmptyL) -> Just (x,ss,t)
+       ((x,w) :< ss, (y,w') :< ts)
          | w < w'    -> Just ((x,w),ss,t)
          | otherwise -> Just ((y,w'),s,ts)
    build s t =
@@ -67,7 +68,7 @@ huffmanSorted = build S.empty . prepare
        Nothing -> Empty
        Just ((x,w),s',t') ->
          case dequeue s' t' of
-           Nothing -> x
+           Nothing               -> x
            Just ((y,w'),s'',t'') -> build (s'' |> (Node x y, w+w')) t''
 
 
@@ -82,4 +83,4 @@ codewords = code' []
 -- Pretty-print a binary code.  Mostly useful for debugging.
 ppCode :: Show a => Code a -> String
 ppCode = intercalate "\n" .
-           map (\(x,bits) -> show x ++ ": " ++ concat (map show bits))
+           map (\(x,bits) -> show x ++ ": " ++ concatMap show bits)

@@ -1,18 +1,18 @@
 {- |
 Module      :  Parser for Kolmogorov (algorithmic) complexity 'Machine' definition
-Description :  Program reads input file with description and parameters for 
+Description :  Program reads input file with description and parameters for
                machine containing models for graphs and charcater models
-Copyright   :  (c) 2018 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -26,7 +26,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -40,16 +40,16 @@ module Complexity.Parsers
   ( parseMachineFile
   ) where
 
-import Data.List
-import Control.Applicative
-import Data.String.Utils
-import Data.Char
-import Complexity.Types
-import Data.Maybe
-import Complexity.Utilities
+import           Complexity.Types
+import           Complexity.Utilities
+import           Control.Applicative
+import           Data.Char
+import           Data.List
+import           Data.Maybe
+import           Data.String.Utils
 
 -- | ArgCrust are charcaterts in arguments that may need to be filtered
-argCruft :: [Char]
+argCruft :: String
 argCruft = ['(', ')','[',']']
 
 -- | removeContents filters out comments lines (beginning with '--') from file input
@@ -143,11 +143,10 @@ parseMachine inString =
     let graphNameLocal = getGraphName machineElements
         blockPairs = getBlockName machineElements
     in
-    --trace (name ++ " " ++ graphName ++ " " ++ show blockPairs)
     (name, graphNameLocal, blockPairs)
 
 
--- | getNumber looks through contents of graph specification and 
+-- | getNumber looks through contents of graph specification and
 -- pulls parts matching in string throuws error if not found
 getNumber :: String -> [String] -> Int
 getNumber findHere guts =
@@ -204,7 +203,6 @@ getAlphabet inList =
       let alphString = filter (/= '"') $ takeWhile (/= ']') (last parts)
           alphList = divideWith ',' $ tail alphString --removes leading '['
       in
-      --trace (show alphList)
       alphList
     else getAlphabet (tail inList)
 
@@ -231,7 +229,6 @@ getRateModifiers inList =
     let first = fmap toLower $ removeWhiteSpace $ head inList
         parts = divideWith ':' first
     in
-    --trace ("grm: " ++ show (tail parts)) (
     if head parts == "ratemodifiers" then
       if length parts < 2 then error "Too few arguments in RateModifiers"
       else if (parts !! 1) == "none" then [(None, [])]
@@ -242,7 +239,6 @@ getRateModifiers inList =
             if head restMod == "invariant" then [(Invariant, [read (last restMod) :: DistributionParameter])]
             else error ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
         else if length restMod == 4 then --gamma
-            --trace ("LRM4: " ++ (tail (restMod !! 1)) ++ " "++ (takeWhile (/= ',') (restMod !! 2)) ++ " " ++ (tail $ dropWhile (/= ',') (restMod !! 2)) ++ " " ++ (restMod !! 3) ) (
             if head restMod == "gamma" then
               let firstArg = tail (restMod !! 1)
                   thirdArg = tail $ dropWhile (/= ',') (restMod !! 2)
@@ -256,7 +252,7 @@ getRateModifiers inList =
                 [(Gamma, [fourthArg, secondArg])]
               else error ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
             else error ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
-            --)
+            
         else if length restMod > 4 then --invariants and gamma
             if head restMod == "invariant" then --invariant first
               let invariantArg = read (takeWhile (/=',') (restMod !! 1)) :: DistributionParameter
@@ -300,8 +296,8 @@ convert2Numbers inStringList =
       if head inString `notElem` ['0','1','2','3','4','5','6','7','8','9','.',',','-'] then convert2Numbers $ tail inStringList
       else (read inString :: Double) : convert2Numbers (tail inStringList)
 
--- | getRValues take alphabet size and list of strings and returns 
--- rmatrix values 
+-- | getRValues take alphabet size and list of strings and returns
+-- rmatrix values
 getRValues :: Int -> String -> [[Double]]
 getRValues alphSize inList =
   if null inList then error "Empty RMatrix"
@@ -314,16 +310,14 @@ getRValues alphSize inList =
     else split2Matrix alphSize numberList
     --)
 
--- | getPiValues take alphabet size and list of strings and returns 
--- Pi vector values 
+-- | getPiValues take alphabet size and list of strings and returns
+-- Pi vector values
 getPiValues :: Int -> [String] -> [Double]
-getPiValues alphSize parts = -- inList = 
+getPiValues alphSize parts = -- inList =
   if null parts then error "Empty PiMatrix"
   else
-    let --parts = divideWith ',' inList
-        numberList = convert2Numbers parts
+    let numberList = convert2Numbers parts
     in
-    --trace (show numberList) (
     if length numberList /= alphSize then error "Error--mismatch between alphabet size and Pi Vector element number"
     else
       let total = sum numberList
@@ -338,7 +332,7 @@ getPiVector modelString alphaSize inParts
   | null inParts = error ("Pi vector not found for " ++ modelString)
   | head inParts == "pivector" = getPiValues alphaSize (take alphaSize (tail inParts))
   | otherwise = getPiVector modelString alphaSize (tail inParts)
-    --)
+  
 
 -- | getParam take String of parameter name and returns Double value of parameter
 getParam :: String -> [String] -> Double
@@ -368,7 +362,6 @@ log2NormalizedTransitions base inR =
         sumR = getNonDiagMatrixSum alphSize 0 0 expR
         normFactor = numValues / sumR
     in
-    --trace (ppMatrix inR ++ "\n" ++ ppMatrix expR ++ "\n" ++ (ppMatrix $ fmap (fmap (* normFactor)) expR))
     fmap (fmap (* normFactor)) expR
 
 
@@ -385,7 +378,7 @@ getChangeModel alphSize inList =
     if fmap toLower (head parts) == "changemodel" then
       if length parts < 2 then error "Too few arguments in RateModifiers"
       else if lcParts == "neyman" || lcParts == "jc69" then (Neyman, [[]],[],[]) else
-        let rest = (fmap toLower <$> fmap (filter (`notElem` argCruft)) (drop 2 parts)) 
+        let rest = (fmap toLower <$> fmap (filter (`notElem` argCruft)) (drop 2 parts))
             partsSplit = concatMap (divideWith ',') rest
             piMatrix = getPiVector lcParts alphSize partsSplit --rest
         in
@@ -487,7 +480,7 @@ getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter])
 getBlockParams inStringList =
   let alphabetLocal = putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
       branchLengthLocal = getBranchLength inStringList --(Uniform,[])
-      rateModifiersLocal = getRateModifiers inStringList --[(None,[])] 
+      rateModifiersLocal = getRateModifiers inStringList --[(None,[])]
       changeModelLocal = getChangeModel (length alphabetLocal) inStringList --(Neyman, [[]], [])
       precisionLocal = getPrecision inStringList
       charLengthLocal = getCharLength inStringList
@@ -568,7 +561,7 @@ parseSections inSectionList =
         --Find and pull Graph
       let (gMachineName, graphNameLocal, blockModels) = head machineModels
           graphModels = parseGraph graphNameLocal $ getElementString "graph" inSectionList
-        --Find and pull CharModel(s) 
+        --Find and pull CharModel(s)
           cCharModelList = parseCharModel blockModels $ getElementString "blockmodel" inSectionList
           reorderedCharacterModelList = reorderCharacterModels cCharModelList blockModels
       in
@@ -577,7 +570,6 @@ parseSections inSectionList =
       else if null reorderedCharacterModelList then error "Need at least one character model"
       else
         --IN HERE for finding parsed graph and models
-      --(machineModel, graphModel, characterModelList)
         let thisMachineModel = MachineModel {machineName = gMachineName, graphSpecification = head graphModels, characterModelList = reorderedCharacterModelList}
         in
         thisMachineModel
@@ -590,5 +582,4 @@ parseMachineFile fileContents =
       sections = strip Control.Applicative.<$> getSections filteredContents
       parsedSections = parseSections sections
   in
-  --trace (show sections ++ show parsedSections)
   parsedSections

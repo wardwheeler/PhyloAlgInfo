@@ -1,17 +1,17 @@
 {- |
-Module      :  Matrix funtions for Algorithmic (Kolmogorov) complexity 
+Module      :  Matrix funtions for Algorithmic (Kolmogorov) complexity
 Description :  Functions to generate(algorithmic) complexity of GTR-type character change models
 Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
-License     :  
+License     :
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,7 +25,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
 Maintainer  :  Ward Wheeler <wheeler@amnh.org>
@@ -41,12 +41,12 @@ generated code
 
 module Complexity.MatrixUtilities where
 
-import Data.List
-import Debug.Trace
-import Complexity.MathUtilities
-import Complexity.Constants
-import Complexity.Types
-import Complexity.Utilities
+import           Complexity.Constants
+import           Complexity.MathUtilities
+import           Complexity.Types
+import           Complexity.Utilities
+import           Data.List
+import           Debug.Trace
 -- import Data.Ord
 -- import Control.Applicative
 
@@ -74,7 +74,7 @@ removeRowAndColumn row column inMatrix =
     in
     secondMatrix
 
--- | getCofactors returns the cofactors of a matrix for detetminant 
+-- | getCofactors returns the cofactors of a matrix for detetminant
 -- calculation
 getCofactor1 :: Int -> Matrix -> Double
 getCofactor1 jIndex inMatrix
@@ -149,22 +149,18 @@ cofactorTMatrix aMatrix row =
 
 -- | central calcualtion of pr_{i,j}(t)
 --counts from 0, 0, x
---Key the COLUMNS correspond to eigenvectors 
+--Key the COLUMNS correspond to eigenvectors
 -- Striomer and vonHessler lambda i is column vector i
---for (column, row) indexing whereas usually (row, column)  
+--for (column, row) indexing whereas usually (row, column)
 getPij :: [Double] -> Matrix -> Matrix -> Double -> Int -> Int -> Int -> Int -> Double
 getPij eigenVectorList uMatrix uInvMatrix time mLambda iRow jColumn iterations =
   if mLambda == length uMatrix then 0
   else
     let lambda = eigenVectorList !! mLambda
-        --umi = (uMatrix !! mLambda) !! iRow
-        --uInvjm = (uInvMatrix !! jColumn) !! mLambda
         umi = (uMatrix !! iRow) !! mLambda
         uInvjm = (uInvMatrix !! mLambda) !! jColumn
         result = (expE (lambda * time) * umi * uInvjm)
-        --result = umi * uInvjm * exp (lambda * time) 
     in
-    --trace ("getPij " ++ show mLambda ++ " " ++ (show lambda) ++ show iRow ++ " " ++ show jColumn ++ " "++ (show time) ++ " " ++ show (exp (lambda * time)) ++ " " ++ show time ++ " " ++ (show umi) ++ " " ++ (show uInvjm) ++ " " ++ (show result))
     result + getPij eigenVectorList uMatrix uInvMatrix time (mLambda + 1) iRow jColumn iterations
 
 -- | adjustSym taks a matrix and row number and makes new symmetric row
@@ -182,7 +178,7 @@ adjustSym inMatrix row column
       if newValue > 0 then newValue : adjustSym inMatrix row (column + 1)
       else epsilon : adjustSym inMatrix row (column + 1)
 
-{-
+
 -- | adjust probabiliteis makes some adjustments for numerical issues
 -- Pij = Pji enforced by average
 -- small negative become epsilon positive
@@ -194,7 +190,7 @@ adjustProbs inMatrix row =
     let newRow = adjustSym inMatrix row 0
     in
     newRow : adjustProbs inMatrix (row + 1)
--}
+
 
 -- | adjustDiag adjusts diagnoal values to sum to 1.0
 -- start at 0
@@ -216,7 +212,7 @@ adjustDiag inMatrix fullMatrix row =
 -- the initial funtion is from the matrix stuff.
 -- the second function is getUniforPDF or getExponentialPDF type
 -- signatures
--- give it row and column of Prob(t) 
+-- give it row and column of Prob(t)
 -- kMultiplier is for rate class calculation---only used in the model prob function--not in branch
 -- should brwnch not have kWeight?
 trapezoidIntegration :: ([Double] -> [[Double]] -> [[Double]] -> Double -> Int -> Int -> Int -> Int -> Double) -> (Double -> Int -> Double -> Double) -> [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> Double -> Double
@@ -227,20 +223,14 @@ trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColu
         time = fromIntegral counter * interval
         pij = pijFun eigenValueList uMatrix uInvMatrix (time * kWeight) 0 iRow jColumn iterations
         pij' = pijFun eigenValueList uMatrix uInvMatrix ((time * kWeight)  + interval) 0 iRow jColumn iterations
-        --pij'' = pijFun eigenValueList uMatrix uInvMatrix ((time * kWeight) + (interval/2)) 0 iRow jColumn iterations
         probTime = distFun probDistParam iterations time
         probTime' = distFun probDistParam iterations (time + interval)
-        --probTime'' = distFun probDistParam iterations (time + (interval/2))
         value = interval * ((pij * probTime) + (pij' * probTime')) / 2
-        --value2 = interval * pij'' * probTime''
     in
-    --trace ("ti " ++ show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show probDistParam ++ " " ++ show (time + (interval/2)) ++ " " ++ show pij'' ++ " " ++ show probTime'' ++ " " ++ show value2)(
-    --if (value < 0) then error  ("Neg prob " ++ show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show time ++ " " ++ show time' ++ " " ++ show pij ++ " " ++ show pij' ++ " " ++ show probTime ++ " " ++ show probTime' ++ " " ++ show value)
     if value < 0 then
       if abs value < epsilon then 0 + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
       else error ("Negative probability in trapezoid " ++ show uMatrix ++ "\n" ++ show uInvMatrix ++ "\n" ++ show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show time ++ " " ++ " " ++ " " ++ show value)
     else
-      --trace (show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show time ++ " " ++ show time' ++ " " ++ show pij ++ " " ++ show pij' ++ " " ++ show probTime ++ " " ++ show probTime' ++ " " ++ show value)
       value + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
 
 
@@ -262,8 +252,6 @@ makeGTRMatrixLocal alphabetSize rMatrixIn piVectorIn =
             eigenVals = getDiagValues rqMatrix 0
             eigenVectorsInverse = invertMatrix eigenVectors
         in
-        --trace ("\nQ Matrix " ++ show qMatrix2 ++ "\nEigen values :" ++ show eigenVals ++ "\nEigen Vectors :" ++ show eigenVectors 
-        --   ++ "\nEigen Vectors Inv :" ++ show eigenVectorsInverse)
         (eigenVals, eigenVectors, eigenVectorsInverse)
 
 -- | isPosR take input matrix (ignores diagonals) and checks that all >0,
@@ -276,7 +264,7 @@ isPosR inR alphSize row column
   | ((inR !! row) !! column) < 0 = error ("Element (" ++ show row ++ "," ++ show column ++ ") in R matrix <0 : " ++ show inR)
   | otherwise = ((inR !! row) !! column) : isPosR inR alphSize row (column + 1)
 
--- | checkSymmetryQ checks Qij=Qji 
+-- | checkSymmetryQ checks Qij=Qji
 checkSymmetryQ :: [[Double]] -> [Double] -> Int -> Int -> Int -> Bool
 checkSymmetryQ qMatrix piVector alphSize row column
   | row == alphSize = True
@@ -487,7 +475,7 @@ makeEVector dimension position value =
     in
     (firstPart ++ [value] ++ thirdPart)
 
--- getColumnVector gets column i (0-indexed) as 
+-- getColumnVector gets column i (0-indexed) as
 -- column vector (matrix of order nx1) from matrix
 getColumnVector :: Int -> [[Double]] -> [[Double]]
 getColumnVector column aMatrix =
@@ -502,7 +490,7 @@ getColumnVector column aMatrix =
       columnVals
 
 -- | getHouseHolder takes a matrix and column number to create Housholder matrix
--- for QR 
+-- for QR
 getHouseholder :: [[Double]]-> [[Double]]
 getHouseholder aMatrix  =
   if null aMatrix then error "Null matrix in getHouseHolder"
@@ -520,9 +508,9 @@ getHouseholder aMatrix  =
     qMatrix
 
 -- | padOutMinor adds 1 on diagnoal and elsewhere 0's
--- to pad out a minor matrix into full size (dimension x dimension) 
+-- to pad out a minor matrix into full size (dimension x dimension)
 -- for Householder
--- assumes square 
+-- assumes square
 padOutMinor :: [[Double]] ->Int -> [[Double]]
 padOutMinor inMinor dimension =
   if null inMinor then makeDiagMatrix dimension 1 --identity matrix
@@ -542,7 +530,7 @@ padOutMinor inMinor dimension =
       fullMatrix
 
 -- | getHouseholderList takes a matrix and recurseively generates the list of Q, Q', Q'' etc
--- dimension-1 times (assumes square here) 
+-- dimension-1 times (assumes square here)
 getHouseholderList :: [[Double]] -> [[Double]] -> Int -> Int -> [[[Double]]]
 getHouseholderList inMatrix aMatrix fullDimension counter =
   if null inMatrix then error "Null matrix in getHousehlderList"
@@ -551,10 +539,8 @@ getHouseholderList inMatrix aMatrix fullDimension counter =
         thisQ = padOutMinor thisQ' fullDimension
         q1AMatrix = matrixMultiply thisQ aMatrix
     in
-    --trace ("GHL " ++ ppMatrix thisQ) (
     if length thisQ' == 2 then [thisQ]
     else thisQ : getHouseholderList (makeMatrixMinor counter counter q1AMatrix) aMatrix fullDimension (counter + 1)
-    --)
 
 -- qrDecomposition perfomres QR decomposition using Householder reflections
 -- assumes square here though not a general restriction of the method
@@ -567,8 +553,6 @@ qrDecomposition aMatrix =
         qMatrix = foldl' matrixMultiply (head qTList) (tail qTList)
         rMatrix = matrixMultiply (transposeMatrix qMatrix) aMatrix
     in
-    --trace ("rMatrix length Q = " ++ show (length qMatrixList) ++ "\n" ++ ppMatrix rMatrix) 
-    --(qMatrix,r2Zero)
     (qMatrix, rMatrix)
 
 -- qrFactorization repeated calls qrDecomposition untril maxIteratrions or convergance
