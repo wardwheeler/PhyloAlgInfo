@@ -84,6 +84,7 @@ getCofactor1 jIndex inMatrix
       in
       (aij * cij * determinantNumerical mij) + getCofactor1 (jIndex + 1) inMatrix
 
+
 -- | dummy determinant function to set up file
 -- assumes it is square (check earlier)
 determinantNumerical :: Matrix -> Double
@@ -96,6 +97,7 @@ determinantNumerical inMatrix
       a*d - b*c
   | otherwise = --use cofactors
       getCofactor1 1 inMatrix
+
 
 -- | matrixMultiplyScalar multiplies a matrix by a scalar value
 matrixMultiplyScalar :: Double -> Matrix -> Matrix
@@ -130,6 +132,7 @@ invertMatrix aMatrix = --invertMatrixExt aMatrix
   else if abs detA < epsilon then error ("Matrix is nearly singular (det = " ++ show detA ++ ") and may blow up")
   else matrixMultiplyScalar detARecip cMatrix
 
+
 -- | gets Transpose cofacrtor matrix C^T for matrix inversion
 cofactorTMatrix :: Matrix -> Int -> Matrix
 cofactorTMatrix aMatrix row =
@@ -138,6 +141,7 @@ cofactorTMatrix aMatrix row =
     let cofARow = getRow row 1 aMatrix
     in
     cofARow : cofactorTMatrix aMatrix (row + 1)
+
 
 -- | central calcualtion of pr_{i,j}(t)
 --counts from 0, 0, x
@@ -174,7 +178,7 @@ adjustSym inMatrix row column
       if newValue > 0 then newValue : adjustSym inMatrix row (column + 1)
       else epsilon : adjustSym inMatrix row (column + 1)
 
-
+{-
 -- | adjust probabiliteis makes some adjustments for numerical issues
 -- Pij = Pji enforced by average
 -- small negative become epsilon positive
@@ -186,6 +190,7 @@ adjustProbs inMatrix row =
     let newRow = adjustSym inMatrix row 0
     in
     newRow : adjustProbs inMatrix (row + 1)
+-}
 
 -- | adjustDiag adjusts diagnoal values to sum to 1.0
 -- start at 0
@@ -420,6 +425,7 @@ subtractMatrices a b
       in
       c0 : subtractMatrices (tail a) (tail b)
 
+
 -- | transposeMatrix exchanges row and column values
 -- ued to convert eigenvectors as rows matrix to eigenvectors as columns.
 transposeMatrix :: [[Double]] -> [[Double]]
@@ -429,6 +435,7 @@ transposeMatrix a =
     let row = fmap head a
     in
     row : transposeMatrix (fmap tail a)
+
 
 -- | makeMatrixMinor removes rows and columns to create minor
 -- indexed from 0,0
@@ -464,6 +471,7 @@ euclidNorm inVector =
   if null inVector then error "Null vector in euclidNorm"
   else
     sqrt (sum $ zipWith (*) inVector inVector)
+
 
 -- | makeEVector make vector of [0....,1,..0]
 makeEVector :: Int -> Int -> Double -> [Double]

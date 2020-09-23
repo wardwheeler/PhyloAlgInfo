@@ -56,6 +56,7 @@ factorial 0 = 1
 factorial 1 = 1
 factorial n = n * factorial (n - 1)
 
+{-
 -- | baseE is naive calcultions of 'e' base of natural logorithms
 -- take numbr of iterations, counter set to 0, curValue set to 0.0 
 baseE :: Int -> Int -> Double
@@ -64,6 +65,7 @@ baseE iterations counter =
   else
     --trace (show (factorial counter) ++ " " ++ show curValue ++ " ")
     (1.0 / fromIntegral (factorial counter)) + baseE iterations (counter + 1) --(fromIntegral $ factorial counter)))
+-}
 
 -- | expE naive claculation of 'e^x' exponent of natural logorithm
 -- can be used to calcilaue value of 'e' with 1 as exponent
@@ -81,10 +83,8 @@ expE exponentLocal =
     ((power exponent counter 0) / (fromIntegral (factorial counter))) + expE exponent iterations (counter + 1)
   
   --trace (show $ power (1+(1/(fromIntegral 1000))) 1000 0)
-  -}
-  {-
   power (1+(exponent/(fromIntegral fixedPrecision))) fixedPrecision 0
-  -}
+ -} 
 
 -- | expX2Y exponentiation general x^y via e^(y * log x)
 expX2Y :: Double -> Double -> Double
@@ -93,6 +93,7 @@ expX2Y base exponentLocal =
   {-
   expE (exponent * (logE base iterations 0 0)) iterations 0
   -}
+
 
 -- | power take a base and positive integer exponent and returns value
 -- this for use in expE calculation  initialized with counter value of 0

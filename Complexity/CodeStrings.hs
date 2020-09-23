@@ -612,6 +612,7 @@ dropString="\
 \ else d4(m+1)n(a6 a)\n"
 -}
 
+{-
 -- \reverse :: [a] -> [a]\n\
 reverseString :: String
 reverseString="\
@@ -619,6 +620,7 @@ reverseString="\
 \ if null a then []\n\
 \ else\n\
 \  a3 a:f8(f6 a)\n"
+-}
 
 -- \b4 :: [[Double]] -> Int -> Int -> Int -> [Double]\n\
 addDiagValuesString :: String
@@ -665,6 +667,7 @@ sqrtString :: String
 sqrtString="\
 \f9 x i c=e0(0.5*l0 x i c 0)i c\n"
 
+{-
 -- \g0 ::(Ord a) => [a] -> a -> a\n\
 maximumString :: String
 maximumString="\
@@ -672,12 +675,15 @@ maximumString="\
 \ | null a=c\n\
 \ | c>a5 a=g0(a6 a)c\n\
 \ | otherwise=g0(a6 a)(a5 a)\n"
+-}
 {-
 \g0 a c=\n\
 \ if null a then c\n\
 \ else if c>a5 a then g0(a6 a)c\n\
 \ else g0(a6 a)(a5 a)\n"
 -}
+
+{-
 -- \g1 ::(Ord a) => [a] -> a -> a\n\
 minimumString :: String
 minimumString="\
@@ -685,12 +691,15 @@ minimumString="\
 \ | null a=c\n\
 \ | c<a5 a=g1(a6 a)c\n\
 \ | otherwise=g1(a6 a)(a5 a)\n"
+-}
+
 {-
 \ if null a then c\n\
 \ else if c<(a5 a) then g1(a6 a)c\n\
 \ else g1(a6 a)(a5 a)\n"
 -}
 
+{-
 -- \b8 :: Int -> [Double]-> [Double]\n\
 normalizeVectorWithSignString :: String
 normalizeVectorWithSignString="\
@@ -699,14 +708,18 @@ normalizeVectorWithSignString="\
 \ in\n\
 \ if g0(a6 a)(a5 a)>=(c8$g1(a6 a)(a5 a)) then gM(/s)a\n\
 \ else gM(/(-1 *s))a\n"
+-}
 
+{-
 -- \g2 :: (a -> Bool) -> [a] -> [a]\n\
 filterString :: String
 filterString="\
 \g2 a b=\n\
 \ if a(a5 b) then (a5 b):g2 a(a6 b)\n\
 \ else g2 a(a6 b)\n"
+-}
 
+{-
 -- \g3 :: [[Double]] -> Int -> [[Double]]\n\
 reduceRowString :: String
 reduceRowString="\
@@ -717,29 +730,38 @@ reduceRowString="\
 \     h nr=let k=nr!!r in e5(\\a b -> k*a -b)f nr\n\
 \     i=g h$d4 0(r+1)d\n\
 \ in d3 0 r d++[f]++i\n"
+-}
 
+{-
 -- \fixlastrow :: [[Double]] -> [[Double]]\n\
 fixlastrowString :: String
 fixlastrowString="\
 \g5 b=(f6 b)++[f6(f6(a3 b))++[1,(a3(a3 b))/a3(f6(a3 b))]]\n"
+-}
 
+{-
 -- \substitute :: [[Double]] -> [Double]\n\
 substituteString :: String
 substituteString="\
 \g6 a=h0 b [a3(a3 a)] (f6 a) where\n\
 \ b c e=a3 c -c3(+)0(e5(*)e$f6$d4 0(d5 0 a -d5 0 e)c):e\n"
+-}
 
+{-
 -- \g9 :: Int -> [a] -> ([a],[a])\n\
 splitAtString :: String
 splitAtString="\
 \g9 a b=(d3 0 a b,d4 0 a b)\n"
+-}
 
+{-
 -- \h0 :: (a -> b -> b) -> b -> [a] -> b\n\
 foldrString :: String
 foldrString="\
 \h0 f b a=\n\
 \ if null a then b\n\
 \ else h0 f (f(a5 a)b) (a6 a)\n"
+-}
 
 --error \"\"\n\ if maxiterations exceeded  precision issue?
 -- \h3 :: [[Double]] -> [[Double]] -> Int -> Int -> ([[Double]], [[Double]], [[Double]])\n\

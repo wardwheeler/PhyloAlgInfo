@@ -58,9 +58,11 @@ maxTime = 2.0 :: Double
 fixedPrecision :: Int
 fixedPrecision = 100 :: Int
 
+{-
 -- strings for use in code generation
 maxTimeString :: String
 maxTimeString= show maxTime
+-}
 
 epsilonString :: String
 epsilonString = show epsilon
@@ -68,8 +70,10 @@ epsilonString = show epsilon
 maxIterationsString :: String
 maxIterationsString = show maxIterations
 
+{-
 maxGammaRateString :: String
 maxGammaRateString = show maxGammaRate
+-}
 
 fixedPrecisionString :: String
 fixedPrecisionString = show fixedPrecision
