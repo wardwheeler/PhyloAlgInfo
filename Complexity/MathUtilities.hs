@@ -56,7 +56,7 @@ factorial 0 = 1
 factorial 1 = 1
 factorial n = n * factorial (n - 1)
 
-{-
+
 -- | baseE is naive calcultions of 'e' base of natural logorithms
 -- take numbr of iterations, counter set to 0, curValue set to 0.0 
 baseE :: Int -> Int -> Double
@@ -65,7 +65,7 @@ baseE iterations counter =
   else
     --trace (show (factorial counter) ++ " " ++ show curValue ++ " ")
     (1.0 / fromIntegral (factorial counter)) + baseE iterations (counter + 1) --(fromIntegral $ factorial counter)))
--}
+
 
 -- | expE naive claculation of 'e^x' exponent of natural logorithm
 -- can be used to calcilaue value of 'e' with 1 as exponent

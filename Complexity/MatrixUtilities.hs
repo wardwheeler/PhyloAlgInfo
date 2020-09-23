@@ -1,7 +1,7 @@
 {- |
 Module      :  Matrix funtions for Algorithmic (Kolmogorov) complexity 
 Description :  Functions to generate(algorithmic) complexity of GTR-type character change models
-Copyright   :  (c) 2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :  
 
 Redistribution and use in source and binary forms, with or without
@@ -32,19 +32,23 @@ Maintainer  :  Ward Wheeler <wheeler@amnh.org>
 Stability   :  unstable
 Portability :  portable (I hope)
 
+Many functions not used in Complexity code when moved from matrix Eigen calculation
+to QR decomposition.  THese codes also models for the code strings for
+generated code
+
 -}
 
 
 module Complexity.MatrixUtilities where
 
 import Data.List
--- import Data.Ord
-import Control.Applicative
 import Debug.Trace
 import Complexity.MathUtilities
 import Complexity.Constants
 import Complexity.Types
 import Complexity.Utilities
+-- import Data.Ord
+-- import Control.Applicative
 
 
 
@@ -531,7 +535,7 @@ padOutMinor inMinor dimension =
       let nRows = dimension - minorDim
           identityMatrix = makeDiagMatrix dimension 1
           newRows = take nRows identityMatrix
-          newColumns = take nRows Control.Applicative.<$> drop nRows identityMatrix
+          newColumns = take nRows <$> drop nRows identityMatrix
           fullRows = zipWith (++) newColumns inMinor
           fullMatrix = newRows ++ fullRows
       in
@@ -577,7 +581,7 @@ qrFactorization aMatrix uMatrix counter =
         newU = matrixMultiply uMatrix qMatrix
         linAMatrix = concat aMatrix
         linNewAMatrix = concat newA
-        diffVal = sum $ abs Control.Applicative.<$> zipWith (-) linAMatrix linNewAMatrix
+        diffVal = sum $ abs <$> zipWith (-) linAMatrix linNewAMatrix
     in
     trace (show (diffVal/ fromIntegral (length aMatrix * length aMatrix))) (
     if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < epsilon then (qMatrix, rMatrix, newU)
@@ -585,7 +589,7 @@ qrFactorization aMatrix uMatrix counter =
     else qrFactorization newA newU (counter + 1)
     )
 
--- | getDiagValues returns the diagnoal values of a matrix
+-- | getDiagValues returns the diagonal values of a matrix
 getDiagValues :: [[Double]] -> Int -> [Double]
 getDiagValues inMatrix counter
   | null inMatrix = error "Null matrix in getDiagValues"

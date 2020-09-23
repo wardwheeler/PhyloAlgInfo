@@ -9,16 +9,16 @@ module Data.Compression.Huffman
   , Bit(..)
   , Code
   , huffman
--- , huffmanSorted
+  , huffmanSorted
   , codewords
---  , ppCode
+  , ppCode
   ) where
 
--- import Data.List (intercalate)
-import Control.Arrow (second)
+import Data.List (intercalate)
+import Control.Arrow (first, second)
 import qualified Data.PriorityQueue.FingerTree as PQ
--- import           Data.Sequence  (ViewL((:<), EmptyL), (|>), viewl)
--- import qualified Data.Sequence as S
+import           Data.Sequence  (ViewL((:<), EmptyL), (|>), viewl)
+import qualified Data.Sequence as S
 
 data Bit = Zero | One
   deriving Eq
@@ -47,7 +47,7 @@ huffman = build . prepare
            Nothing -> x
            Just ((w',y), pq'') -> build $ PQ.insert (w+w') (Node x y) pq''
 
-{-
+
 -- More efficient implementation, O(n).  Requires that the input
 -- list of symbols and weight is sorted by increasing weight.
 huffmanSorted :: (Ord w, Num w) => [(a,w)] -> HuffmanTree a
@@ -69,7 +69,7 @@ huffmanSorted = build S.empty . prepare
          case dequeue s' t' of
            Nothing -> x
            Just ((y,w'),s'',t'') -> build (s'' |> (Node x y, w+w')) t''
--}
+
 
 -- Derive the prefix-free binary code from a huffman tree.
 codewords :: HuffmanTree a -> Code a
@@ -78,9 +78,8 @@ codewords = code' []
         code' bits (Leaf x)   = [(x,bits)]
         code' bits (Node l r) = map (second (Zero:)) (code' bits l) ++
                                 map (second (One:)) (code' bits r)
-{-
+
 -- Pretty-print a binary code.  Mostly useful for debugging.
 ppCode :: Show a => Code a -> String
 ppCode = intercalate "\n" .
            map (\(x,bits) -> show x ++ ": " ++ concat (map show bits))
--}

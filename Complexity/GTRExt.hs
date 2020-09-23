@@ -1,7 +1,7 @@
 {- |
 Module      :  GTRExt 
 Description :  GTR functions using external numerical libraries
-Copyright   :  (c) 2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :  
 
 Redistribution and use in source and binary forms, with or without

@@ -37,13 +37,13 @@ Used symbolic integrator https://www.integral-calculator.com/
 -}
 module Complexity.IntegratedModels where
 
-import Debug.Trace
 import Complexity.Types
 import Complexity.MathUtilities
 import Complexity.MatrixUtilities
 import Complexity.Constants
+-- import Debug.Trace
 
-{-
+
 -- | neymanUniformWithK returns the probabilities if change and no change Pii and Pij
 -- for Neyman models characters with Uniform branch length distribution and rate classes with 'k' weights
 -- after Wheeler Cladistics 30 (2014) 282–290
@@ -63,9 +63,9 @@ neymanUniformWithK r a iterations (kWeight, kFraction) =
         in
         --trace ("U:" ++ (show kFraction) ++ " " ++ (show kWeight) ++ " " ++ (show pii2) ++ " " ++ (show pij))
         (kFraction * pii2, kFraction * pij)
--}
 
-{-
+
+
 -- | neymanExponential returns the probabilities if change and no change Pii and Pij
 -- for Neyman models characters with Exponential branch length distribution and rate classes with 'k' weights
 -- after Wheeler Cladistics 30 (2014) 282–290
@@ -82,7 +82,7 @@ neymanExponentialWithK r a (kWeight, kFraction) =
         in
         --trace ("E:" ++ (show kFraction) ++ " " ++ (show kWeight) ++ " " ++ (show pii) ++ " " ++ (show pij))
         (kFraction * pii2, kFraction * pij)
--}
+
 
 -- | neymanGeneralWithK is Neyman for both Expinential and Uniform with wights list
 -- if weight list is [(1,1)] then is simple Neyman
@@ -105,7 +105,7 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
         (kFraction * pii, kFraction * pij)
   | otherwise = error ("Distibution " ++ show distribution ++ " not implemented)")
 
-{-
+
 -- | neymanUniform returns the probabilities if change and no change Pii and Pij
 -- for Neyman models characters with Uniform branch length distribution
 -- after Wheeler Cladistics 30 (2014) 282–290
@@ -116,9 +116,9 @@ neymanUniform alphabetSize alpha iterations =
         pij = (alpha - 1 + expE (-1 * alpha) ) / (fromIntegral alphabetSize * alpha)
     in
     (pii, pij)
--}
 
-{-
+
+
 -- | neymanExponential returns the probabilities if change and no change Pii and Pij
 -- for Neyman models characters with Exponential branch length distribution
 -- after Wheeler Cladistics 30 (2014) 282–290
@@ -129,7 +129,7 @@ neymanExponential alphabetSize alpha =
         pij = 1 / ((alpha + 1) * fromIntegral alphabetSize)
     in
     (pii, pij)
--}
+
 
 -- | TN93 model with exponential branch length distributions following Yang (2005) rates alpha1 for T<>C, alpha2 A<>G, and Beta for transversion
 -- matrices reorderd (and eigenvalues) 
