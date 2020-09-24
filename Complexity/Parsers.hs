@@ -40,15 +40,15 @@ module Complexity.Parsers
   ( parseMachineFile
   ) where
 
+import           Complexity.PhyloParsers
 import           Complexity.Types
 import           Complexity.Utilities
 import           Data.Char
+import qualified Data.Graph.Inductive.Graph        as G
+import qualified Data.Graph.Inductive.PatriciaTree as P
 import           Data.List
 import           Data.Maybe
 import           Data.String.Utils
-import           Complexity.PhyloParsers
-import qualified Data.Graph.Inductive.Graph        as G
-import qualified Data.Graph.Inductive.PatriciaTree as P
 import qualified Data.Text.Lazy                    as T
 
 
@@ -155,8 +155,8 @@ parseMachine inString =
 -- pulls parts matching in string throuws error if not found
 getValue :: String -> [String] -> String
 getValue findHere guts =
-  if null guts then 
-    if (findHere == "representation") then "No representation input"
+  if null guts then
+    if findHere == "representation" then "No representation input"
     else error ("No parameter " ++ findHere ++ " specified in graph")
   else
     let firstGut = toLower <$> head guts
@@ -179,7 +179,7 @@ parseGraph graphNameLocal inStringList=
     in
     -- values specified
     if graphNameLocal == gName then
-      if graphRepresentation == "No representation input" then 
+      if graphRepresentation == "No representation input" then
         let nLeaves = read (getValue "leaves" pieces) :: Int
             nRoots = read (getValue "roots" pieces) :: Int
             nSingletons = read (getValue "singletons" pieces) :: Int
@@ -189,7 +189,7 @@ parseGraph graphNameLocal inStringList=
         theGraphModel : parseGraph graphNameLocal (tail inStringList)
       -- get values from graph representation
       -- assumes (for now) Forest Enhanced Newick format
-      else 
+      else
         let graphString = reverse $ takeWhile (/=':') $ drop 1 $ reverse guts
         in
         if (head graphString /= '"') || (last graphString /= '"') then
@@ -204,9 +204,9 @@ parseGraph graphNameLocal inStringList=
 
 -- | getGraphAspects takes an fgl graph and reurns 4-tuple of numLeaves, numRoots, numSingleton nodes, and numNetworkEdges
 getGraphAspects :: P.Gr T.Text Double -> (Int, Int, Int, Int)
-getGraphAspects inGraph = 
+getGraphAspects inGraph =
   if G.isEmpty inGraph then (0,0,0,0)
-  else 
+  else
     let nodeSet = G.nodes inGraph
         nodeDegreeList = fmap (G.deg inGraph) nodeSet
         nodeDegreePairList = zip nodeDegreeList nodeSet
@@ -296,7 +296,7 @@ getRateModifiers inList =
                 [(Gamma, [fourthArg, secondArg])]
               else error ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
             else error ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
-            
+
         else if length restMod > 4 then --invariants and gamma
             if head restMod == "invariant" then --invariant first
               let invariantArg = read (takeWhile (/=',') (restMod !! 1)) :: DistributionParameter
@@ -376,7 +376,7 @@ getPiVector modelString alphaSize inParts
   | null inParts = error ("Pi vector not found for " ++ modelString)
   | head inParts == "pivector" = getPiValues alphaSize (take alphaSize (tail inParts))
   | otherwise = getPiVector modelString alphaSize (tail inParts)
-  
+
 
 -- | getParam take String of parameter name and returns Double value of parameter
 getParam :: String -> [String] -> Double
