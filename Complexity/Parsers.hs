@@ -194,7 +194,7 @@ parseGraph graphNameLocal inStringList=
         in
         if (head graphString /= '"') || (last graphString /= '"') then
           error ("Graph representation must be in double quotes: " ++ graphString)
-        else
+        else -- only processes first graph if more than one
           let fglGraph = head $ forestEnhancedNewickStringList2FGLList (T.tail $ T.init $ T.pack graphString)
               (nLeaves, nRoots, nSingletons, nNetworkEdges) = getGraphAspects fglGraph
               theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
@@ -618,12 +618,96 @@ parseSections inSectionList =
         in
         thisMachineModel
 
+-- | fst4 returns the first element of a 4-tuple
+fst4 :: (a,b,c,d) -> a
+fst4 (f, _, _ ,_ ) = f
 
 -- | parseMachineFile takes a file name as String and returns the machine model aspects
-parseMachineFile :: String -> MachineModel
-parseMachineFile fileContents =
+--  optimizeModels here to reduce number of different models (ie GTR and Neyman to just 2x GTR with diff parameters)
+parseMachineFile :: Bool -> String -> MachineModel
+parseMachineFile optimizeModels fileContents =
   let filteredContents = removeComments (lines fileContents)
       sections = strip <$> getSections filteredContents
       parsedSections = parseSections sections
   in
-  parsedSections
+  if not optimizeModels then parsedSections
+  else 
+    let inModelList = nub $ fmap fst4 $ fmap changeModel $ fmap fst $ characterModelList parsedSections
+        newModels = reduceModels inModelList $ characterModelList parsedSections
+    in 
+    MachineModel {machineName = machineName parsedSections, graphSpecification = graphSpecification parsedSections, characterModelList = newModels}
+
+-- | reduceModels tkaes model specification and tries to reduce the number of 
+-- different Markov Models by using more genreal models if already specified.
+-- e.g subsitution a GTR with all params the same-> no need for Neyman code
+-- or more complex and less comples 4-state DNA models
+reduceModels :: [MarkovModel] -> [(CharacterModel, Int)] -> [(CharacterModel, Int)]
+reduceModels  markovPresent inModelList = 
+  if null markovPresent then error "No markov models specified in reduceModels"
+  else if length inModelList == 1 then inModelList -- single model
+  else if length markovPresent == 1 then inModelList -- all characters have same model already
+  else 
+    let (firstCharModel, numChar) = head inModelList
+        fName = characterName firstCharModel
+        fAlph = alphabet firstCharModel
+        fBL = branchLength firstCharModel
+        rMod = rateModifiers firstCharModel
+        inModel = changeModel firstCharModel
+        fPrec = precision firstCharModel
+        fCharLength = charLength firstCharModel
+    in
+    let newChangeModel = findExistingModel markovPresent (length fAlph) inModel
+        newModel = CharacterModel {characterName = fName, alphabet = fAlph, branchLength = fBL, rateModifiers = rMod, changeModel = newChangeModel, precision = fPrec, charLength = fCharLength}
+    in
+    (newModel, numChar) : reduceModels  markovPresent (tail inModelList)
+
+-- | findExistingModel markovPresent oldModel
+-- F84 and HKY85 same but alternate parameterization
+findExistingModel :: [MarkovModel] -> Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> (MarkovModel, RMatrix, PiVector, [ModelParameter])
+findExistingModel markovPresent alphabetSize inModel@(modelType, rMatrix, piVector, paramList) =
+  if modelType == GTR then inModel --already GTR
+  else if modelType == LOGMATRIX then inModel --already GTR
+  else if GTR `elem` markovPresent then -- Neyman and all 4-states can be converted to GTR
+    let (newR, newPi) = getRPiGTR alphabetSize inModel
+    in
+    (GTR, newR, newPi, [])
+  else if alphabetSize /= 4 then inModel -- Neyman /= 4 states
+  else if TN93 `elem` markovPresent then -- F84, HKY85, F81, K80, JC69 models can be converted to TN93
+    inModel
+  else if HKY85 `elem` markovPresent then -- F84, F81, K80, JC69 models can be converted to HKY85
+    inModel
+  else if F84 `elem` markovPresent then -- F81, K80, JC69 models can be converted to F84
+    inModel
+  else if K80 `elem` markovPresent then -- JC69 only to K80
+    inModel
+  else if F81 `elem` markovPresent then -- JC69 only to F81
+    inModel
+  else inModel
+
+-- | getRPiGTR take an alphabet size and model and retusn the r and pi matrices implied by that model
+-- e.g. Newyman to all equal
+getRPiGTR :: Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> ([[Double]], [Double])
+getRPiGTR alphabetSize inModel@(modelType, rMatrix, piVector, paramList) =
+  if (modelType == Neyman) || (modelType == Neyman) then 
+    let newPiVect = replicate alphabetSize (1.0 / (fromIntegral alphabetSize))
+        newRMatrix = makeSimpleR 0 alphabetSize
+    in
+    (newRMatrix, newPiVect)
+  else 
+    (rMatrix, piVector)
+
+-- | makeSimpleR takes an alphabet size and returns 0 diag and 1 non-diag square matrix
+makeSimpleR :: Int -> Int -> [[Double]]
+makeSimpleR rowIndex alphabetSize =
+  if rowIndex == alphabetSize then []
+  else 
+    let newRow = makeRow 0 rowIndex alphabetSize
+    in 
+    newRow : makeSimpleR (rowIndex + 1) alphabetSize 
+
+-- | makeRow make a row where index = 0 and all others 1
+makeRow :: Int -> Int -> Int -> [Double]
+makeRow colCounter rowNum alphabetSize = 
+  if colCounter == alphabetSize then []
+  else if colCounter == rowNum then (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
+  else (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize

@@ -64,18 +64,20 @@ main =
     do
         --Read input parameter
         args <- getArgs
-        if length args /= 2 then error "Error:  Incorrect number of arguments.  Require a filename for input configuration and a stub for output files"
+        if length args < 2 then error ("Error:  Incorrect number of arguments.  Require at least filename for input configuration, " ++ 
+            "a stub for output files, and third, optional, argument \"opt(imize)\" to optimize model specification")
         else do hPutStr stderr "Inputs: "
                 hPutStrLn stderr (head args ++ " machine configuration file and " ++ args!!1 ++ " stub ")
                 hPutStrLn stderr ("Output files: " ++ ((args!!1) ++ ".complexity") ++ " and potentially multiple " ++ ((args!!1) ++ ".X.tcm"))
                 hPutStrLn stderr ("Haskell code files: " ++ ((args!!1) ++ ".graph.hs") ++ " and " ++ ((args!!1) ++ ".characters.hs"))
                 hPutStrLn stderr ("Huffman code files: " ++ ((args!!1) ++ ".graph.huffman") ++ " and " ++ ((args!!1) ++ ".characters.huffmans"))
         let stub = args!!1
+        let optimizeModels = if (length args == 2) then False else if ((take 3 $ args!!2) == "opt") then True else False
 
         --Read and parse contents of input file
         inFileHandle <- openFile (head args) ReadMode
         inContents <- hGetContents inFileHandle
-        let machineConfig = parseMachineFile inContents
+        let machineConfig = parseMachineFile optimizeModels inContents
         let graphConfig = graphSpecification machineConfig
         let charInfo = characterModelList machineConfig
         putStrLn ("Machine configuration: " ++ show machineConfig)
