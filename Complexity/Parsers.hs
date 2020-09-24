@@ -622,6 +622,34 @@ parseSections inSectionList =
 fst4 :: (a,b,c,d) -> a
 fst4 (f, _, _ ,_ ) = f
 
+-- | getRPiGTR take an alphabet size and model and retusn the r and pi matrices implied by that model
+-- e.g. Newyman to all equal
+getRPiGTR :: Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> ([[Double]], [Double])
+getRPiGTR alphabetSize inModel@(modelType, rMatrix, piVector, paramList) =
+  if (modelType == Neyman) || (modelType == Neyman) then 
+    let newPiVect = replicate alphabetSize (1.0 / (fromIntegral alphabetSize))
+        newRMatrix = makeSimpleR 0 alphabetSize
+    in
+    (newRMatrix, newPiVect)
+  else 
+    (rMatrix, piVector)
+
+-- | makeSimpleR takes an alphabet size and returns 0 diag and 1 non-diag square matrix
+makeSimpleR :: Int -> Int -> [[Double]]
+makeSimpleR rowIndex alphabetSize =
+  if rowIndex == alphabetSize then []
+  else 
+    let newRow = makeRow 0 rowIndex alphabetSize
+    in 
+    newRow : makeSimpleR (rowIndex + 1) alphabetSize 
+
+-- | makeRow make a row where index = 0 and all others 1
+makeRow :: Int -> Int -> Int -> [Double]
+makeRow colCounter rowNum alphabetSize = 
+  if colCounter == alphabetSize then []
+  else if colCounter == rowNum then (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
+  else (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
+
 -- | parseMachineFile takes a file name as String and returns the machine model aspects
 --  optimizeModels here to reduce number of different models (ie GTR and Neyman to just 2x GTR with diff parameters)
 parseMachineFile :: Bool -> String -> MachineModel
@@ -663,11 +691,12 @@ reduceModels  markovPresent inModelList =
 
 -- | findExistingModel markovPresent oldModel
 -- F84 and HKY85 same but alternate parameterization
+--What about 2 models not GTR--is GTR better?  maybe check experimentally
 findExistingModel :: [MarkovModel] -> Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> (MarkovModel, RMatrix, PiVector, [ModelParameter])
 findExistingModel markovPresent alphabetSize inModel@(modelType, rMatrix, piVector, paramList) =
   if modelType == GTR then inModel --already GTR
   else if modelType == LOGMATRIX then inModel --already GTR
-  else if GTR `elem` markovPresent then -- Neyman and all 4-states can be converted to GTR
+  else if (GTR `elem` markovPresent || LOGMATRIX `elem` markovPresent) then -- Neyman and all 4-states can be converted to GTR
     let (newR, newPi) = getRPiGTR alphabetSize inModel
     in
     (GTR, newR, newPi, [])
@@ -684,30 +713,3 @@ findExistingModel markovPresent alphabetSize inModel@(modelType, rMatrix, piVect
     inModel
   else inModel
 
--- | getRPiGTR take an alphabet size and model and retusn the r and pi matrices implied by that model
--- e.g. Newyman to all equal
-getRPiGTR :: Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> ([[Double]], [Double])
-getRPiGTR alphabetSize inModel@(modelType, rMatrix, piVector, paramList) =
-  if (modelType == Neyman) || (modelType == Neyman) then 
-    let newPiVect = replicate alphabetSize (1.0 / (fromIntegral alphabetSize))
-        newRMatrix = makeSimpleR 0 alphabetSize
-    in
-    (newRMatrix, newPiVect)
-  else 
-    (rMatrix, piVector)
-
--- | makeSimpleR takes an alphabet size and returns 0 diag and 1 non-diag square matrix
-makeSimpleR :: Int -> Int -> [[Double]]
-makeSimpleR rowIndex alphabetSize =
-  if rowIndex == alphabetSize then []
-  else 
-    let newRow = makeRow 0 rowIndex alphabetSize
-    in 
-    newRow : makeSimpleR (rowIndex + 1) alphabetSize 
-
--- | makeRow make a row where index = 0 and all others 1
-makeRow :: Int -> Int -> Int -> [Double]
-makeRow colCounter rowNum alphabetSize = 
-  if colCounter == alphabetSize then []
-  else if colCounter == rowNum then (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
-  else (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
