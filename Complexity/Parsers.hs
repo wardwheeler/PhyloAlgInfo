@@ -42,11 +42,16 @@ module Complexity.Parsers
 
 import           Complexity.Types
 import           Complexity.Utilities
-import           Control.Applicative
 import           Data.Char
 import           Data.List
 import           Data.Maybe
 import           Data.String.Utils
+import           Complexity.PhyloParsers
+import qualified Data.Graph.Inductive.Graph        as G
+import qualified Data.Graph.Inductive.PatriciaTree as P
+import qualified Data.Text.Lazy                    as T
+
+
 
 -- | ArgCrust are charcaterts in arguments that may need to be filtered
 argCruft :: String
@@ -73,7 +78,7 @@ removeWhiteSpace inString =
     if isSpace first then removeWhiteSpace $ tail inString
     else first : removeWhiteSpace (tail inString)
 
--- | split with takes  astring and splits on a character returning a list of strings
+-- | split with takes  a string and splits on a character returning a list of strings
 -- remove target from list strings
 divideWith :: (Eq a) => a -> [a] -> [[a]]
 divideWith target inString =
@@ -146,18 +151,20 @@ parseMachine inString =
     (name, graphNameLocal, blockPairs)
 
 
--- | getNumber looks through contents of graph specification and
+-- | getValue looks through contents of graph specification and
 -- pulls parts matching in string throuws error if not found
-getNumber :: String -> [String] -> Int
-getNumber findHere guts =
-  if null guts then error ("No parameter " ++ findHere ++ " specified in graph")
+getValue :: String -> [String] -> String
+getValue findHere guts =
+  if null guts then 
+    if (findHere == "representation") then "No representation input"
+    else error ("No parameter " ++ findHere ++ " specified in graph")
   else
-    let firstGut = toLower Control.Applicative.<$> head guts
+    let firstGut = toLower <$> head guts
         parts = divideWith ':' firstGut
     in
     if length parts /=2 then error ("Incorrect number of parameters " ++ show (length parts) ++ " in " ++ findHere ++ " in graphModel\n Should be 1.")
-    else if findHere == head parts then (read (last parts) :: Int)
-    else getNumber findHere (tail guts)
+    else if findHere == head parts then last parts -- (read (last parts) :: Int)
+    else getValue findHere (tail guts)
 
 -- | parseGraph takes graph string and parses
 parseGraph :: String -> [String] -> [GraphModel]
@@ -168,17 +175,54 @@ parseGraph graphNameLocal inStringList=
         gName = last $ words $ takeWhile (/= '{') inString
         guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
         pieces = divideWith ';' guts
-        nLeaves = getNumber "leaves" pieces
-        nRoots = getNumber "roots" pieces
-        nSingletons = getNumber "singletons" pieces
-        nNetworkEdges = getNumber "networkedges" pieces
+        graphRepresentation = getValue "representation" pieces
     in
+    -- values specified
     if graphNameLocal == gName then
-      let theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
-      in
-      --defaultGraph
-      theGraphModel : parseGraph graphNameLocal (tail inStringList)
+      if graphRepresentation == "No representation input" then 
+        let nLeaves = read (getValue "leaves" pieces) :: Int
+            nRoots = read (getValue "roots" pieces) :: Int
+            nSingletons = read (getValue "singletons" pieces) :: Int
+            nNetworkEdges = read (getValue "networkedges" pieces) :: Int
+            theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
+        in
+        theGraphModel : parseGraph graphNameLocal (tail inStringList)
+      -- get values from graph representation
+      -- assumes (for now) Forest Enhanced Newick format
+      else 
+        let graphString = reverse $ takeWhile (/=':') $ drop 1 $ reverse guts
+        in
+        if (head graphString /= '"') || (last graphString /= '"') then
+          error ("Graph representation must be in double quotes: " ++ graphString)
+        else
+          let fglGraph = head $ forestEnhancedNewickStringList2FGLList (T.tail $ T.init $ T.pack graphString)
+              (nLeaves, nRoots, nSingletons, nNetworkEdges) = getGraphAspects fglGraph
+              theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
+          in
+          theGraphModel : parseGraph graphNameLocal (tail inStringList)
     else parseGraph graphNameLocal (tail inStringList)
+
+-- | getGraphAspects takes an fgl graph and reurns 4-tuple of numLeaves, numRoots, numSingleton nodes, and numNetworkEdges
+getGraphAspects :: P.Gr T.Text Double -> (Int, Int, Int, Int)
+getGraphAspects inGraph = 
+  if G.isEmpty inGraph then (0,0,0,0)
+  else 
+    let nodeSet = G.nodes inGraph
+        nodeDegreeList = fmap (G.deg inGraph) nodeSet
+        nodeDegreePairList = zip nodeDegreeList nodeSet
+        singletonNodePairList = filter ((== 0).fst) nodeDegreePairList
+        nodeInDegreeList = fmap (G.indeg inGraph) nodeSet
+        nodeInDegreePairList = zip nodeInDegreeList nodeSet
+        nodeOutDegreeList = fmap (G.outdeg inGraph) nodeSet
+        nodeOutDegreePairList = zip nodeOutDegreeList nodeSet
+        rootPairList = filter ((== 0).fst) nodeInDegreePairList
+        leafPairList = filter ((== 0).fst) nodeOutDegreePairList
+        networkNodePairList = filter ((> 1).fst) nodeInDegreePairList
+        numberNetworkEdges = sum $ fmap fst networkNodePairList
+    in
+    (length leafPairList, length rootPairList, length singletonNodePairList, numberNetworkEdges)
+
+
 
 -- | getBlock takes a Sring--the name of the block and looks into a list of (String, Int)
 -- pairs and returns the number of chats if the name finds a match--zwero otherwise if not found.
@@ -554,7 +598,7 @@ parseSections inSectionList =
   if null inSectionList then error "Empty list of machine sections"
   else
         --Find and pull Machine
-    let machineModels = parseMachine Control.Applicative.<$> getElementString "machine" inSectionList
+    let machineModels = parseMachine <$> getElementString "machine" inSectionList
     in
     if length machineModels > 1 then error "Can only specify a single machine model"
     else
@@ -579,7 +623,7 @@ parseSections inSectionList =
 parseMachineFile :: String -> MachineModel
 parseMachineFile fileContents =
   let filteredContents = removeComments (lines fileContents)
-      sections = strip Control.Applicative.<$> getSections filteredContents
+      sections = strip <$> getSections filteredContents
       parsedSections = parseSections sections
   in
   parsedSections
