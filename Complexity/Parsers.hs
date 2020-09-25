@@ -627,44 +627,44 @@ fst4 (f, _, _ ,_ ) = f
 makeSimpleR :: Int -> Int -> [[Double]]
 makeSimpleR rowIndex alphabetSize =
   if rowIndex == alphabetSize then []
-  else 
+  else
     let newRow = makeRow 0 rowIndex alphabetSize
-    in 
-    newRow : makeSimpleR (rowIndex + 1) alphabetSize 
+    in
+    newRow : makeSimpleR (rowIndex + 1) alphabetSize
 
 -- | makeRow make a row where index = 0 and all others 1
 makeRow :: Int -> Int -> Int -> [Double]
-makeRow colCounter rowNum alphabetSize = 
-  if colCounter == alphabetSize then []
-  else if colCounter == rowNum then (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
-  else (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
+makeRow colCounter rowNum alphabetSize
+  | colCounter == alphabetSize = []
+  | colCounter == rowNum = (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
+  | otherwise = (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
 
 -- | parseMachineFile takes a file name as String and returns the machine model aspects
 --  optimizeModels here to reduce number of different models (ie GTR and Neyman to just 2x GTR with diff parameters)
-parseMachineFile :: Bool -> String -> MachineModel
+parseMachineFile :: Bool -> String -> (MachineModel, MachineModel)
 parseMachineFile optimizeModels fileContents =
   let filteredContents = removeComments (lines fileContents)
       sections = strip <$> getSections filteredContents
       parsedSections = parseSections sections
   in
-  if not optimizeModels then parsedSections
-  else 
-    let inModelList = nub $ fmap fst4 $ fmap changeModel $ fmap fst $ characterModelList parsedSections
+  if not optimizeModels then (parsedSections, parsedSections)
+  else
+    let inModelList = nub $ fmap (fst4 . changeModel) $ fmap fst $ characterModelList parsedSections
         newModels = reduceModels inModelList $ characterModelList parsedSections
-    in 
-    MachineModel {machineName = machineName parsedSections, graphSpecification = graphSpecification parsedSections, characterModelList = newModels}
+        optmizedSections = MachineModel {machineName = machineName parsedSections, graphSpecification = graphSpecification parsedSections, characterModelList = newModels}
+    in
+    (optmizedSections, parsedSections)
 
--- | reduceModels tkaes model specification and tries to reduce the number of 
+-- | reduceModels tkaes model specification and tries to reduce the number of
 -- different Markov Models by using more genreal models if already specified.
 -- e.g subsitution a GTR with all params the same-> no need for Neyman code
 -- or more complex and less comples 4-state DNA models
 reduceModels :: [MarkovModel] -> [(CharacterModel, Int)] -> [(CharacterModel, Int)]
-reduceModels  markovPresent inModelList = 
-  trace ("Models present: " ++ show markovPresent) (
-  if null markovPresent then error "No markov models specified in reduceModels"
-  else if length markovPresent == 1 then inModelList -- all characters have same model already
-  else if null inModelList then []
-  else 
+reduceModels markovPresent inModelList
+  | null markovPresent = error "No markov models specified in reduceModels"
+  | length markovPresent == 1 = inModelList
+  | null inModelList = []
+  | otherwise =
     let (firstCharModel, numChar) = head inModelList
         fName = characterName firstCharModel
         fAlph = alphabet firstCharModel
@@ -678,48 +678,47 @@ reduceModels  markovPresent inModelList =
         newModel = CharacterModel {characterName = fName, alphabet = fAlph, branchLength = fBL, rateModifiers = rMod, changeModel = newChangeModel, precision = fPrec, charLength = fCharLength}
     in
     (newModel, numChar) : reduceModels  markovPresent (tail inModelList)
-    )
+    -- )
 
 -- | findExistingModel markovPresent oldModel
 -- F84 and HKY85 same but alternate parameterization
 --What about 2 models not GTR--is GTR better?  maybe check experimentally
 findExistingModel :: [MarkovModel] -> Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> (MarkovModel, RMatrix, PiVector, [ModelParameter])
-findExistingModel markovPresent alphabetSize inModel@(modelType, _, _, _) =
-  trace ("InModel: " ++ show modelType) (
-  if modelType == GTR then inModel --already GTR
-  else if modelType == LOGMATRIX then inModel --already GTR
-  else if (GTR `elem` markovPresent || LOGMATRIX `elem` markovPresent) then -- Neyman and all 4-states can be converted to GTR
+findExistingModel markovPresent alphabetSize inModel@(modelType, _, _, _)
+  | modelType == GTR = inModel
+  | modelType == LOGMATRIX = inModel
+  | GTR `elem` markovPresent || LOGMATRIX `elem` markovPresent = -- Neyman and all 4-states can be converted to GTR
     transformModel alphabetSize inModel GTR
-  --else if alphabetSize /= 4 then inModel -- Neyman /= 4 states
-  else if TN93 `elem` markovPresent then -- F84, HKY85, F81, K80, JC69 models can be converted to TN93
+      | alphabetSize /= 4 = inModel
+      | TN93 `elem` markovPresent = -- F84, HKY85, F81, K80, JC69 models can be converted to TN93
     transformModel alphabetSize inModel TN93
-  else if HKY85 `elem` markovPresent then -- F84, F81, K80, JC69 models can be converted to HKY85
+      | HKY85 `elem` markovPresent = -- F84, F81, K80, JC69 models can be converted to HKY85
     transformModel alphabetSize inModel HKY85
-  else if F84 `elem` markovPresent then -- F81, K80, JC69 models can be converted to F84
+      | F84 `elem` markovPresent = -- F81, K80, JC69 models can be converted to F84
     transformModel alphabetSize inModel F84
-  else if K80 `elem` markovPresent then -- JC69 only to K80
+      | K80 `elem` markovPresent = -- JC69 only to K80
     transformModel alphabetSize inModel K80
-  else if F81 `elem` markovPresent then -- JC69 only to F81
+      | F81 `elem` markovPresent = -- JC69 only to F81
     transformModel alphabetSize inModel F81
-  else error ("InModel " ++ show inModel ++ " not found")
-  )
+  -- )
 
 -- | transformModel take an alphabet size and model and retusn the r and pi matrices implied by that model
 -- e.g. Newyman to all equal
+-- can't transforma complex model into a simpler one (e.g. TN93 to K80)--so then it just returns the input model
 transformModel :: Int -> (MarkovModel, RMatrix, PiVector, [ModelParameter]) -> MarkovModel -> (MarkovModel, RMatrix, PiVector, [ModelParameter])
 transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetModel =
-  trace ("Transforming model " ++ show modelType ++ " to " ++ show targetModel) (
   if modelType == targetModel then inModel
-  else 
-    let equalPiVect = replicate alphabetSize (1.0 / (fromIntegral alphabetSize))
+  else
+    trace ("Transforming model " ++ show modelType ++ " to " ++ show targetModel) (
+    let equalPiVect = replicate alphabetSize (1.0 / fromIntegral alphabetSize)
         equalRMatrix = makeSimpleR 0 alphabetSize
-        pA = piVector !! 0
+        pA = head piVector
         pC = piVector !! 1
         pG = piVector !! 2
         pT = piVector !! 3
     in
-    -- transform model from input modelType to targetModel 
-    if (modelType == Neyman) || (modelType == JC69) then 
+    -- transform model from input modelType to targetModel
+    if (modelType == Neyman) || (modelType == JC69) then
       if targetModel == GTR then
         (GTR, equalRMatrix, equalPiVect, [])
       else if targetModel == TN93 then
@@ -735,83 +734,58 @@ transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetMo
       else error ("Optimization target model " ++ show modelType ++ " not implemented")
 
     else if modelType == TN93 then
-      let a1 = paramList !! 0
+      let a1 = head paramList
           a2 = paramList !! 1
           b  = paramList !! 2
-          a  = (a1 + a2) / 2
-          k1 = ((a1/b) - 1) * (pC + pT)
-          k2 = ((a2/b) - 1) * (pA + pG)
-          k  = (k1 + k2) / 2
       in
       if targetModel == GTR then
-        (GTR, [[0, b * pC,a2 * pG , b * pT],[b * pA, 0,b * pG, a1 * pT],[a2 * pA, b * pC, 0, a1 * pT],[b * pA, a1 * pC ,b * pG, 0]], piVector, [])
+        (GTR, [[0, b, a2, b],[b, 0, b, a1],[a2 , b, 0, b],[b, a1, b, 0]], piVector, [])
       else if targetModel == TN93 then
-        (TN93, [[]], piVector, paramList) -- keeping identit models for legibility
-      else if targetModel == HKY85 then
-        (HKY85, [[]], piVector, [a,b])
-      else if targetModel == F84 then
-        (F84, [[]], piVector, [k,b])
-      else if targetModel == K80 then
-        (K80, [[]], equalPiVect, [a,b])
-      else if targetModel == F81 then
-        (F81, [[]], piVector, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
-  
+        (TN93, [[]], piVector, [a1,a2,b]) -- keeping identit models for legibility
+      else inModel -- error (show modelType ++ " can't be converted into " ++ show targetModel)
+
     else if modelType == HKY85 then
-      let a1 = paramList !! 0
-          a2 = paramList !! 0
-          a  = paramList !! 0
+      let a1 = head paramList
+          a2 = head paramList
+          a  = head paramList
           b  = paramList !! 1
-          k1 = ((a1/b) - 1) * (pC + pT)
-          k2 = ((a2/b) - 1) * (pA + pG)
-          k  = (k1 + k2) / 2
       in
       if targetModel == GTR then
-        (GTR, [[0, b * pC,a2 * pG , b * pT],[b * pA, 0,b * pG, a1 * pT],[a2 * pA, b * pC, 0, a1 * pT],[b * pA, a1 * pC ,b * pG, 0]], piVector, [])
+        (GTR, [[0, b, a2, b],[b, 0, b, a1],[a2 , b, 0, b],[b, a1, b, 0]], piVector, [])
       else if targetModel == TN93 then
         (TN93, [[]], piVector, [a1,a2,b]) -- keeping identit models for legibility
       else if targetModel == HKY85 then
-        (HKY85, [[]], piVector, paramList)
-      else if targetModel == F84 then
-        (F84, [[]], piVector, [k,b])
-      else if targetModel == K80 then
-        (K80, [[]], equalPiVect, [a,b])
-      else if targetModel == F81 then
-        (F81, [[]], piVector, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
+        (HKY85, [[]], piVector, [a,b])
+      else inModel --error (show modelType ++ " can't be converted into " ++ show targetModel)
 
     else if modelType == F84 then
-      let k  = paramList !! 0
+      let k  = head paramList
           b  = paramList !! 1
           a1 = (1 +(k / (pC + pT))) * b
           a2 = (1 +(k / (pA + pG))) * b
-          a  = (a1 + a2) / 2 
+          a  = (a1 + a2) / 2
       in
       if targetModel == GTR then
-        (GTR, [[0, b * pC,a2 * pG , b * pT],[b * pA, 0,b * pG, a1 * pT],[a2 * pA, b * pC, 0, a1 * pT],[b * pA, a1 * pC ,b * pG, 0]], piVector, [])
+        (GTR, [[0, b, a2, b],[b, 0, b, a1],[a2 , b, 0, b],[b, a1, b, 0]], piVector, [])
       else if targetModel == TN93 then
         (TN93, [[]], piVector, [a1,a2,b]) -- keeping identit models for legibility
       else if targetModel == HKY85 then
         (HKY85, [[]], piVector, [a,b])
       else if targetModel == F84 then
         (F84, [[]], piVector, paramList)
-      else if targetModel == K80 then
-        (K80, [[]], equalPiVect, [a,b])
-      else if targetModel == F81 then
-        (F81, [[]], piVector, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
+      else inModel
 
     else if modelType == K80 then
-      let a1 = paramList !! 0
-          a2 = paramList !! 0
-          a  = paramList !! 0
+      let a1 = head paramList
+          a2 = head paramList
+          a  = head paramList
           b  = paramList !! 1
-          k1 = ((a1/b) - 1) * (pC + pT)
-          k2 = ((a2/b) - 1) * (pA + pG)
+          k1 = ((a1/b) - 1) * 0.5
+          k2 = ((a2/b) - 1) * 0.5
           k  = (k1 + k2) / 2
       in
       if targetModel == GTR then
-        (GTR, [[0, b, a2, b],[b, 0, b, a1],[a2 , b, 0, a1],[b, a1, b, 0]], equalPiVect, [])
+        (GTR, [[0, b, a2, b],[b, 0, b, a1],[a2 , b, 0, b],[b, a1, b, 0]], equalPiVect, [])
       else if targetModel == TN93 then
         (TN93, [[]], equalPiVect, [a1,a2,b]) -- keeping identit models for legibility
       else if targetModel == HKY85 then
@@ -819,11 +793,11 @@ transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetMo
       else if targetModel == F84 then
         (F84, [[]], equalPiVect, [k,b])
       else if targetModel == K80 then
-        (K80, [[]], equalPiVect, paramList)
+        (K80, [[]], equalPiVect, [a,b])
+      else inModel -- error (show modelType ++ " can't be converted into " ++ show targetModel)
       else if targetModel == F81 then
-        (F81, [[]], equalPiVect, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
-      
+        inModel -- error ("Optimization target model " ++ show modelType ++ " not implemented")
+
     else if modelType == F81 then
       let a1 = 1
           a2 = 1
@@ -842,10 +816,10 @@ transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetMo
       else if targetModel == F84 then
         (F84, [[]], piVector, [k,b])
       else if targetModel == K80 then
-        (K80, [[]], equalPiVect, [a,b])
+        inModel -- error (show modelType ++ " can't be converted into " ++ show targetModel)
       else if targetModel == F81 then
-        (F81, [[]], piVector, paramList)
+        (F81, [[]], piVector, [])
       else error ("Optimization target model " ++ show modelType ++ " not implemented")
-      
+
   else error ("Optimization input model " ++ show modelType ++ " not implemented")
   )

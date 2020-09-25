@@ -64,7 +64,7 @@ main =
     do
         --Read input parameter
         args <- getArgs
-        if length args < 2 then error ("Error:  Incorrect number of arguments.  Require at least filename for input configuration, " ++ 
+        if length args < 2 then error ("Error:  Incorrect number of arguments.  Require at least filename for input configuration, " ++
             "a stub for output files, and third, optional, argument \"opt(imize)\" to optimize model specification")
         else do hPutStr stderr "Inputs: "
                 hPutStrLn stderr (head args ++ " machine configuration file and " ++ args!!1 ++ " stub ")
@@ -72,14 +72,23 @@ main =
                 hPutStrLn stderr ("Haskell code files: " ++ ((args!!1) ++ ".graph.hs") ++ " and " ++ ((args!!1) ++ ".characters.hs"))
                 hPutStrLn stderr ("Huffman code files: " ++ ((args!!1) ++ ".graph.huffman") ++ " and " ++ ((args!!1) ++ ".characters.huffmans"))
         let stub = args!!1
-        let optimizeModels = if (length args == 2) then False else if ((take 3 $ args!!2) == "opt") then True else False
+        let optimizeModels
+              | length args == 2 = False
+              | take 3 (args!!2) == "opt" = True
+              | otherwise = False
 
         --Read and parse contents of input file
         inFileHandle <- openFile (head args) ReadMode
         inContents <- hGetContents inFileHandle
-        let machineConfig = parseMachineFile optimizeModels inContents
+
+        -- two vesrion heres so AIC/BIC calcualtinos are not affected by optimization of models
+        -- to more complex models that are simpler in algorithmic complexity
+        -- machineConfig and machineConfigOrig are the same if no optimizations
+        let (machineConfig, machineConfigOrig) = parseMachineFile optimizeModels inContents
         let graphConfig = graphSpecification machineConfig
         let charInfo = characterModelList machineConfig
+        let charInfoOrig = if optimizeModels then characterModelList machineConfigOrig else charInfo
+
         putStrLn ("Machine configuration: " ++ show machineConfig)
         --putStrLn ("\tGraph configuration: " ++ show graphConfig)
         --putStrLn ("\tCharacter configurations: " ++ show charInfo)
@@ -124,7 +133,8 @@ main =
         let tcmListE = fmap (makeTCM logE . fst) charInfo
         mapM_ (writeTCMFile "nat" stub) tcmListE
 
-        let (aic, bic) = getAICBIC charInfo 0 0
+        -- charInfoOrig so unaffected by model optimization
+        let (aic, bic) = getAICBIC charInfoOrig 0 0
         putStrLn ("Akaike Information adjustment : " ++ show aic)
         putStrLn ("Bayesian Information adjustment : " ++ show bic)
 
