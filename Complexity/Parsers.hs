@@ -639,6 +639,24 @@ makeRow colCounter rowNum alphabetSize
   | colCounter == rowNum = (0 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
   | otherwise = (1 :: Double) : makeRow (colCounter + 1) rowNum alphabetSize
 
+-- | checkK80F81BranchDistributions takes a list of charcater models and checks teh K80 and F81
+-- models for their distributions. Tis is to see if there is a benefit of convverting them to KY85 models
+-- in terms of complexity.  If their branch distibutins are all the same, or overlapping if there are multiple
+-- models with multiple branch length distributions.  The basic idea is that if the K80 and F81 models have non-overlapping
+-- branch distributions, then converting them both to HKY85 will not reduce complexity, but increase it
+-- since they will not have shared generated code, but non-shared more complex code then they would have had 
+-- otherwise.
+checkK80F81BranchDistributions :: [Distribution] -> [Distribution] -> [CharacterModel] -> Bool
+checkK80F81BranchDistributions k80List f81List modelList = 
+  if null modelList then not $ null (intersect (nub k80List) (nub f81List))
+  else 
+    let firstModel = fst4 $ changeModel $ head modelList
+        firstDist = fst $ branchLength $ head modelList
+    in
+    if firstModel == K80 then checkK80F81BranchDistributions (firstDist : k80List) f81List (tail modelList)
+    else if firstModel == F81 then checkK80F81BranchDistributions k80List (firstDist : f81List) (tail modelList)
+    else checkK80F81BranchDistributions k80List f81List (tail modelList)
+
 -- | parseMachineFile takes a file name as String and returns the machine model aspects
 --  optimizeModels here to reduce number of different models (ie GTR and Neyman to just 2x GTR with diff parameters)
 parseMachineFile :: Bool -> String -> (MachineModel, MachineModel)
@@ -650,7 +668,12 @@ parseMachineFile optimizeModels fileContents =
   if not optimizeModels then (parsedSections, parsedSections)
   else
     let inModelList = nub $ fmap (fst4 . changeModel) $ fmap fst $ characterModelList parsedSections
-        newModels = reduceModels inModelList $ characterModelList parsedSections
+        --Optimization for special case of K80 and F81 both present hence converted to HKY85 so single model (JC69 also converted)
+        moreComplexModelsNotPresent = (GTR `notElem` inModelList) && (LOGMATRIX `notElem` inModelList) && (TN93 `notElem` inModelList) && (HKY85 `notElem` inModelList) && (F84 `notElem` inModelList)
+        k80F81Present = (K80 `elem` inModelList) && (F81 `elem` inModelList)
+        k80F81BranchDistributionsFactor = checkK80F81BranchDistributions [] [] (fmap fst $ characterModelList parsedSections)
+        additionallModels = if (moreComplexModelsNotPresent && k80F81Present && k80F81BranchDistributionsFactor) then [HKY85] else []
+        newModels = reduceModels (additionallModels ++ inModelList) $ characterModelList parsedSections
         optmizedSections = MachineModel {machineName = machineName parsedSections, graphSpecification = graphSpecification parsedSections, characterModelList = newModels}
     in
     (optmizedSections, parsedSections)
@@ -700,7 +723,6 @@ findExistingModel markovPresent alphabetSize inModel@(modelType, _, _, _)
     transformModel alphabetSize inModel K80
       | F81 `elem` markovPresent = -- JC69 only to F81
     transformModel alphabetSize inModel F81
-  -- )
 
 -- | transformModel take an alphabet size and model and retusn the r and pi matrices implied by that model
 -- e.g. Newyman to all equal
