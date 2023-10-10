@@ -1,6 +1,6 @@
 {- |
 Module      :  MathUtilities
-Description :  mathematical utuilities for calculating Kolmnogorov Complexity
+Description :  Mathematical utilities for calculating Kolmogorov Complexity
 Copyright   :  (c) 2018 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 

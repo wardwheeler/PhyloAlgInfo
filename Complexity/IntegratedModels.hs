@@ -1,6 +1,6 @@
 {- |
 Module      :  IntegratedModels
-Description :  Analytically integrated models -functions for Algorithmic (Kolmogorov) complexity
+Description :  Analytically integrated models--functions for Algorithmic (Kolmogorov) complexity
 Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 

@@ -1,8 +1,8 @@
 {- |
 Module      :  Parser for Kolmogorov (algorithmic) complexity 'Machine' definition
 Description :  Program reads input file with description and parameters for
-               machine containing models for graphs and charcater models
-Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+               machine containing models for graphs and character models
+Copyright   :  (c) 2018-2023 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 
 Redistribution and use in source and binary forms, with or without

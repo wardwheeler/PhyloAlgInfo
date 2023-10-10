@@ -1,10 +1,10 @@
 {- |
 Module      :  Graphs
-Description :  Functions to generate(algorithmic) complexity of graphs
+Description :  Functions to generate (algorithmic) complexity of graphs
                Generates a Haskell program (compiles)
 				       with a description of a graph. The output program can be executed with
 				       GHCi interpreter. ghci --:load progName
-               also oputputs Huffman binary code of program
+               also outputs Huffman binary code of program
 Copyright   :  (c) 2018-2019 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 

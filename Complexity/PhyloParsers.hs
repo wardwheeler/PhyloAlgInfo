@@ -1,6 +1,6 @@
 {- |
 Module      :  PhyloParsers.hs
-Description :  module witb parseing functios for commonly used phylogentic files
+Description :  module with parsing functions for commonly used phylogentic files
                 graphs parsed to fgl types.
 Copyright   :  (c) 2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :

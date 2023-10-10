@@ -1,7 +1,7 @@
 {- |
-Module      :  Matrix funtions for Algorithmic (Kolmogorov) complexity
+Module      :  Matrix functions for Algorithmic (Kolmogorov) complexity
 Description :  Functions to generate(algorithmic) complexity of GTR-type character change models
-Copyright   :  (c) 2019-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+Copyright   :  (c) 2019-2023 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 
 Redistribution and use in source and binary forms, with or without

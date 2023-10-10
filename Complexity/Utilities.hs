@@ -1,6 +1,6 @@
 {- |
 Module      :  Utilities
-Description :  Functions to generate(algorithmic) complexity of objects
+Description :  Functions to generate (algorithmic) complexity of objects
 Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 
