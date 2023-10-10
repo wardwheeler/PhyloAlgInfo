@@ -1,16 +1,19 @@
-cabal-version:  2.2
-build-type:     Simple
+cabal-version:  3.8
+Name:           phyloComplexity
+Version:        0.1.0
+Stability:      Alpha
+Build-Type:     Simple
+Tested-With:
+  GHC == 9.8.1
 
-name:           phyloComplexity
-version:        0.1.0.0
---description:    Please see the README on GitHub at <https://github.com/wardwheeler/PhyloAlgInfo#readme>
---homepage:       https://github.com/wardwheeler/PhyloAlgInfo#readme
---bug-reports:    https://github.com/wardwheeler/PhyloAlgInfo/issues
---author:         Ward Wheeler
---maintainer:     wheeler@amnh.org
---copyright:      2018-2020 Ward Wheeler
---license:        BSD3
---license-file:   LICENSE
+Author:        Ward Wheeler <wheeler@amnh.org>
+Copyright:     © 2018 Ward Wheeler and The American Museum of Natural History
+License:       BSD-3-Clause
+License-File:  doc/LICENSE
+
+Maintainer:    Ward Wheeler <wheeler@amnh.org>
+Homepage:      https://github.com/WardWheeler/PhyloComplexity#readme
+Bug-Reports:   https://github.com/WardWheeler/PhyloComplexity/issues
 
 executable phyloComplexity
 
@@ -20,10 +23,12 @@ executable phyloComplexity
                 -Wincomplete-patterns
                 -threaded 
                 -O2
-                -XBangPatterns
-                -fwrite-ide-info
+                -- -XBangPatterns
+                -- -fwrite-ide-info
+                -rtsopts
+                "-with-rtsopts=-A64m -AL128M -H1024m -n4m"
 
-  build-depends:  base >=4.7 && <5
+  build-depends:  base >= 4.10
                 , containers >=0.6
                 , fingertree
                 , process

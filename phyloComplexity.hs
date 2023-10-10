@@ -1,8 +1,9 @@
 {- |
 Module      :  Kolmogorov (algorithmic) complexity of overall machine
-Description :  Program reads input file with m,achine configuration and
-               determines Kolmnogorov Complexity of Graph and Character models
-Copyright   :  (c) 2018-2020 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
+Description :  Program reads input file with machine configuration and
+               determines heuristic upper bound of Kolmogorov Complexity of 
+               Graph and Character models
+Copyright   :  (c) 2018-2023 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
 
 Redistribution and use in source and binary forms, with or without
@@ -64,7 +65,7 @@ main =
     do
         --Read input parameter
         args <- getArgs
-        if length args < 2 then error ("Error:  Incorrect number of arguments.  Require at least filename for input configuration, " ++
+        if length args < 2 then errorWithoutStackTrace ("Error:  Incorrect number of arguments.  Require at least filename for input configuration, " ++
             "a stub for output files, and third, optional, argument \"opt(imize)\" to optimize model specification")
         else do hPutStr stderr "Inputs: "
                 hPutStrLn stderr (head args ++ " machine configuration file and " ++ args!!1 ++ " stub ")
