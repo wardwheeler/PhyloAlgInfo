@@ -50,6 +50,7 @@ Portability :  portable (I hope)
 
 module Complexity.Graphs
   (  makeProgramStringGraph
+  ,  makeDisplayGraphString
   )  where
 
 import           Complexity.CodeStrings
@@ -64,7 +65,7 @@ makeProgramStringGraph  numLeaves numSingle numRoots numNetEdges  =
   in
   outProgram  ++ middleString ++ sumString
 
--- | makeGraphProgramString puts apropriate code and values into string
+-- | makeGraphProgramString puts apropriate code and values into string to define a general graph
 makeGraphProgramString :: Int -> Int -> Int -> String -> String -> String -> Int -> Int -> Int -> Int -> (String, String, String)
 makeGraphProgramString numLeavesOrig numRootsOrig numSingleOrig beforeMain afterMain sumString numLeaves numRoots numNetEdges numSingle =
   let numLeaves2 =  numLeavesOrig - numSingleOrig
@@ -99,3 +100,11 @@ makeGraphProgramString numLeavesOrig numRootsOrig numSingleOrig beforeMain after
         else
           (beforeMain ++ fullTreeString ++ addEdgeString, afterMain ++ "  let t=cG True " ++ show maxVertex ++ " " ++ show numLeaves3 ++ "\n" ++ "  let n=dG " ++ show maxVertex2 ++ " t " ++ show numNetEdges ++ "\n", sumString ++ "n)")
   else (beforeMain, afterMain, sumString)
+
+-- | makeDisplayGraphString cretges code to generate a general gaph and then output a display graph based on that graph
+-- the ouput is the display graph
+-- if input is tree then return graph string as is
+makeDisplayGraphString :: Int -> Int -> Int -> Int -> String
+makeDisplayGraphString numLeaves numSingle numRoots numNetEdges =
+  if numNetEdges == 0 then makeProgramStringGraph numLeaves numSingle numRoots numNetEdges
+  else makeProgramStringGraph numLeaves numSingle numRoots numNetEdges

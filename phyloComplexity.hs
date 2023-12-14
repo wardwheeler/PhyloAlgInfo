@@ -99,9 +99,16 @@ main =
         let graphProgram = makeProgramStringGraph (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
         let (graphShannonBits, graphHuffmanLengthBits, graphHuffmanBitRep) = getInformationContent graphProgram
 
+        let graphDisplayProgram = makeDisplayGraphString (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
+        let (graphDisplayShannonBits, graphDisplayHuffmanLengthBits, graphDisplayHuffmanBitRep) = getInformationContent graphDisplayProgram
+
         --Output complexity of Graph Component
         putStrLn ("Shannon bits of Graph program = " ++ show graphShannonBits)
         putStrLn ("Huffman bits of Graph program = " ++ show graphHuffmanLengthBits)
+
+        putStrLn ("Shannon bits of Graph Display program = " ++ show graphDisplayShannonBits)
+        putStrLn ("Huffman bits of Graph Display program = " ++ show graphDisplayHuffmanLengthBits)
+
 
         graphHuffmanBinaryHandle <- openFile (stub ++ ".graph.huffman") WriteMode
         graphHaskellHandle <- openFile (stub ++ ".graph.hs") WriteMode
@@ -125,6 +132,9 @@ main =
         let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
         let graph2DisplayTreeComplexity = fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
         hPutStrLn stderr ("Softwired Graph -> Tree complexity: " ++ show graph2DisplayTreeComplexity)
+
+        hPutStrLn stderr ("Conditional complexity (Shannon) of single display from softwired graph: " ++ show (graphDisplayShannonBits - graphShannonBits))
+        hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show (graphDisplayShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * (graphDisplayShannonBits - graphShannonBits))))
 
         --calculate and output Bit TCMs for each character change model for complexity calculations
         let tcmListBit = fmap (makeTCM log2 . fst) charInfo
