@@ -106,16 +106,15 @@ main =
         putStrLn ("Shannon bits of Graph program = " ++ show graphShannonBits)
         putStrLn ("Huffman bits of Graph program = " ++ show graphHuffmanLengthBits)
 
-        putStrLn ("Shannon bits of Graph Display program = " ++ show graphDisplayShannonBits)
-        putStrLn ("Huffman bits of Graph Display program = " ++ show graphDisplayHuffmanLengthBits)
-
-
         graphHuffmanBinaryHandle <- openFile (stub ++ ".graph.huffman") WriteMode
         graphHaskellHandle <- openFile (stub ++ ".graph.hs") WriteMode
+        graphDisplayHaskellHandle <- openFile (stub ++ ".display.hs") WriteMode
         hPutStrLn graphHuffmanBinaryHandle graphHuffmanBitRep
         hPutStrLn graphHaskellHandle graphProgram
+        hPutStrLn graphDisplayHaskellHandle graphDisplayProgram
         hClose graphHuffmanBinaryHandle
         hClose graphHaskellHandle
+        hClose graphDisplayHaskellHandle
 
         --Calculate cost of converting general graph to tree -- 1 bit for each pair of network edges (r/2)
         ----(must come in pairs for phylogenetic network) and at most log 2^r (or just r) for number of display trees
@@ -133,8 +132,13 @@ main =
         let graph2DisplayTreeComplexity = fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
         hPutStrLn stderr ("Softwired Graph -> Tree complexity: " ++ show graph2DisplayTreeComplexity)
 
-        hPutStrLn stderr ("Conditional complexity (Shannon) of single display from softwired graph: " ++ show (graphDisplayShannonBits - graphShannonBits))
-        hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show (graphDisplayShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * (graphDisplayShannonBits - graphShannonBits))))
+        if (numSingletons graphConfig) > 0 || (numRoots graphConfig) /= 1 || (numLeaves graphConfig) < 5 then hPutStrLn stderr ("Base graph cannot be resolved to a phylogenetic display tree")
+        else if (numNetworkEdges graphConfig) > 0 then do
+            putStrLn ("Shannon bits of Graph Display program = " ++ show graphDisplayShannonBits)
+            putStrLn ("Huffman bits of Graph Display program = " ++ show graphDisplayHuffmanLengthBits)
+            hPutStrLn stderr ("Conditional complexity (Shannon) of single display from softwired graph: " ++ show (graphDisplayShannonBits - graphShannonBits))
+            hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show (graphDisplayShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * (graphDisplayShannonBits - graphShannonBits))))
+        else hPutStrLn stderr ("Base graph is a tree so no extra complxity to make a display tree")
 
         --calculate and output Bit TCMs for each character change model for complexity calculations
         let tcmListBit = fmap (makeTCM log2 . fst) charInfo

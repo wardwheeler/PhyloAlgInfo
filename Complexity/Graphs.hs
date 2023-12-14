@@ -53,7 +53,8 @@ module Complexity.Graphs
   ,  makeDisplayGraphString
   )  where
 
-import           Complexity.CodeStrings
+import Complexity.CodeStrings
+import Debug.Trace
 
 mainStartString :: String
 mainStartString = "main=do\n"
@@ -101,10 +102,164 @@ makeGraphProgramString numLeavesOrig numRootsOrig numSingleOrig beforeMain after
           (beforeMain ++ fullTreeString ++ addEdgeString, afterMain ++ "  let t=cG True " ++ show maxVertex ++ " " ++ show numLeaves3 ++ "\n" ++ "  let n=dG " ++ show maxVertex2 ++ " t " ++ show numNetEdges ++ "\n", sumString ++ "n)")
   else (beforeMain, afterMain, sumString)
 
+-- | makeBaseStringGraph creates graph code for a graph that can become a display tree
+-- so conditions already checked--leaves > 0, numSunbgle == 0, numRoots == 1 
+makeBaseStringGraph :: Int -> String -> String -> String -> Int -> Int -> (String, String, String)
+makeBaseStringGraph numLeavesOrig beforeMain afterMain sumString numLeaves numNetEdges =
+  let maxVertex2 = (2 * numLeavesOrig) - 1
+      zero0 = 0 :: Int -- quiets warning
+      necessaryFunctionStrings = beforeMain ++ fullTreeString ++ addEdgeString ++ fmapString ++ sndString ++ headString ++ tailString
+                                 ++ elemString ++ notElemString ++ getRepeatedElementsString ++ childrenParentsOfNodeString ++ lastString ++ filterString ++ displayEdgesString
+  in
+  
+  (necessaryFunctionStrings, afterMain ++ "  let t=cG True " ++ show zero0 ++ " " ++ show numLeavesOrig ++ "\n" ++ "  let n=dG " ++ show maxVertex2 ++ " t " ++ show numNetEdges ++ "\n" ++ "  let d=dE n\n", sumString ++ "  p0 \"\" d")
+  
+
 -- | makeDisplayGraphString cretges code to generate a general gaph and then output a display graph based on that graph
 -- the ouput is the display graph
 -- if input is tree then return graph string as is
 makeDisplayGraphString :: Int -> Int -> Int -> Int -> String
 makeDisplayGraphString numLeaves numSingle numRoots numNetEdges =
   if numNetEdges == 0 then makeProgramStringGraph numLeaves numSingle numRoots numNetEdges
-  else makeProgramStringGraph numLeaves numSingle numRoots numNetEdges
+  else 
+    let (outProgram, middleString, sumString) = makeBaseStringGraph numLeaves programStartStringGraph mainStartString "" numLeaves numNetEdges 
+    in 
+    outProgram  ++ middleString ++ sumString
+
+{-
+Resolve general graph to display tree
+(Assuming here can be ie 1 root, leaves >4, net edges > 1, no isolated nodes etc)
+
+0) Get node list from edge list (don't care about root--only once there for sure
+  so can just get all n odes that are terminations of edges
+1) get indegree > 1 nodes
+2) take first netNode
+3) get edges and nodes that will be effected
+4) delete edges from list that need to be
+5) add new edges to list that need to be create
+6) since only dealing with edges no need to update nodes
+7) recurse till no net nodes
+-}
+
+{- -- | Functions that are needed
+  need 
+    n = list of edges from previous code
+    gM = fmapString 
+    iM = sndString  
+    a5 = headString
+    a6 = tailString
+    eS = elemString
+    nE = notElementString
+    eR = getRepeatedElementsString
+    cN = childrenParentsOfNode
+    a3 = lastString
+    g2 = filterString
+    dE = displayEdgesString
+-}
+
+{- general flow
+-- get list of nodes that terminate an edge
+--  fmap snd [(u,v)]
+"let v=gM iM n\n"
+
+--for each member of list, is it repeated--ie found in tail
+-- return list of repeated elements
+
+"let r=rE v\n"
+
+-- if r is empty then return current node list for final print and termination
+"if null r then p0 \"\" n\n"
+
+-- else resolve (arbitrarily first since only need cost of doing one resolution really) first vertex in list
+"else "
+  vertex = head r
+"let h=a5 r\n"
+
+-- get children and parents of network node from list of edges
+
+-- call with empty lists for child and parent
+childrenParentsOfNode :: Int -> [(Int,Int)] -> [Int] -> [Int] -> ([Int], [Int])
+childrenParentsOfNode node edgeList childList parentList =
+  if null edgeList then (childList, parentList)
+  else 
+    let (e,u) = head edgeList
+        if node == e then childrenParentsOfNode node (tail edgeList) (u:childList) parentList
+        else if node == u then childrenParentsOfNode node (tail edgeList) childList (e:parentList)
+        else childrenParentsOfNode node (tail edgeList) childList parentList
+
+"let (c,p)=cN h n [] []\n"
+
+-- get grandparents of network edge (need for new edges)
+"let (_,pL)=cN (a5 p) n [] []\n"
+"    (_,pR)=cn (a3 p) n [] []\n"
+--"    gL=a5 pL\n"
+"    gR=a5 pR\n"
+
+-- get left and right siblings of net node (h)
+--"    (cL, _)=cN (a5 p) n [] []\n"
+"    (cR, _)=cN (a3 p) n [] []\n"
+--"    sL=a5 $ g2 (/=h) cL\n"
+"    sR=a5 $ g2 (/=h) cR\n"
+
+
+-- get list of edges to delete
+  -- connecting child of network node (h) to "left" side
+  -- net node to child of net node
+  -- parent left to net node
+  -- parent right to net node
+  -- grand parent right to parent right
+  -- parent right to sibling right
+"let d=[(h,a5 c),(a5 p, h),(a3 p, h),(gR,a3 p),(a3 p,sR)]\n"
+
+-- get edges to add
+"    a=[(a5 p, a5 c),(gR, sR)]\n"
+
+-- filter out nodes to delete and add new ones
+--  displayNodes = filter (`notElem` d) n
+"   w=(gM(`nE` d)h)++a \n"
+
+
+-- print edge set and terminate
+
+"   p0 "" d\n"
+
+
+-- wrap all inside of a recursive function
+displayEdges :: [(Int, Int)] -> [(Int, Int)] 
+displayEdges n =
+  if null n then []
+  else 
+      -- get node list
+      "let v=gM iM n\n"
+      -- get repeated node list
+      "    r=rE v\n"
+      "in\n"
+      -- if no repeated nodes then return current list
+      "if null r then n\n"
+      -- else resolve first net (repeated) node by removing 5 edges and adding 2 new
+      "else\n"
+      "    let h=a5 r\n"
+      -- get children and parents of net node
+      "        (c,p)=cN h n [] []\n"
+      -- get left and right parent and right grandparent (since adding net child to left parent of net node) 
+      --       of network edge (need for new edges)
+      "        (_,pL)=cN (a5 p) n [] []\n"
+      "        (_,pR)=cn (a3 p) n [] []\n"
+      "        gR=a5 pR\n"
+      -- get right sibling of net node (h)
+      "       (cR, _)=cN (a3 p) n [] []\n"
+      "       sR=a5 $ g2 (/=h) cR\n"
+      -- get list of edges to delete
+      -- connecting child of network node (h) to "left" side
+      -- net node to child of net node
+      -- parent left to net node
+      -- parent right to net node
+      -- grand parent right to parent right
+      -- parent right to sibling right
+      "       d=[(h,a5 c),(a5 p, h),(a3 p, h),(gR,a3 p),(a3 p,sR)]\n"
+      -- get edges to add
+      "       a=[(a5 p, a5 c),(gR, sR)]\n"
+      -- filter out nodes to delete and add new ones and return
+      "       w=(gM(`nE` d)h)++a \n"
+      "    in displayEdges w\n"
+-}

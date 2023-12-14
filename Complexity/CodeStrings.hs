@@ -164,6 +164,68 @@ makeMatrixString="\
 \  else [(r c n 0)++[0]]\n"
 -}
 
+-- is the first arg element of second (list)
+-- eS :: a -> [a] -> Bool
+elemString :: String
+elemString="\
+\eS a b\n\
+\   | null b = False\n\
+\   | a==a5 b = True\n\
+\   | otherwise=eS a (a6 b)\n" 
+
+-- is the first arg not an element of second (list)
+-- eS :: a -> [a] -> Bool
+notElemString :: String
+notElemString="\
+\nE a b\n\
+\   | null b = True\n\
+\   | a==a5 b = False\n\
+\   | otherwise=nE a (a6 b)\n" 
+
+-- getRepeatedElements in list
+getRepeatedElementsString :: String
+getRepeatedElementsString="\
+\rE l@(x:y)\n\
+\   | null l=[]\n\
+\   | null y=[]\n\
+\   | eS x y=x:(rE y)\n\
+\   | otherwise=rE y\n"
+
+-- childrenParentsOfNode call with 2 null lists
+-- childrenParentsOfNodeString :: Int -> [(Int,Int)] -> [(Int,Int)] -> [(Int,Int)] -> ([(Int,Int)], [(Int,Int)])
+childrenParentsOfNodeString :: String
+childrenParentsOfNodeString="\
+\cN n l c p=\n\
+\   if null l then (c,p)\n\
+\   else\n\
+\      let (e,u)=a5 l\n\
+\      in\n\
+\      if n==e then cN n (a6 l) (u:c) p\n\
+\      else if n==u then cN n (a6 l) c (e:p)\n\
+\      else cN n (a6 l) c p\n"
+
+-- get display edges from full input edge list (n)
+-- not checking for null list
+displayEdgesString :: String
+displayEdgesString="\
+\dE n=\n\
+\  let v=gM iM n\n\
+\      r=rE v\n\
+\      in\n\
+\      if null r then n\n\
+\      else\n\
+\          let h=a5 r\n\
+\              (c,p)=cN h n [] []\n\
+\              (_,pL)=cN (a5 p) n [] []\n\
+\              (_,pR)=cN (a3 p) n [] []\n\
+\              gR=a5 pR\n\
+\              (cR, _)=cN (a3 p) n [] []\n\
+\              sR=a5 $ g2 (/=h) cR\n\
+\              d=[(h,a5 c),(a5 p, h),(a3 p, h),(gR,a3 p),(a3 p,sR)]\n\
+\              a=[(a5 p, a5 c),(gR, sR)]\n\
+\              w=(g2(`nE` d)n)++a\n\
+\          in dE w\n"
+
 fmapString :: String
 fmapString="\
 \gM f l =\n\
@@ -376,11 +438,13 @@ concatString="\
 
 headString :: String
 headString="\
-\a5(a:b)=a\n"
+\a5(a:_)=a\n"
+-- \a5[]=error"BadHead"\n"
+
 
 tailString :: String
 tailString="\
-\a6(a:b)=b\n"
+\a6(_:b)=b\n"
 
 -- \a7 :: Int -> Double -> Int ->  [(Double, Double)] -> String -> [[Double]]\n\
 makeNeymanUniformMatrixString :: String
@@ -500,7 +564,7 @@ getPijString="\
 \ if f==d5 0 b then 0\n\
 \ else (e0((a!!f)*d)i 0*((b!!g)!!f)*((c!!f)!!h))+e7 a b c d(f+1)g h i\n"
 
--- \removeColumn :: Int -> [[a]] -> [[a]]\n\
+-- removeColumn :: Int -> [[a]] -> [[a]]\n\
 removeColumnString :: String
 removeColumnString="\
 \e9 a b=\n\
@@ -582,7 +646,7 @@ regularizeRString="\
 \ let b=fromIntegral $ d5 0 a\n\
 \ in gM(gM(*((((b*b)-b)/2)/(c3(+)0(gM(c3(+)0)(gM(f7(>0))a))))))a\n"
 
--- need to start witgh 0 as first arg
+-- need to start with 0 as first arg
 -- \d3 :: Int -> Int -> [a] -> [a]\n\
 takeString :: String
 takeString="\
@@ -711,9 +775,10 @@ normalizeVectorWithSignString="\
 -- \g2 :: (a -> Bool) -> [a] -> [a]\n\
 filterString :: String
 filterString="\
-\g2 a b=\n\
-\ if a(a5 b) then (a5 b):g2 a(a6 b)\n\
-\ else g2 a(a6 b)\n"
+\g2 f b\n\
+\   | null b=[]\n\
+\   | f(a5 b)=(a5 b):g2 f(a6 b)\n\
+\   | otherwise=g2 f(a6 b)\n"
 
 
 -- \g3 :: [[Double]] -> Int -> [[Double]]\n\
