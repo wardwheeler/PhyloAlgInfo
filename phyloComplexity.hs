@@ -128,8 +128,10 @@ main =
         ---- each edge is defined by 2 vertices hence, r * log |V| conversion cost multiplied by number of display trees
         ---- 2^r upper bound on number of display trees
         -- number of vertices in phylogenetic graph
-        let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
-        let graph2DisplayTreeComplexity = fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
+        -- let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
+        let graph2DisplayTreeComplexity = (graphDisplayShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * (graphDisplayShannonBits - graphShannonBits)))
+                --fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
+
         hPutStrLn stderr ("Softwired Graph -> Tree complexity: " ++ show graph2DisplayTreeComplexity)
 
         if (numSingletons graphConfig) > 0 || (numRoots graphConfig) /= 1 || (numLeaves graphConfig) < 5 then hPutStrLn stderr ("Base graph cannot be resolved to a phylogenetic display tree")
@@ -137,7 +139,7 @@ main =
             putStrLn ("Shannon bits of Graph Display program = " ++ show graphDisplayShannonBits)
             putStrLn ("Huffman bits of Graph Display program = " ++ show graphDisplayHuffmanLengthBits)
             hPutStrLn stderr ("Conditional complexity (Shannon) of single display from softwired graph: " ++ show (graphDisplayShannonBits - graphShannonBits))
-            hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show (graphDisplayShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * (graphDisplayShannonBits - graphShannonBits))))
+            hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show graph2DisplayTreeComplexity)
         else hPutStrLn stderr ("Base graph is a tree so no extra complxity to make a display tree")
 
         --calculate and output Bit TCMs for each character change model for complexity calculations
@@ -182,7 +184,7 @@ main =
         ----follow individual display trees so the number of characters (take smaller of two),
         ----but still need 'r' bits to encoding which display tree
         -- let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
-        let softWiredFactor = displayTreeSwitchingComplexity + (min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber * graph2DisplayTreeComplexity)
+        let softWiredFactor = displayTreeSwitchingComplexity + ((min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber) * (graphDisplayShannonBits - graphShannonBits))
         hPutStrLn stderr ("Softwire complexity factor: " ++ show softWiredFactor)
 
         --Output machine Complexity
