@@ -72,9 +72,9 @@ minimalTreesString ="\
 fullTreeString :: String
 fullTreeString = "\
 \cG a b d\n\
-\  | d==0=[]\n\
-\  | a=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-2)\n\
-\  | otherwise=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-1)\n"
+\   | d==0=[]\n\
+\   | a=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-2)\n\
+\   | otherwise=[(b+2,b),(b+2,b+1)]++cG False (b+2)(d-1)\n"
 
 addEdgeString :: String
 addEdgeString = "\
