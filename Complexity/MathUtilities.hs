@@ -108,7 +108,7 @@ power base exponentLocal counter
 -- | log2 is logarithm base 2 defined in terms of Taylor series for log base e
 -- 2 unused args do same as LogE for functional argument use
 log2 :: Double -> Int-> Int -> Double -> Double
-log2 value iterations blah bleh = logE value iterations 0 0.0 / logE 2.0 iterations 0 0.0
+log2 value iterations blah bleh = logBase 2.0 value -- logE value iterations 0 0.0 / logE 2.0 iterations 0 0.0
 
 -- | Taylor series for natural logorithm, value >= 0
 --- counter set to 0, curValue set to 0.0
@@ -123,6 +123,9 @@ logE value iterations counter curValue = log value
     in
     logE value iterations (counter + 1) (curValue + newValue)
     -}
+
+log10 :: Double -> Int -> Int -> Double -> Double
+log10 value iterations counter curValue = logBase 10.0 value
 
 -- | gammma function of input--Guess method
 -- from https://www.csie.ntu.edu.tw/~b89089/link/gammaFunction.pdf

@@ -134,6 +134,10 @@ main =
         let tcmListE = fmap (makeTCM logE . fst) charInfo
         mapM_ (writeTCMFile "nat" stub) tcmListE
 
+        --calculate and output log10 TCMs for each character change model for likelihood calculations
+        let tcmList10 = fmap (makeTCM log10 . fst) charInfo
+        mapM_ (writeTCMFile "dit" stub) tcmList10
+
         -- charInfoOrig so unaffected by model optimization
         let (aic, bic) = getAICBIC charInfoOrig 0 0
         putStrLn ("Akaike Information adjustment : " ++ show aic)
@@ -179,5 +183,5 @@ main =
         hPutStrLn machineHandle ("Character number complexity : " ++ show charNumComplexity)
         hClose machineHandle
 
-        hPutStrLn stderr "All done"
+        -- hPutStrLn stderr "All done"
 
