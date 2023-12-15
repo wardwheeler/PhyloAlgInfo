@@ -49,7 +49,7 @@ programStartString="module Main where\n" --import Debug.Trace\n"
 recursivePrintString :: String
 recursivePrintString="\
 \p0 a b=\n\
-\ if null b then putStr a\n\
+\ if nU b then putStr a\n\
 \ else\n\
 \ let ((c,d):e)=b\n\
 \ in p0(a++(show c++\" \"++show d++\"\\n\")) e\n"
@@ -131,7 +131,7 @@ logEString :: String
 logEString="\
 \l0 v i c w=\n\
 \ if c==i then 2*w\n\
-\ else l0 v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral $ 1+2*c)))\n"
+\ else l0 v i (c+1) (w+((p1 ((v-1)/(v+1)) (1+2*c) 0)/(fromIntegral$1+2*c)))\n"
 
 -- log2 :: Double -> Int-> Int -> Double -> Double
 -- log2 value iterations blah bleh=(logE value iterations 0 0.0)/(logE 2.0 iterations 0 0.0)
@@ -169,7 +169,7 @@ makeMatrixString="\
 elemString :: String
 elemString="\
 \eS a b\n\
-\ |null b=False\n\
+\ |nU b=False\n\
 \ |a==a5 b=True\n\
 \ |otherwise=eS a (a6 b)\n" 
 
@@ -178,7 +178,7 @@ elemString="\
 notElemString :: String
 notElemString="\
 \nE a b\n\
-\ |null b=True\n\
+\ |nU b=True\n\
 \ |a==a5 b=False\n\
 \ |otherwise=nE a (a6 b)\n" 
 
@@ -186,17 +186,17 @@ notElemString="\
 getRepeatedElementsString :: String
 getRepeatedElementsString="\
 \rE l@(x:y)\n\
-\ |null l=[]\n\
-\ |null y=[]\n\
+\ |nU l=[]\n\
+\ |nU y=[]\n\
 \ |eS x y=x:(rE y)\n\
 \ |otherwise=rE y\n"
 
--- childrenParentsOfNode call with 2 null lists
+-- childrenParentsOfNode call with 2 nU lists
 -- childrenParentsOfNodeString :: Int -> [(Int,Int)] -> [(Int,Int)] -> [(Int,Int)] -> ([(Int,Int)], [(Int,Int)])
 childrenParentsOfNodeString :: String
 childrenParentsOfNodeString="\
 \cN n l c p=\n\
-\  if null l then (c,p)\n\
+\  if nU l then (c,p)\n\
 \  else\n\
 \  let (e,u)=a5 l\n\
 \  in\n\
@@ -205,22 +205,22 @@ childrenParentsOfNodeString="\
 \  else cN n (a6 l) c p\n"
 
 -- get display edges from full input edge list (n)
--- not checking for null list
+-- not checking for nU list
 displayEdgesString :: String
 displayEdgesString="\
 \dE n=\n\
 \ let v=gM iM n\n\
 \     r=rE v\n\
 \ in\n\
-\ if null r then n\n\
+\ if nU r then n\n\
 \ else\n\
 \ let h=a5 r\n\
 \     (c,p)=cN h n [] []\n\
-\     v(_,pL)=cN (a5 p) n [] []\n\
-\     (v_,pR)=cN (a3 p) n [] []\n\
+\     (_,pL)=cN (a5 p) n [] []\n\
+\     (_,pR)=cN (a3 p) n [] []\n\
 \     gR=a5 pR\n\
 \     (cR, _)=cN (a3 p) n [] []\n\
-\     sR=a5 $ g2 (/=h) cR\n\
+\     sR=a5$g2 (/=h) cR\n\
 \     d=[(h,a5 c),(a5 p, h),(a3 p, h),(gR,a3 p),(a3 p,sR)]\n\
 \     a=[(a5 p, a5 c),(gR, sR)]\n\
 \     w=(g2(`nE` d)n)++a\n\
@@ -229,14 +229,18 @@ displayEdgesString="\
 fmapString :: String
 fmapString="\
 \gM f l=\n\
-\ if null l then []\n\
+\ if nU l then []\n\
 \ else f (a5 l):gM f (a6 l)\n"
+
+nullString :: String
+nullString="\
+\nU a=(a==[])\n"
 
 matrix2StringString :: String
 matrix2StringString="\
 \s0 m=\n\
-\ if null m then \"\\n\"\n\
-\ else (a4 $ gM (++ \" \") $ gM show $ a5 m)++\"\\n\"++s0 (a6 m)\n"
+\ if nU m then \"\\n\"\n\
+\ else (a4$gM (++ \" \")$gM show$a5 m)++\"\\n\"++s0 (a6 m)\n"
 
 neymanUniformString :: String
 neymanUniformString="\
@@ -332,7 +336,7 @@ discreteGammaString="\
 cumulativeSumString :: String
 cumulativeSumString="\
 \k2(a:c)b=\n\
-\ if null c then [b+a]\n\
+\ if nU c then [b+a]\n\
 \ else (b+a):k2 c(b+a)\n"
 
 -- \t :: Double -> Int -> Double -> Double -> Double\n\
@@ -344,7 +348,7 @@ gammaPDFString="\
 getNTilesString :: String
 getNTilesString="\
 \w0 c d g t o=\n\
-\ if null d then []\n\
+\ if nU d then []\n\
 \ else\n\
 \   let f=a5 d\n\
 \       e=a5 g\n\
@@ -399,7 +403,7 @@ getModifierListSmallString="\
 \ |v==1 && h==0=[(0,t),(1/(1-t),1-t)]\n\
 \ |otherwise=\n\
 \  let w=x0 a n 10.0 i(n*i)\n\
-\    f=r0 n(1.0/(fromIntegral n))0\n\
+\      f=r0 n(1.0/(fromIntegral n))0\n\
 \  in\n\
 \  if t==0 then a2 w f else\n\
 \  a2(0:(gM(*(1/(1-t)))w))(t:(gM(*(1-t))f))\n"
@@ -419,21 +423,21 @@ getModifierListSmallString="\
 zipString :: String
 zipString="\
 \a2(l:m)(n:o)=\n\
-\ if null m then [(l,n)]\n\
+\ if nU m then [(l,n)]\n\
 \ else (l,n):a2 m o\n"
 
 -- \a3 :: [a] -> a\n\
 lastString :: String
 lastString="\
 \a3(a:b)=\n\
-\ if null b then a\n\
+\ if nU b then a\n\
 \ else a3 b\n"
 
 -- \a4 :: [[a]] -> [a]\n\
 concatString :: String
 concatString="\
 \a4(a:b)=\n\
-\ if null b then a\n\
+\ if nU b then a\n\
 \ else a++a4 b\n"
 
 headString :: String
@@ -472,7 +476,7 @@ makeNeymanExponentialMatrixString="\
 transposeMatrixString :: String
 transposeMatrixString="\
 \b7 a=\n\
-\ if null$a5 a then []\n\
+\ if nU$a5 a then []\n\
 \ else gM a5 a:b7(gM a6 a)\n"
 
 absString :: String
@@ -486,7 +490,7 @@ absString="\
 lengthString :: String
 lengthString="\
 \d5 b a=\n\
-\ if null a then b\n\
+\ if nU a then b\n\
 \ else d5(b+1)(a6 a)\n"
 
 -- \c0 :: [[Double]] -> [[Double]]\n\
@@ -498,28 +502,28 @@ invertMatrixString="\
 zipWithString :: String
 zipWithString="\
 \e5 f a b=\n\
-\ if null a ||null b then []\n\
+\ if nU a ||nU b then []\n\
 \ else f(a5 a)(a5 b):e5 f(a6 a)(a6 b)\n"
 
 -- \b2 :: Int -> [Double] -> [[Double]]\n\
 split2MatrixString :: String
 split2MatrixString="\
 \b2 a b=\n\
-\ if null b then []\n\
+\ if nU b then []\n\
 \ else (d3 0 a b):b2 a(d4 0 a b)\n"
 
 -- \c4 :: [[Double]] -> [[Double]] -> [[Double]]\n\
 addMatricesString :: String
 addMatricesString="\
 \c4 a b=\n\
-\ if null a && null b then []\n\
+\ if nU a && nU b then []\n\
 \ else (e5(+)(a5 a)(a5 b)):c4(a6 a)(a6 b)\n"
 
 -- \c3 :: (a -> b -> a) -> a -> [b] -> a\n\
 foldlString :: String
 foldlString="\
 \c3 f a b=\n\
-\ if null b then a\n\
+\ if nU b then a\n\
 \ else c3 f(f a$a5 b)(a6 b)\n"
 
 -- \c2 :: [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> (Double -> Int -> Double -> Double) -> (Double, Double) -> [Double]\n\
@@ -568,7 +572,7 @@ getPijString="\
 removeColumnString :: String
 removeColumnString="\
 \e9 a b=\n\
-\ if null b then []\n\
+\ if nU b then []\n\
 \ else\n\
 \ let c=a5 b\n\
 \ in ((d3 0(a-1)c)++(d4 0 a c)):(e9 a$a6 b)\n"
@@ -577,21 +581,21 @@ removeColumnString="\
 removeRowAndColumnString :: String
 removeRowAndColumnString="\
 \f0 a b c=\n\
-\ if null c then []\n\
+\ if nU c then []\n\
 \ else e9 b ((d3 0 (a -1) c) ++ (d4 0 a c))\n"
 
 -- \d8 :: Double -> [[Double]] -> [[Double]]\n\
 matrixMultiplyScalarString :: String
 matrixMultiplyScalarString="\
 \d8 a b=\n\
-\ if null b then []\n\
+\ if nU b then []\n\
 \ else gM(a *)(a5 b):d8 a(a6 b)\n"
 
 -- \d7 :: [[Double]] -> Double\n\
 determinantNumericalString :: String
 determinantNumericalString="\
 \d7 e=\n\
-\ if (d5 0 $ a5 e)==2 then\n\
+\ if (d5 0$a5 e)==2 then\n\
 \ let [a,b]=a5 e\n\
 \     [c,d]=a3 e\n\
 \ in a*d-b*c\n\
@@ -629,12 +633,12 @@ getExponentialPdfString="\
 takeWhileString :: String
 takeWhileString="\
 \f7 f a\n\
-\ |null a=[]\n\
-\ |(not $f(a5 a))=[]\n\
+\ |nU a=[]\n\
+\ |(not$f(a5 a))=[]\n\
 \ |otherwise=(a5 a):(f7 f(a6 a))\n"
 {-
 \f7 f a=\n\
-\ if null a then []\n\
+\ if nU a then []\n\
 \ else if (not$f(a5 a)) then []\n\
 \ else (a5 a):(f7 f(a6 a))\n"
 -}
@@ -643,7 +647,7 @@ takeWhileString="\
 regularizeRString :: String
 regularizeRString="\
 \b1 a=\n\
-\ let b=fromIntegral $ d5 0 a\n\
+\ let b=fromIntegral$d5 0 a\n\
 \ in gM(gM(*((((b*b)-b)/2)/(c3(+)0(gM(c3(+)0)(gM(f7(>0))a))))))a\n"
 
 -- need to start with 0 as first arg
@@ -651,12 +655,12 @@ regularizeRString="\
 takeString :: String
 takeString="\
 \d3 m n a\n\
-\ |null a=[]\n\
+\ |nU a=[]\n\
 \ |m==n=[]\n\
 \ |otherwise=a5 a:d3(m+1)n(a6 a)\n"
 {-
 \d3 m n a=\n\
-\ if null a then []\n\
+\ if nU a then []\n\
 \ else if m==n then []\n\
 \ else a5 a:d3(m+1)n(a6 a)\n"
 -}
@@ -666,12 +670,12 @@ takeString="\
 dropString :: String
 dropString="\
 \d4 m n a\n\
-\ |null a=[]\n\
+\ |nU a=[]\n\
 \ |m==n=a\n\
 \ |otherwise=d4(m+1)n(a6 a)\n"
 {-
 \d4 m n a=\n\
-\ if null a then []\n\
+\ if nU a then []\n\
 \ else if m==n then a\n\
 \ else d4(m+1)n(a6 a)\n"
 -}
@@ -681,7 +685,7 @@ dropString="\
 reverseString :: String
 reverseString="\
 \f8 a=\n\
-\ if null a then []\n\
+\ if nU a then []\n\
 \ else\n\
 \ a3 a:f8(f6 a)\n"
 -}
@@ -736,13 +740,13 @@ sqrtString="\
 maximumString :: String
 maximumString="\
 \g0 a c\n\
-\ |null a=c\n\
+\ |nU a=c\n\
 \ |c>a5 a=g0(a6 a)c\n\
 \ |otherwise=g0(a6 a)(a5 a)\n"
 
 {-
 \g0 a c=\n\
-\ if null a then c\n\
+\ if nU a then c\n\
 \ else if c>a5 a then g0(a6 a)c\n\
 \ else g0(a6 a)(a5 a)\n"
 -}
@@ -752,13 +756,13 @@ maximumString="\
 minimumString :: String
 minimumString="\
 \g1 a c\n\
-\ |null a=c\n\
+\ |nU a=c\n\
 \ |c<a5 a=g1(a6 a)c\n\
 \ |otherwise=g1(a6 a)(a5 a)\n"
 
 
 {-
-\ if null a then c\n\
+\ if nU a then c\n\
 \ else if c<(a5 a) then g1(a6 a)c\n\
 \ else g1(a6 a)(a5 a)\n"
 -}
@@ -776,7 +780,7 @@ normalizeVectorWithSignString="\
 filterString :: String
 filterString="\
 \g2 f b\n\
-\ |null b=[]\n\
+\ |nU b=[]\n\
 \ |f(a5 b)=(a5 b):g2 f(a6 b)\n\
 \ |otherwise=g2 f(a6 b)\n"
 
@@ -815,7 +819,7 @@ splitAtString="\
 foldrString :: String
 foldrString="\
 \h0 f b a=\n\
-\ if null a then b\n\
+\ if nU a then b\n\
 \ else h0 f (f(a5 a)b) (a6 a)\n"
 
 
@@ -837,12 +841,12 @@ qrFactorizationString="\
 getDiagValuesString :: String
 getDiagValuesString="\
 \h5 i c\n\
-\ |null i=error \"\"\n\
+\ |nU i=error \"\"\n\
 \ |c==d5 0 i=[]\n\
 \ |otherwise=((i!!c)!!c):h5 i(c+1)\n"
 {-
 \h5 i c=\n\
-\ if null i then error \"\"\n\
+\ if nU i then error \"\"\n\
 \ else if c==d5 0 i then []\n\
 \ else ((i!!c)!!c):h5 i (c+1)\n"
 -}
@@ -882,7 +886,7 @@ getHouseholderString="\
 padOutMinorString :: String
 padOutMinorString="\
 \h9 a d=\n\
-\ if null a then i6 d 1 --identity matrix\n\
+\ if nU a then i6 d 1 --identity matrix\n\
 \ else\n\
 \  let m=d5 0 a\n\
 \  in\n\
@@ -916,7 +920,7 @@ makeEVectorString="\
 subtractMatricesString :: String
 subtractMatricesString="\
 \i4 a b=\n\
-\ if null a && null b then []\n\
+\ if nU a && nU b then []\n\
 \ else e5(-)(a5 a)(a5 b):i4(a6 a)(a6 b)\n"
 
 -- \i5 :: [[Double]] -> Int -> [[Double]]\n\
@@ -991,7 +995,7 @@ makeGTRLogMatrixString="\
 makeGTRLogMatrix4StateString :: String
 makeGTRLogMatrix4StateString="\
 \j1 l m p i o q f=\n\
-\ let y=b2 4 $ c5 (c3 c4(r0 4(r0 4 0.0 0)0)(gM(m o q p i)f)) 0 0\n\
+\ let y=b2 4$c5 (c3 c4(r0 4(r0 4 0.0 0)0)(gM(m o q p i)f)) 0 0\n\
 \ in b2 4$gM(* (-1))$c7 l(c6 y y 0)4 \"T\" 0 0 i\n"
 
 -- \c7 :: (Double -> Int-> Int -> Double -> Double) -> [[Double]] -> Int -> String -> Int -> Int -> Int -> [Double]\n\

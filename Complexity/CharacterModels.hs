@@ -192,8 +192,8 @@ getModelList charModelList areModifiers areBothDistributions =
       in
       modelDependencies ++ getModelList (tail charModelList) areModifiers areBothDistributions
 
--- | getDependencies takes a model, distibution, and rate modifiers klist and retuirns dependency list
--- only GTR for sitribution because others are already baked in--no numerical integration
+-- | getDependencies takes a model, distribution, and rate modifiers klist and returns dependency list
+-- only GTR for distribution because others are already baked in--no numerical integration
 getDependencies :: MarkovModel -> Distribution -> [Modifier] -> [String]
 getDependencies modelType distribution modifierList =
   if modelType == GTR then getModelDep modelType distribution ++ getDistDep distribution ++ getModList modifierList
@@ -264,7 +264,7 @@ makeProgramStringCharacters :: [CharacterModel] -> String
 makeProgramStringCharacters inModelList =
     let areRateModifiers = scanModifiers inModelList
         areBothDistributions = scanDistributions inModelList False False
-        modelList = nub $ getModelList inModelList areRateModifiers areBothDistributions
+        modelList = nub $ nullString : getModelList inModelList areRateModifiers areBothDistributions
         firstPart = makeDependenciesString modelList
         modelString = makeCharacterModelsString inModelList 0 areRateModifiers areBothDistributions
     in
