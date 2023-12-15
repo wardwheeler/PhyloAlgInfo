@@ -54,7 +54,7 @@ module Complexity.Graphs
   )  where
 
 import Complexity.CodeStrings
-import Debug.Trace
+--import Debug.Trace
 
 mainStartString :: String
 mainStartString = "main=do\n"
