@@ -110,9 +110,10 @@ makeBaseStringGraph numLeavesOrig beforeMain afterMain sumString numLeaves numNe
       zero0 = 0 :: Int -- quiets warning
       necessaryFunctionStrings = beforeMain ++ fullTreeString ++ addEdgeString ++ fmapString ++ sndString ++ headString ++ tailString
                                  ++ elemString ++ notElemString ++ getRepeatedElementsString ++ childrenParentsOfNodeString ++ lastString ++ filterString ++ displayEdgesString ++ nullString
+      bitList = replicate numNetEdges (0 :: Int)
   in
   
-  (necessaryFunctionStrings, afterMain ++ "  let t=cG True " ++ show zero0 ++ " " ++ show numLeavesOrig ++ "\n" ++ "  let n=dG " ++ show maxVertex2 ++ " t " ++ show numNetEdges ++ "\n" ++ "  let d=dE n\n", sumString ++ "  p0 \"\" d")
+  (necessaryFunctionStrings, afterMain ++ "  let t=cG True " ++ show zero0 ++ " " ++ show numLeavesOrig ++ "\n" ++ "  let n=dG " ++ show maxVertex2 ++ " t " ++ show numNetEdges ++ "\n" ++ "  let b=" ++ (show bitList) ++ "\n"  ++ "  let d=dE b n\n", sumString ++ "  p0 \"\" d")
   
 
 -- | makeDisplayGraphString cretges code to generate a general gaph and then output a display graph based on that graph

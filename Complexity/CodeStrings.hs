@@ -206,9 +206,11 @@ childrenParentsOfNodeString="\
 
 -- get display edges from full input edge list (n)
 -- not checking for nU list
+-- first arg is 0/1 bit list 1 per net node
+-- uses binary strem fo detemine left right
 displayEdgesString :: String
 displayEdgesString="\
-\dE n=\n\
+\dE b n=\n\
 \ let v=gM iM n\n\
 \     r=rE v\n\
 \ in\n\
@@ -216,15 +218,16 @@ displayEdgesString="\
 \ else\n\
 \ let h=a5 r\n\
 \     (c,p)=cN h n [] []\n\
-\     (_,pL)=cN (a5 p) n [] []\n\
-\     (_,pR)=cN (a3 p) n [] []\n\
+\     (_,pL')=cN (a5 p) n [] []\n\
+\     (_,pR')=cN (a3 p) n [] []\n\
+\     (pL, pR)=if(a5 b)==0 then (pL',pR') else (pR',pL')\n\
 \     gR=a5 pR\n\
 \     (cR, _)=cN (a3 p) n [] []\n\
 \     sR=a5$g2 (/=h) cR\n\
 \     d=[(h,a5 c),(a5 p, h),(a3 p, h),(gR,a3 p),(a3 p,sR)]\n\
 \     a=[(a5 p, a5 c),(gR, sR)]\n\
 \     w=(g2(`nE` d)n)++a\n\
-\ in dE w\n"
+\ in dE (a6 b) w\n"
 
 fmapString :: String
 fmapString="\
