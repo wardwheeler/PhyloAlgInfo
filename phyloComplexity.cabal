@@ -29,7 +29,9 @@ executable phyloComplexity
                 "-with-rtsopts=-A64m -AL128M -H1024m -n4m"
 
   build-depends:  base >= 4.10
+                , bytestring
                 , containers >=0.6
+                , encode-string
                 , fingertree
                 , process
                 , parallel
@@ -39,6 +41,7 @@ executable phyloComplexity
                 , fgl
                 , text
                 , parallel
+                , zlib
                 
 
   default-language: Haskell2010

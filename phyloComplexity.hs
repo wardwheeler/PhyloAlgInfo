@@ -97,14 +97,15 @@ main =
         --Calculate complexity of Graph Component
         -- based on number of edges |E| * 2 (for vertex specification) * log |V| (for number of bits required to specify largest vertex index).
         let graphProgram = makeProgramStringGraph (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
-        let (graphShannonBits, graphHuffmanLengthBits, graphHuffmanBitRep) = getInformationContent graphProgram
+        let (graphShannonBits, graphHuffmanLengthBits, graphHuffmanBitRep, gzipGraph) = getInformationContent graphProgram
 
         let graphDisplayProgram = makeDisplayGraphString (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
-        let (graphDisplayShannonBits, graphDisplayHuffmanLengthBits, graphDisplayHuffmanBitRep) = getInformationContent graphDisplayProgram
+        let (graphDisplayShannonBits, graphDisplayHuffmanLengthBits, _, gzipDisplay) = getInformationContent graphDisplayProgram
 
         --Output complexity of Graph Component
         putStrLn ("Shannon bits of Graph program = " ++ show graphShannonBits)
         putStrLn ("Huffman bits of Graph program = " ++ show graphHuffmanLengthBits)
+        putStrLn ("Compressed bits of Graph program = " ++ show gzipGraph)
 
         graphHuffmanBinaryHandle <- openFile (stub ++ ".graph.huffman") WriteMode
         graphHaskellHandle <- openFile (stub ++ ".graph.hs") WriteMode
@@ -130,10 +131,12 @@ main =
         -- number of vertices in phylogenetic graph
 
         -- Marginal graph display bits is complexity of resolved display tree code - base graph complexity
-        let marginalDisplayComplexity = graphDisplayShannonBits - graphShannonBits 
+        -- now based on compression
+        --let marginalDisplayComplexity = graphDisplayShannonBits - graphShannonBits 
+        let marginalDisplayComplexity = gzipDisplay - gzipGraph 
 
         -- let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
-        let graph2DisplayTreeComplexity = graphShannonBits + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * marginalDisplayComplexity)
+        let graph2DisplayTreeComplexity = gzipGraph + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * marginalDisplayComplexity)
                 --fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
 
         hPutStrLn stderr ("Softwired Graph -> Display tree complexity: " ++ show graph2DisplayTreeComplexity)
@@ -142,8 +145,9 @@ main =
         else if (numNetworkEdges graphConfig) > 0 then do
             putStrLn ("Shannon bits of Graph Display program = " ++ show graphDisplayShannonBits)
             putStrLn ("Huffman bits of Graph Display program = " ++ show graphDisplayHuffmanLengthBits)
-            hPutStrLn stderr ("Conditional complexity (Shannon) of single display from softwired graph: " ++ show marginalDisplayComplexity)
-            hPutStrLn stderr ("Total complexity (Shannon) softwired graph: " ++ show graph2DisplayTreeComplexity)
+            putStrLn ("Compressed bits of Graph Display program = " ++ show gzipDisplay)
+            hPutStrLn stderr ("Conditional complexity of single display from softwired graph: " ++ show marginalDisplayComplexity)
+            hPutStrLn stderr ("Total complexity softwired graph: " ++ show graph2DisplayTreeComplexity)
         else hPutStrLn stderr ("Base graph is a tree so no extra complxity to make a display tree")
 
         --calculate and output Bit TCMs for each character change model for complexity calculations
@@ -168,12 +172,14 @@ main =
 
         -- if want to show huffman representation otherwise don't need.
         -- let (characterShannonBits, characterHuffmanLengthBits, characterHuffmanBitRep) = getInformationContent characterProgram
-        let (characterShannonBits, characterHuffmanLengthBits, _) = getInformationContent characterProgram
+        let (characterShannonBits, characterHuffmanLengthBits, _, characterGZIP) = getInformationContent characterProgram
         writeFile (stub ++ ".blockModels.hs") characterProgram
 
-        let characterModelComplexity = characterShannonBits
+        let characterModelComplexity = characterGZIP
         hPutStrLn stderr ("Shannon bits of character program: " ++ show characterShannonBits)
         hPutStrLn stderr ("Huffman bits of character program: " ++ show characterHuffmanLengthBits)
+        hPutStrLn stderr ("Compressed bits of character program: " ++ show characterGZIP)
+
         --Calaculate Complexity of model switching over Character Components
         --Need to read from MachineModel
         --Need to add the log number of characters for each
@@ -188,11 +194,11 @@ main =
         ----follow individual display trees so the number of characters (take smaller of two),
         ----but still need 'r' bits to encoding which display tree
         -- let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
-        let softWiredFactor = displayTreeSwitchingComplexity + ((min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber) * marginalDisplayComplexity)
+        let softWiredFactor = gzipGraph + displayTreeSwitchingComplexity + ((min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber) * marginalDisplayComplexity)
         hPutStrLn stderr ("Softwire complexity factor: " ++ show softWiredFactor)
 
         --Output machine Complexity
-        let machineComplexity = graphShannonBits + softWiredFactor + characterModelComplexity + modelSpecificationComplexity + charNumComplexity
+        let machineComplexity = gzipGraph + softWiredFactor + characterModelComplexity + modelSpecificationComplexity + charNumComplexity
         hPutStrLn stderr ("Machine complexity : " ++ show machineComplexity)
         machineHandle <- openFile (stub ++ ".complexity") WriteMode
         hPutStrLn machineHandle ("Machine complexity : " ++ show machineComplexity)
