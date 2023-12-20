@@ -67,7 +67,7 @@ getTotalBits currentSum occurenceList bitList =
       getTotalBits (currentSum + (occurrences * bitCoding)) (tail occurenceList) (tail bitList)
 
 -- | getShannon gets Shannon entropy bits by freqency for string (list of symbols)
-getShannon :: String -> Double
+getShannon :: String -> Int
 getShannon inCharList =
   if null inCharList then error "Input list to getShannon is empty"
   else
@@ -79,7 +79,7 @@ getShannon inCharList =
         totalBits = getTotalBits 0.0 symbolOccurences symbolBits --This and above line could be a single function
     in
     --trace ("There were " ++ show (length symbolList) ++ " unique symbols in program.")
-    abs totalBits
+    ceiling $ abs totalBits
 
 -- | getHuffCode takes the code map list and rturns the binary code
 getHuffCode :: Code Char -> Char -> [Bit]
@@ -122,9 +122,9 @@ getInformationContent programString =
     let (huffBits, huffBinary) =  getHuffman programString
         compressedStream = GZ.compressWith GZ.defaultCompressParams {GZ.compressLevel = GZ.bestCompression} (E.convertString programString)
         shannonBits = getShannon programString
-        compressedBits = min shannonBits (fromIntegral $ 8 * (length $ B.unpack compressedStream))
+        compressedBits = min shannonBits (8 * (length $ B.unpack compressedStream))
     in
-    (shannonBits, huffBits, huffBinary, compressedBits)
+    (fromIntegral shannonBits, huffBits, huffBinary, fromIntegral compressedBits)
 
 -- | split2Matrix takes alist and splits after n elements to make it a list of lists
 split2Matrix :: Int -> [Double] -> [[Double]]
