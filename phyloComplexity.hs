@@ -148,7 +148,7 @@ main =
             putStrLn ("Compressed bits of Graph Display program = " ++ show gzipDisplay)
             hPutStrLn stderr ("Conditional complexity of single display from softwired graph: " ++ show marginalDisplayComplexity)
             hPutStrLn stderr ("Total complexity softwired graph: " ++ show graph2DisplayTreeComplexity)
-        else hPutStrLn stderr ("Base graph is a tree so no extra complxity to make a display tree")
+        else hPutStrLn stderr ("Base graph is a tree so no extra complexity to make a display tree")
 
         --calculate and output Bit TCMs for each character change model for complexity calculations
         let tcmListBit = fmap (makeTCM log2 . fst) charInfo
@@ -183,11 +183,11 @@ main =
         --Calaculate Complexity of model switching over Character Components
         --Need to read from MachineModel
         --Need to add the log number of characters for each
-        let modelSpecificationComplexity = fromIntegral (length charInfo) * logBase 2.0 (fromIntegral $ length charInfo)
+        let modelSpecificationComplexity = logBase 2.0 (fromIntegral $ length charInfo)
         hPutStrLn stderr ("Character model switching complexity: " ++ show modelSpecificationComplexity)
-        let charNumComplexity = sum $ fmap (logBase 2.0 . fromIntegral) (snd <$> characterModelList machineConfig)
-        let characterNumber = fromIntegral $ sum $ snd <$> characterModelList machineConfig
-        hPutStrLn stderr ("Character number : " ++ show characterNumber)
+        let charNumComplexity = fromIntegral (sum $ fmap ceiling (fmap (logBase 2.0 . fromIntegral) (snd <$> characterModelList machineConfig) :: [Double]) :: Int) 
+        let characterNumber = fromIntegral (sum $ snd <$> characterModelList machineConfig :: Int)
+        --hPutStrLn stderr ("Character number : " ++ show characterNumber)
         hPutStrLn stderr ("Character number complexity: " ++ show charNumComplexity)
 
         -- display tree could be at most 2^r but is limited by the number of 'blocks' or characters that could
@@ -198,10 +198,12 @@ main =
         hPutStrLn stderr ("Softwire complexity factor: " ++ show softWiredFactor)
 
         --Output machine Complexity
-        let machineComplexity = gzipGraph + softWiredFactor + characterModelComplexity + modelSpecificationComplexity + charNumComplexity
-        hPutStrLn stderr ("Machine complexity : " ++ show machineComplexity)
+        let machineComplexity = characterModelComplexity + modelSpecificationComplexity + charNumComplexity
+        hPutStrLn stderr ("Machine complexity (without gaph): " ++ show machineComplexity)
+        hPutStrLn stderr ("Machine complexity with gaph: " ++ show (machineComplexity + softWiredFactor))
         machineHandle <- openFile (stub ++ ".complexity") WriteMode
-        hPutStrLn machineHandle ("Machine complexity : " ++ show machineComplexity)
+        hPutStrLn machineHandle ("Machine complexity (without gaph): " ++ show machineComplexity)
+        hPutStrLn machineHandle ("Machine complexity with gaph: " ++ show (machineComplexity + softWiredFactor))
         hPutStrLn machineHandle ("Graph complexity : " ++ show graphShannonBits)
         hPutStrLn machineHandle ("Softwire complexity factor: " ++ show softWiredFactor)
         hPutStrLn machineHandle ("Model specification complexity : " ++ show modelSpecificationComplexity)
