@@ -1,6 +1,6 @@
 {- |
 Module      :  Parser for Kolmogorov (algorithmic) complexity 'Machine' definition
-Description :  Program reads input file with description and parameters for
+Description :  Program readMaybes input file with description and parameters for
                machine containing models for graphs and character models
 Copyright   :  (c) 2018-2023 Ward C. Wheeler, Division of Invertebrate Zoology, AMNH. All rights reserved.
 License     :
@@ -50,6 +50,7 @@ import           Data.List
 import           Data.Maybe
 import           Data.String.Utils
 import qualified Data.Text.Lazy                    as T
+import           Text.Read
 import           Debug.Trace
 
 
@@ -111,14 +112,17 @@ getMachineElements inStringList =
     if fmap toLower (head first) == "graph" then
       ("graph", last first, 1) : getMachineElements (tail inStringList)
     else if fmap toLower (head first) == "block" then
-      ("block",  first !! 1, read (first !! 2 ) :: Int) : getMachineElements (tail inStringList)
-    else error ("Unrecognized machine element " ++ head first)
+      let midVal = readMaybe (first !! 2 ) :: Maybe Int
+      in 
+      if isNothing midVal then errorWithoutStackTrace ("Error parsine machine element: " <> (first !! 2 ))
+      else ("block",  first !! 1, (fromJust midVal)) : getMachineElements (tail inStringList)
+    else errorWithoutStackTrace ("Unrecognized machine element " ++ head first)
 
 
 -- | getGraphName extracts graph from elements list
 getGraphName :: [(String, String, Int)] -> String
 getGraphName elementList =
-  if null elementList then error "Graph specification not found"
+  if null elementList then errorWithoutStackTrace "Graph specification not found"
   else
     let (fType, fName, _) = head elementList
     in
@@ -139,7 +143,7 @@ getBlockName elementList =
 -- | parseMachine takes machine string and returns names in order for parsing of other elements
 parseMachine :: String -> (String, String, [(String, Int)])
 parseMachine inString =
-  if null inString then error "No machine specification in input file"
+  if null inString then errorWithoutStackTrace "No machine specification in input file"
   else
     let name = last $ words $ takeWhile (/= '{') inString
         guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
@@ -158,13 +162,13 @@ getValue :: String -> [String] -> String
 getValue findHere guts =
   if null guts then
     if findHere == "representation" then "No representation input"
-    else error ("No parameter " ++ findHere ++ " specified in graph")
+    else errorWithoutStackTrace ("No parameter " ++ findHere ++ " specified in graph")
   else
     let firstGut = toLower <$> head guts
         parts = divideWith ':' firstGut
     in
-    if length parts /=2 then error ("Incorrect number of parameters " ++ show (length parts) ++ " in " ++ findHere ++ " in graphModel\n Should be 1.")
-    else if findHere == head parts then last parts -- (read (last parts) :: Int)
+    if length parts /=2 then errorWithoutStackTrace ("Incorrect number of parameters " ++ show (length parts) ++ " in " ++ findHere ++ " in graphModel\n Should be 1.")
+    else if findHere == head parts then last parts -- (readMaybe (last parts) :: Int)
     else getValue findHere (tail guts)
 
 -- | parseGraph takes graph string and parses
@@ -181,20 +185,24 @@ parseGraph graphNameLocal inStringList=
     -- values specified
     if graphNameLocal == gName then
       if graphRepresentation == "No representation input" then
-        let nLeaves = read (getValue "leaves" pieces) :: Int
-            nRoots = read (getValue "roots" pieces) :: Int
-            nSingletons = read (getValue "singletons" pieces) :: Int
-            nNetworkEdges = read (getValue "networkedges" pieces) :: Int
-            theGraphModel = GraphModel {graphName = gName, numLeaves = nLeaves, numRoots = nRoots, numSingletons = nSingletons, numNetworkEdges = nNetworkEdges}
+        let nLeaves = readMaybe (getValue "leaves" pieces) :: Maybe Int
+            nRoots = readMaybe (getValue "roots" pieces) :: Maybe Int
+            nSingletons = readMaybe (getValue "singletons" pieces) :: Maybe Int
+            nNetworkEdges = readMaybe (getValue "networkedges" pieces) :: Maybe Int
+            theGraphModel = GraphModel {graphName = gName, numLeaves = fromJust nLeaves, numRoots = fromJust nRoots, numSingletons = fromJust nSingletons, numNetworkEdges = fromJust nNetworkEdges}
         in
-        theGraphModel : parseGraph graphNameLocal (tail inStringList)
+        if isNothing nLeaves then errorWithoutStackTrace ("Error specifying number leaves: " <> (getValue "leaves" pieces))
+        else if isNothing nRoots then errorWithoutStackTrace ("Error specifying number roots: " <> (getValue "rootPairList" pieces))
+        else if isNothing nSingletons then errorWithoutStackTrace ("Error specifying number singleton leaves: " <> (getValue "singletons" pieces))
+        else if isNothing nNetworkEdges then errorWithoutStackTrace ("Error specifying number network edges: " <> (getValue "networkedges" pieces))
+        else theGraphModel : parseGraph graphNameLocal (tail inStringList)
       -- get values from graph representation
       -- assumes (for now) Forest Enhanced Newick format
       else
         let graphString = reverse $ takeWhile (/=':') $ drop 1 $ reverse guts
         in
         if (head graphString /= '"') || (last graphString /= '"') then
-          error ("Graph representation must be in double quotes: " ++ graphString)
+          errorWithoutStackTrace ("Graph representation must be in double quotes: " ++ graphString)
         else -- only processes first graph if more than one
           let fglGraph = head $ forestEnhancedNewickStringList2FGLList (T.tail $ T.init $ T.pack graphString)
               (nLeaves, nRoots, nSingletons, nNetworkEdges) = getGraphAspects fglGraph
@@ -239,7 +247,7 @@ getBlock name pairList =
 -- | getAlphabet take string list and sees if it starts with alpohabet then parses
 getAlphabet :: [String] -> [String]
 getAlphabet inList =
-  if null inList then error "No alphabet specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No alphabet specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
@@ -254,84 +262,97 @@ getAlphabet inList =
 -- | getBranchLength gets brankch length distribution and parameters
 getBranchLength :: [String] -> (Distribution, [DistributionParameter])
 getBranchLength inList =
-  if null inList then error "No BranchLength specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No BranchLength specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
+        val = readMaybe (parts !! 2) :: Maybe DistributionParameter
     in
     if fmap toLower (head parts) == "branchlength" then
-      if length parts /= 3 then error "Incorrect number of arguments in BranchLength (distibution and parameter)"
-      else if fmap toLower (parts !! 1) == "uniform" then (Uniform, [read (parts !! 2) :: DistributionParameter])
-      else if fmap toLower (parts !! 1) == "exponential" then (Exponential, [read (parts !! 2) :: DistributionParameter])
-      else error ("Distibution " ++ (parts !! 1) ++ " is unsupported")
+      if length parts /= 3 then errorWithoutStackTrace "Error: Incorrect number of arguments in BranchLength (distibution and parameter)"
+      else if isNothing val then errorWithoutStackTrace ("Error specifying branch length: " <> (parts !! 2))
+      else if fmap toLower (parts !! 1) == "uniform" then (Uniform, [fromJust val])
+      else if fmap toLower (parts !! 1) == "exponential" then (Exponential, [fromJust val])
+      else errorWithoutStackTrace ("Distibution " ++ (parts !! 1) ++ " is unsupported")
     else getBranchLength (tail inList)
 
 -- | getRateModifiers gets modifiers distribution and parameters
 getRateModifiers :: [String] -> [(Modifier, [DistributionParameter])]
 getRateModifiers inList =
-  if null inList then error "No Rate Modifier specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No Rate Modifier specifed in blockModel"
   else
     let first = fmap toLower $ removeWhiteSpace $ head inList
         parts = divideWith ':' first
     in
     if head parts == "ratemodifiers" then
-      if length parts < 2 then error "Too few arguments in RateModifiers"
+      if length parts < 2 then errorWithoutStackTrace "Too few arguments in RateModifiers"
       else if (parts !! 1) == "none" then [(None, [])]
       else
         let restMod = tail parts
         in
         if length restMod == 2 then --invariants OR gamma
-            if head restMod == "invariant" then [(Invariant, [read (last restMod) :: DistributionParameter])]
-            else error ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
+            if head restMod == "invariant" then 
+              let val = readMaybe (last restMod) :: Maybe DistributionParameter
+              in
+              if isNothing val then errorWithoutStackTrace ("Error specifying invariant paramter: " <> (last restMod)) 
+              else [(Invariant, [fromJust val])]
+
+            else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
         else if length restMod == 4 then --gamma
             if head restMod == "gamma" then
               let firstArg = tail (restMod !! 1)
                   thirdArg = tail $ dropWhile (/= ',') (restMod !! 2)
-                  secondArg = read (takeWhile (/= ',') (restMod !! 2)) :: DistributionParameter
-                  fourthArg = read (takeWhile (/= ')') (restMod !! 3)) :: DistributionParameter
+                  secondArg = readMaybe (takeWhile (/= ',') (restMod !! 2)) :: Maybe DistributionParameter
+                  fourthArg = readMaybe (takeWhile (/= ')') (restMod !! 3)) :: Maybe DistributionParameter
               in
               if firstArg == "classes" && thirdArg == "alpha" then
                 --convert classes to Int later
-                [(Gamma, [secondArg, fourthArg])]
+                [(Gamma, [fromJust secondArg, fromJust fourthArg])]
               else if firstArg == "alpha" && thirdArg == "classes" then
-                [(Gamma, [fourthArg, secondArg])]
-              else error ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
-            else error ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
+                [(Gamma, [fromJust fourthArg, fromJust secondArg])]
+              else errorWithoutStackTrace ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
+            else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier " ++ first ++ " is improperly specified\n")
 
         else if length restMod > 4 then --invariants and gamma
             if head restMod == "invariant" then --invariant first
-              let invariantArg = read (takeWhile (/=',') (restMod !! 1)) :: DistributionParameter
+              let invariantArg = readMaybe (takeWhile (/=',') (restMod !! 1)) :: Maybe DistributionParameter
                   firstArg = tail (restMod !! 2)
                   thirdArg = tail $ dropWhile (/= ',') (restMod !! 3)
-                  secondArg = read (takeWhile (/= ',') (restMod !! 3)) :: DistributionParameter
-                  fourthArg = read (takeWhile (/= ')') (restMod !! 4)) :: DistributionParameter
+                  secondArg = readMaybe (takeWhile (/= ',') (restMod !! 3)) :: Maybe DistributionParameter
+                  fourthArg = readMaybe (takeWhile (/= ')') (restMod !! 4)) :: Maybe DistributionParameter
               in
-              if firstArg == "classes" && thirdArg == "alpha" then
+              if isNothing invariantArg then errorWithoutStackTrace ("Error parsing invariant parameter: " <> (restMod !! 4))
+              else if isNothing secondArg then errorWithoutStackTrace ("Error processing parameter: " <> (takeWhile (/= ',') (restMod !! 2)))
+              else if isNothing fourthArg then errorWithoutStackTrace ("Error processing parameter: " <> (takeWhile (/= ')') (restMod !! 3)))
+              else if firstArg == "classes" && thirdArg == "alpha" then
                 --convert classes to Int later
-                [(Invariant, [invariantArg]),(Gamma, [secondArg, fourthArg])]
+                [(Invariant, [fromJust invariantArg]),(Gamma, [fromJust secondArg, fromJust fourthArg])]
               else if firstArg == "alpha" && thirdArg == "classes" then
-                [(Invariant, [invariantArg]),(Gamma, [fourthArg, secondArg])]
-              else error ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
+                [(Invariant, [fromJust invariantArg]),(Gamma, [fromJust fourthArg, fromJust secondArg])]
+              else errorWithoutStackTrace ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
             else if head restMod == "gamma"  then --gamma first
-              let invariantArg = read (restMod !! 4) :: DistributionParameter
+              let invariantArg = readMaybe (restMod !! 4) :: Maybe DistributionParameter
                   firstArg = tail (restMod !! 1)
                   thirdArg = tail $ dropWhile (/= ',') (restMod !! 2)
-                  secondArg = read (takeWhile (/= ',') (restMod !! 2)) :: DistributionParameter
-                  fourthArg = read (takeWhile (/= ')') (restMod !! 3)) :: DistributionParameter
+                  secondArg = readMaybe (takeWhile (/= ',') (restMod !! 2)) :: Maybe DistributionParameter
+                  fourthArg = readMaybe (takeWhile (/= ')') (restMod !! 3)) :: Maybe DistributionParameter
               in
-              if firstArg == "classes" && thirdArg == "alpha" then
+              if isNothing invariantArg then errorWithoutStackTrace ("Error parsing invariant parameter: " <> (restMod !! 4))
+              else if isNothing secondArg then errorWithoutStackTrace ("Error processing gamma parameter: " <> (takeWhile (/= ',') (restMod !! 2)))
+              else if isNothing fourthArg then errorWithoutStackTrace ("Error processing gamma parameter: " <> (takeWhile (/= ')') (restMod !! 3)))
+              else if firstArg == "classes" && thirdArg == "alpha" then
                 --convert classes to Int later
-                [(Invariant, [invariantArg]),(Gamma, [secondArg, fourthArg])]
+                [(Invariant, [fromJust invariantArg]),(Gamma, [fromJust secondArg, fromJust fourthArg])]
               else if firstArg == "alpha" && thirdArg == "classes" then
-                [(Invariant, [invariantArg]),(Gamma, [fourthArg, secondArg])]
-              else error ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
-            else error ("In getRate Modifier--Rate Modifier: " ++ head restMod ++ " "++ (restMod !! 1) ++ " " ++ (restMod !! 2) ++ " " ++ (restMod !! 3) ++ " combination is not implemented\n")
+                [(Invariant, [fromJust invariantArg]),(Gamma, [fromJust fourthArg, fromJust secondArg])]
+              else errorWithoutStackTrace ("In getRate Modifier--Gamma Rate Modifier: " ++ first ++ " is improperly specified\n")
+            else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier: " ++ head restMod ++ " "++ (restMod !! 1) ++ " " ++ (restMod !! 2) ++ " " ++ (restMod !! 3) ++ " combination is not implemented\n")
               --[(Invariant, [0.9]),(Gamma, [5, 0.9])]
-        else error ("In getRate Modifier--Rate Modifier " ++ show restMod)
+        else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier " ++ show restMod)
     else getRateModifiers (tail inList)
     --)
 
--- | convert2Numbers takes string and converts to numbers only if its first char  is a number
+-- | convert2Numbers takes string and converts to numbers only if its first char is a number
 convert2Numbers :: [String] -> [Double]
 convert2Numbers inStringList =
   if null inStringList then []
@@ -339,19 +360,23 @@ convert2Numbers inStringList =
       let inString = head inStringList
       in
       if head inString `notElem` ['0','1','2','3','4','5','6','7','8','9','.',',','-'] then convert2Numbers $ tail inStringList
-      else (read inString :: Double) : convert2Numbers (tail inStringList)
+      else 
+        let val = readMaybe inString :: Maybe Double
+        in
+        if isNothing val then errorWithoutStackTrace ("Error parsing input as double value: " <> inString)
+        else (fromJust val) : convert2Numbers (tail inStringList)
 
 -- | getRValues take alphabet size and list of strings and returns
 -- rmatrix values
 getRValues :: Int -> String -> [[Double]]
 getRValues alphSize inList =
-  if null inList then error "Empty RMatrix"
+  if null inList then errorWithoutStackTrace "Empty RMatrix"
   else
     let parts = divideWith ',' inList
         numberList = convert2Numbers parts
     in
     --trace  (show $ split2Matrix alphSize numberList) (
-    if length numberList /= (alphSize * alphSize) then error "Error--mismatch between alphabet size and R Matrix element number"
+    if length numberList /= (alphSize * alphSize) then errorWithoutStackTrace "Error--mismatch between alphabet size and R Matrix element number"
     else split2Matrix alphSize numberList
     --)
 
@@ -359,11 +384,11 @@ getRValues alphSize inList =
 -- Pi vector values
 getPiValues :: Int -> [String] -> [Double]
 getPiValues alphSize parts = -- inList =
-  if null parts then error "Empty PiMatrix"
+  if null parts then errorWithoutStackTrace "Empty PiMatrix"
   else
     let numberList = convert2Numbers parts
     in
-    if length numberList /= alphSize then error "Error--mismatch between alphabet size and Pi Vector element number"
+    if length numberList /= alphSize then errorWithoutStackTrace "Error--mismatch between alphabet size and Pi Vector element number"
     else
       let total = sum numberList
       in
@@ -374,7 +399,7 @@ getPiValues alphSize parts = -- inList =
 getPiVector :: String -> Int -> [String] -> [Double]
 getPiVector modelString alphaSize inParts
   | modelString == "k80" = []
-  | null inParts = error ("Pi vector not found for " ++ modelString)
+  | null inParts = errorWithoutStackTrace ("Pi vector not found for " ++ modelString)
   | head inParts == "pivector" = getPiValues alphaSize (take alphaSize (tail inParts))
   | otherwise = getPiVector modelString alphaSize (tail inParts)
 
@@ -382,8 +407,12 @@ getPiVector modelString alphaSize inParts
 -- | getParam take String of parameter name and returns Double value of parameter
 getParam :: String -> [String] -> Double
 getParam paramName paramList
-  | null paramList = error ("Param " ++ paramName ++ " not found")
-  | head paramList == paramName = read (paramList !! 1) :: Double
+  | null paramList = errorWithoutStackTrace ("Param " ++ paramName ++ " not found")
+  | head paramList == paramName = 
+      let val = readMaybe (paramList !! 1) :: Maybe Double
+      in
+      if isNothing val then errorWithoutStackTrace ("Error processing parameter value as Double: " <> (paramList !! 1))
+      else fromJust val
   | otherwise = getParam paramName (tail paramList)
 
 -- | getNonDiagMatrixSum sums values of non-diaghnonal cells
@@ -398,7 +427,7 @@ getNonDiagMatrixSum alphSize iRow jColumn inMatrix
 -- R matrix raising each to base^x and then normalizing so average is 1.0
 log2NormalizedTransitions :: Double -> [[Double]] -> [[Double]]
 log2NormalizedTransitions base inR =
-  if null inR then error "Null input matrix in log2NormalizedTransitions"
+  if null inR then errorWithoutStackTrace "Null input matrix in log2NormalizedTransitions"
   else
     let alphSize = length inR
         numValues = fromIntegral ((alphSize * alphSize) - alphSize)
@@ -414,14 +443,14 @@ log2NormalizedTransitions base inR =
 -- 4-state models adjusted to rates average 1
 getChangeModel :: Int -> [String] -> (MarkovModel, QMatrix, PiVector, [ModelParameter])
 getChangeModel alphSize inList =
-  if null inList then error "No Character Change model specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No Character Change model specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
         lcParts = fmap toLower $ parts !! 1
     in
     if fmap toLower (head parts) == "changemodel" then
-      if length parts < 2 then error "Too few arguments in RateModifiers"
+      if length parts < 2 then errorWithoutStackTrace "Too few arguments in RateModifiers"
       else if lcParts == "neyman" || lcParts == "jc69" then (Neyman, [[]],[],[]) else
         let rest = (fmap toLower <$> fmap (filter (`notElem` argCruft)) (drop 2 parts))
             partsSplit = concatMap (divideWith ',') rest
@@ -477,39 +506,47 @@ getChangeModel alphSize inList =
                 newRMatrix = log2NormalizedTransitions baseParam rMatrix
             in
             (GTR, newRMatrix,newPi,[])
-        else error ("Change Model " ++ (parts !! 1) ++ " is not yet implemented")
+        else errorWithoutStackTrace ("Change Model " ++ (parts !! 1) ++ " is not yet implemented")
     else getChangeModel alphSize (tail inList)
 
 -- | getPrecision take string list and sees if it starts with precision then parses
 getPrecision :: [String] -> Int
 getPrecision inList =
-  if null inList then error "No precision specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No precision specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
     in
     if fmap toLower (head parts) == "precision" then
-      if length parts /= 2 then error "Incorrect number of arguments in precision, should be 1"
-      else (read (last parts) :: Int)
+      if length parts /= 2 then errorWithoutStackTrace "Incorrect number of arguments in precision, should be 1"
+      else 
+        let val = (readMaybe (last parts) :: Maybe Int)
+        in
+        if isNothing val then errorWithoutStackTrace  ("Error processing precsion value as Int: " <> (last parts))
+        else fromJust val
     else getPrecision (tail inList)
 
 -- | getLenfgth take string list and sees if it starts with charLength then parses
 getCharLength :: [String] -> Int
 getCharLength inList =
-  if null inList then error "No character charLength specifed in blockModel"
+  if null inList then errorWithoutStackTrace "No character charLength specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
     in
     if fmap toLower (head parts) == "length" then
-      if length parts /= 2 then error "Incorrect number of arguments in charLength, should be 1"
-      else (read (last parts) :: Int)
+      if length parts /= 2 then errorWithoutStackTrace "Incorrect number of arguments in charLength, should be 1"
+      else 
+        let val = (readMaybe (last parts) :: Maybe Int)
+        in
+        if isNothing val then errorWithoutStackTrace ("Error processing length value as Int: " <> (last parts))
+        else fromJust val
     else getCharLength (tail inList)
 
 -- | putGapAtEnd puts alphabets so Gap at and for GTR matrix interpretations
 putGapAtEnd :: [String] -> [String]
 putGapAtEnd inList =
-  if null inList then error "Empty alphabet in putGapAtEnd"
+  if null inList then errorWithoutStackTrace "Empty alphabet in putGapAtEnd"
     else
       let indexGap = elemIndex "-" inList
       in
@@ -539,7 +576,7 @@ getBlockParams inStringList =
 parseCharModel :: [(String, Int)] -> [String] -> [(CharacterModel, Int)]
 parseCharModel blockNameList inStringList
   | null inStringList = []
-  | null blockNameList = error "No block models specified.  Must have at least 1"
+  | null blockNameList = errorWithoutStackTrace "No block models specified.  Must have at least 1"
   | otherwise =
       let inString = head inStringList
           bmName = last $ words $ takeWhile (/= '{') inString
@@ -575,7 +612,7 @@ getElementString element inStringList =
 -- | getCharModelByName takes String and pull charModel by name
 getCharModelByName :: String -> [(CharacterModel, Int)] -> (CharacterModel, Int)
 getCharModelByName inName inCharModelList =
-  if null inCharModelList then error ("Char model " ++ inName ++ " not found")
+  if null inCharModelList then errorWithoutStackTrace ("Char model " ++ inName ++ " not found")
   else
     let (firstChar, number) = head inCharModelList
         firstName = characterName firstChar
@@ -601,7 +638,7 @@ parseSections inSectionList =
         --Find and pull Machine
     let machineModels = parseMachine <$> getElementString "machine" inSectionList
     in
-    if length machineModels > 1 then error "Can only specify a single machine model"
+    if length machineModels > 1 then errorWithoutStackTrace "Can only specify a single machine model"
     else
         --Find and pull Graph
       let (gMachineName, graphNameLocal, blockModels) = head machineModels
@@ -610,9 +647,9 @@ parseSections inSectionList =
           cCharModelList = parseCharModel blockModels $ getElementString "blockmodel" inSectionList
           reorderedCharacterModelList = reorderCharacterModels cCharModelList blockModels
       in
-      if null graphModels then error "No graph specification in machine file--or not matching name"
-      else if length graphModels > 1 then error ("Can only have a single graph specification in machine file.  There are " ++ show (length graphModels))
-      else if null reorderedCharacterModelList then error "Need at least one character model"
+      if null graphModels then errorWithoutStackTrace "No graph specification in machine file--or not matching name"
+      else if length graphModels > 1 then errorWithoutStackTrace ("Can only have a single graph specification in machine file.  There are " ++ show (length graphModels))
+      else if null reorderedCharacterModelList then errorWithoutStackTrace "Need at least one character model"
       else
         --IN HERE for finding parsed graph and models
         let thisMachineModel = MachineModel {machineName = gMachineName, graphSpecification = head graphModels, characterModelList = reorderedCharacterModelList}
@@ -679,12 +716,12 @@ parseMachineFile optimizeModels fileContents =
     (optmizedSections, parsedSections)
 
 -- | reduceModels tkaes model specification and tries to reduce the number of
--- different Markov Models by using more genreal models if already specified.
+-- different Markov Models by using more genreal models if alreadMaybey specified.
 -- e.g subsitution a GTR with all params the same-> no need for Neyman code
 -- or more complex and less comples 4-state DNA models
 reduceModels :: [MarkovModel] -> [(CharacterModel, Int)] -> [(CharacterModel, Int)]
 reduceModels markovPresent inModelList
-  | null markovPresent = error "No markov models specified in reduceModels"
+  | null markovPresent = errorWithoutStackTrace "No markov models specified in reduceModels"
   | length markovPresent == 1 = inModelList
   | null inModelList = []
   | otherwise =
@@ -753,7 +790,7 @@ transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetMo
         (K80, [[]], equalPiVect, [1,1])
       else if targetModel == F81 then
         (F81, [[]], equalPiVect, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
+      else errorWithoutStackTrace ("Optimization target model " ++ show modelType ++ " not implemented")
 
     else if modelType == TN93 then
       let a1 = head paramList
@@ -841,7 +878,7 @@ transformModel alphabetSize inModel@(modelType, _, piVector, paramList) targetMo
         inModel -- error (show modelType ++ " can't be converted into " ++ show targetModel)
       else if targetModel == F81 then
         (F81, [[]], piVector, [])
-      else error ("Optimization target model " ++ show modelType ++ " not implemented")
+      else errorWithoutStackTrace ("Optimization target model " ++ show modelType ++ " not implemented")
 
-  else error ("Optimization input model " ++ show modelType ++ " not implemented")
+  else errorWithoutStackTrace ("Optimization input model " ++ show modelType ++ " not implemented")
   )
