@@ -199,11 +199,11 @@ main =
 
         --Output machine Complexity
         let machineComplexity = characterModelComplexity + modelSpecificationComplexity + charNumComplexity
-        hPutStrLn stderr ("Machine complexity (without gaph): " ++ show machineComplexity)
-        hPutStrLn stderr ("Machine complexity with gaph: " ++ show (machineComplexity + softWiredFactor))
+        hPutStrLn stderr ("Machine complexity (without graph): " ++ show machineComplexity)
+        hPutStrLn stderr ("Machine complexity with graph: " ++ show (machineComplexity + softWiredFactor))
         machineHandle <- openFile (stub ++ ".complexity") WriteMode
-        hPutStrLn machineHandle ("Machine complexity (without gaph): " ++ show machineComplexity)
-        hPutStrLn machineHandle ("Machine complexity with gaph: " ++ show (machineComplexity + softWiredFactor))
+        hPutStrLn machineHandle ("Machine complexity (without graph): " ++ show machineComplexity)
+        hPutStrLn machineHandle ("Machine complexity with graph: " ++ show (machineComplexity + softWiredFactor))
         hPutStrLn machineHandle ("Graph complexity : " ++ show graphShannonBits)
         hPutStrLn machineHandle ("Softwire complexity factor: " ++ show softWiredFactor)
         hPutStrLn machineHandle ("Model specification complexity : " ++ show modelSpecificationComplexity)
