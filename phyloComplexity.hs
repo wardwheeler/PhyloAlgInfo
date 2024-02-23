@@ -183,7 +183,7 @@ main =
         --Calaculate Complexity of model switching over Character Components
         --Need to read from MachineModel
         --Need to add the log number of characters for each
-        let modelSpecificationComplexity = (fromIntegral $ length charInfo) * (logBase 2.0 (fromIntegral $ length charInfo))
+        let modelSpecificationComplexity = (fromIntegral $ length charInfo) * (ceiling $ logBase 2.0 (fromIntegral $ length charInfo))
         hPutStrLn stderr ("Character model switching complexity: " ++ show modelSpecificationComplexity)
         let charNumComplexity = fromIntegral (sum $ fmap ceiling (fmap (logBase 2.0 . fromIntegral) (snd <$> characterModelList machineConfig) :: [Double]) :: Int) 
         let characterNumber = fromIntegral (sum $ snd <$> characterModelList machineConfig :: Int)

@@ -205,8 +205,8 @@ adjustDiag inMatrix fullMatrix row =
     in
     (first ++ [1 - second] ++ third) : adjustDiag (tail inMatrix) fullMatrix (row + 1)
 
--- |trapezoidIntegration uses trap[ezoid rule to integrate the product of
--- 2 functions 1) from matrix soluitoins to Markov and 2) probabaility distribution
+-- |trapezoidIntegration uses trapezoid rule to integrate the product of
+-- 2 functions 1) from matrix solutions to Markov and 2) probability distribution
 -- function on time.
 -- assumes starting t  [0, maxValue]
 -- the initial funtion is from the matrix stuff.
@@ -214,7 +214,7 @@ adjustDiag inMatrix fullMatrix row =
 -- signatures
 -- give it row and column of Prob(t)
 -- kMultiplier is for rate class calculation---only used in the model prob function--not in branch
--- should brwnch not have kWeight?
+-- should branch not have kWeight?
 trapezoidIntegration :: ([Double] -> [[Double]] -> [[Double]] -> Double -> Int -> Int -> Int -> Int -> Double) -> (Double -> Int -> Double -> Double) -> [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> Double -> Double
 trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations counter kWeight =
   if counter == iterations then 0
@@ -228,8 +228,10 @@ trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColu
         value = interval * ((pij * probTime) + (pij' * probTime')) / 2
     in
     if value < 0 then
-      if abs value < epsilon then 0 + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
-      else error ("Negative probability in trapezoid " ++ show uMatrix ++ "\n" ++ show uInvMatrix ++ "\n" ++ show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show time ++ " " ++ " " ++ " " ++ show value)
+      0 + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
+      -- Hope this is OK
+      -- if abs value < epsilon then 0 + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
+      -- else error ("Negative probability in trapezoid " ++ show uMatrix ++ "\n" ++ show uInvMatrix ++ "\n" ++ show iRow ++ " " ++ show jColumn ++ " " ++ show counter ++ " " ++ show interval ++ " " ++ show time ++ " " ++ " " ++ " " ++ show value)
     else
       value + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
 

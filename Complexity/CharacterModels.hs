@@ -516,7 +516,7 @@ makeSimpleMatrix size diag nondiag rowCounter lastElement=
         if (lastElement /= "-") || (rowCounter < (size -1)) then (first ++ [diag] ++ second) : makeSimpleMatrix size diag nondiag (rowCounter + 1) lastElement
         else [first ++ [0]]
 
--- | getRateParams returns teh total number of rate parameters but adjuting for the convention
+-- | getRateParams returns the total number of rate parameters but adjusting for the convention
 -- of not including the number of classes as a parameer for discrete gamma
 getRateParams :: [(Modifier, [DistributionParameter])] -> Int -> Int
 getRateParams rateModList acc =
