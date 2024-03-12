@@ -63,7 +63,7 @@ import           Complexity.IntegratedModels
 import           Complexity.MatrixUtilities
 import           Complexity.Types
 import           Complexity.Utilities
--- import Debug.Trace
+import Debug.Trace
 
 
 
@@ -487,22 +487,26 @@ makeTCM logType charInfo =
         classList = getModifiers tcmRateModifiers tcmPrecision
         maximumTime = getEndTime branchDist (head branchParams)
     in
+    -- trace ("MTCM: " <> (show tcmChangeModel)) $
     if tcmChangeModel == Neyman then
       let logMatrix = makeNeymanMatrix logType branchDist (length tcmAlphabet) (head branchParams) tcmPrecision classList (last tcmAlphabet)
       in
       (tcmName, tcmAlphabet, logMatrix)
     else
       if tcmChangeModel == GTR then
-        let (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
+        let -- (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
+            (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
             -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
         in
+        -- trace ("MTCM: " <> (show (eigenValueList, uMatrix, uInvMatrix)))
         (tcmName, tcmAlphabet, logMatrix)
       else
         let fourStateModel = get4StateModel tcmChangeModel branchDist
             logMatrix = makeGTRLogMatrix4State logType fourStateModel (head branchParams) tcmPrecision modelParams tcmP classList
         in
         (tcmName, tcmAlphabet, logMatrix)
+
 
 -- | makeSimpleMatrix takes values for diagonal and non-diagnoal and row/column size and returns
 -- square matrix
@@ -513,8 +517,9 @@ makeSimpleMatrix size diag nondiag rowCounter lastElement=
         let first = replicate rowCounter nondiag
             second = replicate (size - rowCounter - 1) nondiag
         in
-        if (lastElement /= "-") || (rowCounter < (size -1)) then (first ++ [diag] ++ second) : makeSimpleMatrix size diag nondiag (rowCounter + 1) lastElement
-        else [first ++ [0]]
+        -- if (lastElement /= "-") || (rowCounter < (size -1)) then (first ++ [diag] ++ second) : makeSimpleMatrix size diag nondiag (rowCounter + 1) lastElement
+        -- else 
+        [first ++ [0]]
 
 -- | getRateParams returns the total number of rate parameters but adjusting for the convention
 -- of not including the number of classes as a parameer for discrete gamma
@@ -593,21 +598,24 @@ makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
       pMatrixAdjusted = adjustDiag pMatrixSym pMatrixSym 0
       logMatrix = split2Matrix alphSize $ (* (-1)) <$> getLogMatrix logType pMatrixAdjusted alphSize lastAlphElement 0 0 iterations
   in
+  --trace ("MLM: " <> (show pMatrixAdjusted))
   logMatrix
 
--- | makeGTRLogMatrix is a general version of makeTCM taing arguments for all of GTR versions
--- and returning teh log matrix for TCM file creation
+-- | makeGTRLogMatrix is a general version of makeTCM taking arguments for all of GTR versions
+-- and returning the log matrix for TCM file creation
 makeGTRLogMatrix ::  (Double -> Int-> Int -> Double -> Double) -> String -> [Double] -> [[Double]] -> [[Double]] -> Int ->  Double -> Double -> Int -> Distribution -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix logType lastAlphElement eigenValueList uMatrix uInvMatrix alphSize probDistParam maxValue iterations distribution modifiers =
   let -- zeroMatrix = replicate alphSize $ replicate alphSize 0.0
       probMatrixList  = fmap (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
+  --trace ("MGTLM: " <> (show probMatrixList))
   logMatrix
 
--- | makeGTRLogMatrix4State is a general version of makeTCM taing arguments for all of 4-state model
+-- | makeGTRLogMatrix4State is a general version of makeTCM taking arguments for all of 4-state model
 -- and returning the log matrix for TCM file creation
 -- uses the integrated model versions
+-- Assumes ACGT in order
 makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]) -> Double -> Int -> [Double] -> [Double] -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelParams piVector modifiers =
   let lastAlphElement = "T"
@@ -618,14 +626,15 @@ makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelPara
   logMatrix
 
 -- | getLogMatrix takes the logType of each element, (n-1)(n-1) <- 0 if
--- last alphbet element is "-"
+-- last alphabet element is "-"
 getLogMatrix :: (Double -> Int-> Int -> Double -> Double) -> [[Double]] -> Int -> String -> Int -> Int -> Int -> [Double]
 getLogMatrix logType aMatrix alphSize lastElement iRow jColumn iterations
   | iRow == alphSize = []
   | jColumn == alphSize = getLogMatrix logType aMatrix alphSize lastElement (iRow + 1) 0 iterations
   | (iRow == (alphSize - 1)) && (jColumn == (alphSize - 1)) =
-    if lastElement == "-" then [0]
-    else logType ((aMatrix !! iRow) !! jColumn) iterations 0 0 : getLogMatrix logType aMatrix alphSize lastElement iRow (jColumn + 1) iterations
+    --if lastElement == "-" then [0]
+    --else 
+    logType ((aMatrix !! iRow) !! jColumn) iterations 0 0 : getLogMatrix logType aMatrix alphSize lastElement iRow (jColumn + 1) iterations
   | otherwise = logType ((aMatrix !! iRow) !! jColumn) iterations 0 0 : getLogMatrix logType aMatrix alphSize lastElement iRow (jColumn + 1) iterations
 
 -- | integrateGTRMatrixWithK takes arguments to generate Pij with time and intergates with distibution of time probs (exponential or uniform)

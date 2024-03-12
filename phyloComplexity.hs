@@ -90,9 +90,9 @@ main =
         let charInfo = characterModelList machineConfig
         let charInfoOrig = if optimizeModels then characterModelList machineConfigOrig else charInfo
 
-        putStrLn ("Machine configuration: " ++ show machineConfig)
+        --putStrLn ("Machine configuration: " ++ show machineConfig)
         --putStrLn ("\tGraph configuration: " ++ show graphConfig)
-        --putStrLn ("\tCharacter configurations: " ++ show charInfo)
+        putStrLn ("\tCharacter configurations: " ++ show charInfo)
 
         --Calculate complexity of Graph Component
         -- based on number of edges |E| * 2 (for vertex specification) * log |V| (for number of bits required to specify largest vertex index).

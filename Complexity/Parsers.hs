@@ -244,7 +244,7 @@ getBlock name pairList =
     if fName == name then fNumber
     else getBlock name (tail pairList)
 
--- | getAlphabet take string list and sees if it starts with alpohabet then parses
+-- | getAlphabet take string list and sees if it starts with alphabet then parses
 getAlphabet :: [String] -> [String]
 getAlphabet inList =
   if null inList then errorWithoutStackTrace "No alphabet specifed in blockModel"
@@ -375,7 +375,7 @@ getRValues alphSize inList =
     let parts = divideWith ',' inList
         numberList = convert2Numbers parts
     in
-    --trace  (show $ split2Matrix alphSize numberList) (
+    --trace  ("GRV: " <> (show $ split2Matrix alphSize numberList)) $
     if length numberList /= (alphSize * alphSize) then errorWithoutStackTrace "Error--mismatch between alphabet size and R Matrix element number"
     else split2Matrix alphSize numberList
     --)
@@ -393,6 +393,7 @@ getPiValues alphSize parts = -- inList =
       let total = sum numberList
       in
       --normalizes to sum to one
+      --trace ("GPV: " <> (show $ fmap (/total) numberList)) $ 
       fmap (/total) numberList
     --)
 -- | getPiVector gets teh pi part from list of parameters
@@ -423,7 +424,7 @@ getNonDiagMatrixSum alphSize iRow jColumn inMatrix
   | iRow == jColumn = getNonDiagMatrixSum alphSize iRow (jColumn + 1) inMatrix
   | otherwise = ((inMatrix !! iRow) !! jColumn) + getNonDiagMatrixSum alphSize iRow (jColumn + 1) inMatrix
 
--- | log2NormalizedTransitions takes values in GTR R matrix and rtats them as logs certing anew
+-- | log2NormalizedTransitions takes values in GTR R matrix and rtats them as logs creating a new
 -- R matrix raising each to base^x and then normalizing so average is 1.0
 log2NormalizedTransitions :: Double -> [[Double]] -> [[Double]]
 log2NormalizedTransitions base inR =
@@ -436,6 +437,7 @@ log2NormalizedTransitions base inR =
         sumR = getNonDiagMatrixSum alphSize 0 0 expR
         normFactor = numValues / sumR
     in
+    --trace ("L2NT: " <> (show $ fmap (fmap (* normFactor)) expR)) $ 
     fmap (fmap (* normFactor)) expR
 
 
@@ -557,20 +559,29 @@ putGapAtEnd inList =
         in
         first ++ second ++ ["-"]
 
--- | getBlockParams takes strings opf args and retruns tuples of params
+-- | getBlockParams takes strings of args and retruns tuples of params
 getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
 getBlockParams inStringList =
-  let alphabetLocal = putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
+  let alphabetLocal = if (length $ nub $ getAlphabet inStringList) /= (length $ getAlphabet inStringList) then 
+                          errorWithoutStackTrace ("Repeated element in alphabet: " ++ (show $ getAlphabet inStringList))
+                      else 
+                          -- wrong since reorders but doesn't effect pi or rmatrix
+                          -- putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
+                          getAlphabet inStringList
+
       branchLengthLocal = getBranchLength inStringList --(Uniform,[])
       rateModifiersLocal = getRateModifiers inStringList --[(None,[])]
       changeModelLocal = getChangeModel (length alphabetLocal) inStringList --(Neyman, [[]], [])
       precisionLocal = getPrecision inStringList
       charLengthLocal = getCharLength inStringList
   in
+  (alphabetLocal, branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
+  
+  {-This reordering is incorrect since doesn't affect pi or rMatrix values
   if head alphabetLocal /= "-" then (alphabetLocal, branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
   else
   (tail alphabetLocal ++ ["-"], branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
-
+  -}
 
 -- | parseCharModel takes character model string and parses
 parseCharModel :: [(String, Int)] -> [String] -> [(CharacterModel, Int)]
@@ -630,7 +641,7 @@ reorderCharacterModels inCharModelList inBlockPairList =
     in
     (charModel, number) : reorderCharacterModels inCharModelList (tail inBlockPairList)
 
--- | parseSections parses sections according to type
+-- | parseSections parses machine, model, and graph sections according to type
 parseSections :: [String] -> MachineModel
 parseSections inSectionList =
   if null inSectionList then error "Empty list of machine sections"

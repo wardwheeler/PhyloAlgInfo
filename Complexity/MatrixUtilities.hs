@@ -238,7 +238,7 @@ trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColu
 
 -- | makeGTRMatrixInternal makes GTR matricx using local functions
 -- and returning eigen values, vectors and vector matrix inversion
--- the eigenvalues are sorted so larges is last and set to 0.
+-- the eigenvalues are sorted so largest is last and set to 0.
 makeGTRMatrixLocal :: Int -> [[Double]] -> [Double]-> ([Double], [[Double]], [[Double]])
 makeGTRMatrixLocal alphabetSize rMatrixIn piVectorIn =
     let newR = split2Matrix alphabetSize $ isPosR rMatrixIn alphabetSize 0 0
@@ -359,7 +359,7 @@ matrixMultiply aMat bMat
       else
         getRows 0 aRows bCols aMat bMat
 
--- | normalizeVectorWithSign mulitplies values by sqrt(sum i^2) for all i's in vector
+-- | normalizeVectorWithSign multiplies values by sqrt(sum i^2) for all i's in vector
 -- sign change used for eigen vectors
 normalizeVectorWithSign :: [Double]-> [Double]
 normalizeVectorWithSign a =
@@ -372,7 +372,7 @@ normalizeVectorWithSign a =
     if maxVal >= abs minVal then fmap (/sumSquares) a
     else fmap (/(-1 *sumSquares)) a
 
--- | normalizeVector mulitplies values by sqrt(sum i^2) for all i's in vector
+-- | normalizeVector multiplies values by sqrt(sum i^2) for all i's in vector
 normalizeVector :: [Double]-> [Double]
 normalizeVector a =
   if null a then error "Null vector in normalize"
@@ -569,11 +569,11 @@ qrFactorization aMatrix uMatrix counter =
         linNewAMatrix = concat newA
         diffVal = sum $ abs <$> zipWith (-) linAMatrix linNewAMatrix
     in
-    trace (show (diffVal/ fromIntegral (length aMatrix * length aMatrix))) (
+    -- trace (show (diffVal/ fromIntegral (length aMatrix * length aMatrix))) (
     if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < epsilon then (qMatrix, rMatrix, newU)
-    else if counter > maxIterations then error "Max iterations exceeded in qrFactorization" -- (qMatrix, rMatrix, uMatrix)
+    else if counter > maxIterations then (qMatrix, rMatrix, newU) -- error "Max iterations exceeded in qrFactorization" -- (qMatrix, rMatrix, uMatrix)
     else qrFactorization newA newU (counter + 1)
-    )
+    --)
 
 -- | getDiagValues returns the diagonal values of a matrix
 getDiagValues :: [[Double]] -> Int -> [Double]
