@@ -41,9 +41,12 @@ module Main where
 import           Complexity.CharacterModels
 import           Complexity.Graphs
 import           Complexity.MathUtilities
+import           Complexity.MatrixUtilities
 import           Complexity.Parsers
 import           Complexity.Types
 import           Complexity.Utilities
+import           Data.List
+import           Data.Maybe
 import           System.Environment
 import           System.IO
 -- import Debug.Trace
@@ -53,7 +56,16 @@ import           System.IO
 writeTCMFile :: String -> String -> (String, [String], [[Double]]) -> IO()
 writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
     let outFileName = stub ++ charName ++ "." ++ unitType ++ ".tcm"
-        alphString = concatMap (++ " ") localAlphabet
+
+        -- reorder if has indel char "-"
+        gapIndex = elemIndex "-" localAlphabet
+        (newAlphabet, newTCMMatrix) = if isNothing gapIndex then (localAlphabet, tcmMatrix)
+                                      else 
+                                        let nMatrix = moveRowAndColumnToEnd (fromJust gapIndex) tcmMatrix
+                                            nAlphabet = init $ moveListElement  (fromJust gapIndex) localAlphabet
+                                        in (nAlphabet, nMatrix) 
+
+        alphString = concatMap (++ " ") newAlphabet
         matrixString = matrix2String tcmMatrix
         tcmString = alphString ++ "\n" ++ matrixString
     in
