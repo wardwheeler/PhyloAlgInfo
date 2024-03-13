@@ -479,7 +479,7 @@ get4StateModelName modelType distribution
   | otherwise = error ("Markov model " ++ show modelType ++ " not implemented")
 
 -- | makeTCM takes unit function (logE or Log2) model type, branch model (and param(s)), and alphabet to create TCMs for POY/PCG
--- the values will be log2/e (depending on input function) of integrated probabilitites  of change (pij)
+-- the values will be log2/e/10 whatever (depending on input function) of integrated probabilitites of change (pij)
 -- the "name" string is returned for filename purposes
 makeTCM :: (Double -> Int-> Int -> Double -> Double) -> CharacterModel -> (String, [String], [[Double]])
 makeTCM logType charInfo =
@@ -494,7 +494,8 @@ makeTCM logType charInfo =
       (tcmName, tcmAlphabet, logMatrix)
     else
       if tcmChangeModel == GTR then
-        let -- (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
+        let -- external library seems to violate an order or other invaritant in my code jumbles eigenvectors etc
+            -- (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
             (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
             -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP

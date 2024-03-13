@@ -277,7 +277,7 @@ trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColu
       value + trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations (counter + 1) kWeight
 
 
--- | makeGTRMatrixInternal makes GTR matricx using local functions
+-- | makeGTRMatrixInternal makes GTR matrix using local functions
 -- and returning eigen values, vectors and vector matrix inversion
 -- the eigenvalues are sorted so largest is last and set to 0.
 makeGTRMatrixLocal :: Int -> [[Double]] -> [Double]-> ([Double], [[Double]], [[Double]])
