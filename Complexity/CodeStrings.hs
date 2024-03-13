@@ -155,8 +155,13 @@ makeMatrixString :: String
 makeMatrixString="\
 \m0 s d n c e\n\
 \ |s==c=[]\n\
+\ |otherwise=((r0 c n 0)++[d]++(r0(s-c-1)n 0)):m0 s d n(c+1)e\n"
+{-
+\m0 s d n c e\n\
+\ |s==c=[]\n\
 \ |(e/=\"-\")||(c<s-1)=((r0 c n 0)++[d]++(r0(s-c-1)n 0)):m0 s d n(c+1)e\n\
 \ |otherwise=[(r0 c n 0)++[0]]\n"
+-}
 {-
 \m s d n c e=\n\
 \ if s==c then []\n\
@@ -1007,8 +1012,15 @@ getLogMatrixString="\
 \c7 l m a e r c i\n\
 \ |r==a=[]\n\
 \ |c==a=c7 l m a e(r+1)0 i\n\
+\ |(r==(a-1))&&(c==(a-1))=(l((m!!r)!!c)i 0 0):c7 l m a e r(c+1)i\n\
+\ |otherwise=(l((m!!r)!!c)i 0 0):c7 l m a e r(c+1)i\n"
+{-
+\c7 l m a e r c i\n\
+\ |r==a=[]\n\
+\ |c==a=c7 l m a e(r+1)0 i\n\
 \ |(r==(a-1))&&(c==(a-1))=if e==\"-\" then [0] else (l((m!!r)!!c)i 0 0):c7 l m a e r(c+1)i\n\
 \ |otherwise=(l((m!!r)!!c)i 0 0):c7 l m a e r(c+1)i\n"
+-}
 {-
 \c7 l m a e r c i=\n\
 \ if r==a then []\n\

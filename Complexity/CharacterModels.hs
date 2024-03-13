@@ -519,7 +519,10 @@ makeSimpleMatrix size diag nondiag rowCounter lastElement=
         in
         -- if (lastElement /= "-") || (rowCounter < (size -1)) then (first ++ [diag] ++ second) : makeSimpleMatrix size diag nondiag (rowCounter + 1) lastElement
         -- else 
-        [first ++ [0]]
+        --[first ++ [0]]
+        (first ++ [diag] ++ second) : makeSimpleMatrix size diag nondiag (rowCounter + 1) lastElement
+        -- else 
+        --[first ++ [0]]
 
 -- | getRateParams returns the total number of rate parameters but adjusting for the convention
 -- of not including the number of classes as a parameer for discrete gamma
@@ -626,7 +629,7 @@ makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelPara
   logMatrix
 
 -- | getLogMatrix takes the logType of each element, (n-1)(n-1) <- 0 if
--- last alphabet element is "-"
+-- last alphabet element is "-" (removed last element gap thing)
 getLogMatrix :: (Double -> Int-> Int -> Double -> Double) -> [[Double]] -> Int -> String -> Int -> Int -> Int -> [Double]
 getLogMatrix logType aMatrix alphSize lastElement iRow jColumn iterations
   | iRow == alphSize = []
