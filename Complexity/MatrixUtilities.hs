@@ -62,7 +62,42 @@ removeColumn index inMatrix =
     in
     newRow : removeColumn index (tail inMatrix)
 
--- | removeRowAndColumn counting from 1 usgin in general cofactor
+-- | moveListElement moves teh index element of a list to the end of 
+-- a new list
+moveListElement :: Int -> [a] -> [a]
+moveListElement index inList =
+  if null inList then []
+  else 
+      (take index inList) <> (drop (index + 1) inList) <> [inList !! index]
+
+
+-- | moveRowAndColumnToEnd takes a mtrix ([[a]]) and moves
+-- the inout index row and columns to last.  This used to
+-- reorder matrices by putting the indel row and column
+-- last as is assumed by POY/PhyG tcm format
+moveRowAndColumnToEnd :: Int -> [[a]] -> [[a]]
+moveRowAndColumnToEnd index inMatrix =
+  if null inMatrix then []
+  else
+      let -- delted row to add back at end
+          deletedRow' = inMatrix !! index
+
+          -- row with identity cell moved to end
+          deleteRow = (take index deletedRow') <> (drop (index + 1) deletedRow') <> [deletedRow' !! index]
+          deleteRowLL = fmap (:[]) deleteRow
+
+          -- matric wihtout row and column to be moved
+          remainderMatrix = removeRowAndColumn index index inMatrix
+
+          -- add cells from delted row to end of remainderMatrix rows
+          newMatrix1 = zipWith (<>) remainderMatrix deleteRowLL
+
+          -- add deleteRow as last row to new matrix
+          newMatrix2 = newMatrix1 <> [deleteRow]
+      in
+      newMatrix2
+
+-- | removeRowAndColumn counting from 1 used in general cofactor
 -- for matrix inversion
 removeRowAndColumn :: Int -> Int -> [[a]] -> [[a]]
 removeRowAndColumn row column inMatrix =
