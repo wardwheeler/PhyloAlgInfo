@@ -46,6 +46,7 @@ import           Complexity.MathUtilities
 import           Complexity.Types
 import           Complexity.Utilities
 import           Data.List
+import           Data.Maybe
 import           Debug.Trace
 -- import Data.Ord
 -- import Control.Applicative
@@ -75,8 +76,8 @@ moveListElement index inList =
 -- the inout index row and columns to last.  This used to
 -- reorder matrices by putting the indel row and column
 -- last as is assumed by POY/PhyG tcm format
-moveRowAndColumnToEnd :: (Show a) => Int -> [[a]] -> [[a]]
-moveRowAndColumnToEnd index inMatrix =
+moveRowAndColumnToEnd :: (Show a) => Maybe a -> Int -> [[a]] -> [[a]]
+moveRowAndColumnToEnd setNNValue0 index inMatrix =
   
   if null inMatrix then []
   else
@@ -84,7 +85,10 @@ moveRowAndColumnToEnd index inMatrix =
           deletedRow' = inMatrix !! index
 
           -- row with identity cell moved to end
-          deleteRow = (take index deletedRow') <> (drop (index + 1) deletedRow') <> [deletedRow' !! index]
+          -- setNNValue0 is Maybe a to set  gap tp gap value at end to 0.0 or whatever
+          finalValue = if isNothing setNNValue0 then deletedRow' !! index
+                       else fromJust setNNValue0
+          deleteRow = (take index deletedRow') <> (drop (index + 1) deletedRow') <> [finalValue]
           deleteRowLL = fmap (:[]) deleteRow
 
           -- matric wihtout row and column to be moved (+1 since indexed from one for some reason)

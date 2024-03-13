@@ -61,8 +61,9 @@ writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
         gapIndex = elemIndex "-" localAlphabet
         (newAlphabet, newTCMMatrix) = if isNothing gapIndex then (localAlphabet, tcmMatrix)
                                       else 
-                                        let nMatrix = moveRowAndColumnToEnd (fromJust gapIndex) tcmMatrix
-                                            nAlphabet = init $ moveListElement  (fromJust gapIndex) localAlphabet
+                                        let nAlphabet = init $ moveListElement  (fromJust gapIndex) localAlphabet
+                                            nMatrix = moveRowAndColumnToEnd (Just 0.0) (fromJust gapIndex) tcmMatrix
+                                            
                                         in 
                                         (nAlphabet, nMatrix) 
 
