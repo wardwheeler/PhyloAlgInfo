@@ -49,7 +49,7 @@ import           Data.List
 import           Data.Maybe
 import           System.Environment
 import           System.IO
--- import Debug.Trace
+import Debug.Trace
 
 -- | writeTCM takes model structure (name, alphabet, matrix) and writes file
 -- creates filename from stub and character name
@@ -63,10 +63,11 @@ writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
                                       else 
                                         let nMatrix = moveRowAndColumnToEnd (fromJust gapIndex) tcmMatrix
                                             nAlphabet = init $ moveListElement  (fromJust gapIndex) localAlphabet
-                                        in (nAlphabet, nMatrix) 
+                                        in 
+                                        (nAlphabet, nMatrix) 
 
         alphString = concatMap (++ " ") newAlphabet
-        matrixString = matrix2String tcmMatrix
+        matrixString = matrix2String newTCMMatrix
         tcmString = alphString ++ "\n" ++ matrixString
     in
     writeFile outFileName tcmString

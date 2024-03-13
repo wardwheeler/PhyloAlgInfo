@@ -75,8 +75,9 @@ moveListElement index inList =
 -- the inout index row and columns to last.  This used to
 -- reorder matrices by putting the indel row and column
 -- last as is assumed by POY/PhyG tcm format
-moveRowAndColumnToEnd :: Int -> [[a]] -> [[a]]
+moveRowAndColumnToEnd :: (Show a) => Int -> [[a]] -> [[a]]
 moveRowAndColumnToEnd index inMatrix =
+  
   if null inMatrix then []
   else
       let -- delted row to add back at end
@@ -86,8 +87,8 @@ moveRowAndColumnToEnd index inMatrix =
           deleteRow = (take index deletedRow') <> (drop (index + 1) deletedRow') <> [deletedRow' !! index]
           deleteRowLL = fmap (:[]) deleteRow
 
-          -- matric wihtout row and column to be moved
-          remainderMatrix = removeRowAndColumn index index inMatrix
+          -- matric wihtout row and column to be moved (+1 since indexed from one for some reason)
+          remainderMatrix = removeRowAndColumn (index + 1) (index + 1) inMatrix
 
           -- add cells from delted row to end of remainderMatrix rows
           newMatrix1 = zipWith (<>) remainderMatrix deleteRowLL
@@ -95,6 +96,7 @@ moveRowAndColumnToEnd index inMatrix =
           -- add deleteRow as last row to new matrix
           newMatrix2 = newMatrix1 <> [deleteRow]
       in
+      -- trace ("MRCE: " <> (show index) <> "\n" <> (show remainderMatrix) <> "\n" <> (show inMatrix) <> "\n" <> (show newMatrix2) <> "\n") $ 
       newMatrix2
 
 -- | removeRowAndColumn counting from 1 used in general cofactor
