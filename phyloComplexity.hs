@@ -57,7 +57,7 @@ writeTCMFile :: String -> String -> (String, [String], [[Double]]) -> IO()
 writeTCMFile unitType stub (charName, localAlphabet, tcmMatrix) =
     let outFileName = stub ++ charName ++ "." ++ unitType ++ ".tcm"
 
-        -- reorder if has indel char "-"
+        -- reorder if has indel char "-", don't print in banner line for POY/PhyG
         gapIndex = elemIndex "-" localAlphabet
         (newAlphabet, newTCMMatrix) = if isNothing gapIndex then (localAlphabet, tcmMatrix)
                                       else 
