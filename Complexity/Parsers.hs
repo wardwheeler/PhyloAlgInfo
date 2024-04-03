@@ -55,7 +55,7 @@ import           Debug.Trace
 
 
 
--- | ArgCrust are charcaterts in arguments that may need to be filtered
+-- | ArgCrust are characters in arguments that may need to be filtered
 argCruft :: String
 argCruft = ['(', ')','[',']']
 
@@ -563,7 +563,10 @@ putGapAtEnd inList =
 getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
 getBlockParams inStringList =
   let alphabetLocal = if (length $ nub $ getAlphabet inStringList) /= (length $ getAlphabet inStringList) then 
-                          errorWithoutStackTrace ("Repeated element in alphabet: " ++ (show $ getAlphabet inStringList))
+                          let repeats = (getAlphabet inStringList) \\ (nub $ getAlphabet inStringList) 
+                              
+                          in
+                          errorWithoutStackTrace ("Repeated element in alphabet: " ++ (concat $ intersperse " " repeats))
                       else 
                           -- wrong since reorders but doesn't effect pi or rmatrix
                           -- putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
@@ -582,6 +585,12 @@ getBlockParams inStringList =
   else
   (tail alphabetLocal ++ ["-"], branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
   -}
+
+
+-- | blockIdentifiers are the charcters that start and stop a block
+-- was conficting with elements need to do something better
+blockIdentifiers :: (Char, Char)
+blockIdentifiers = ('<', '>')
 
 -- | parseCharModel takes character model string and parses
 parseCharModel :: [(String, Int)] -> [String] -> [(CharacterModel, Int)]
