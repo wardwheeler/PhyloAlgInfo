@@ -47,13 +47,20 @@ import           Data.Char
 import qualified Data.Graph.Inductive.Graph        as G
 import qualified Data.Graph.Inductive.PatriciaTree as P
 import           Data.List
+import qualified Data.List.Split                   as LS
 import           Data.Maybe
 import           Data.String.Utils
 import qualified Data.Text.Lazy                    as T
 import           Text.Read
 import           Debug.Trace
 
-
+--  | blockElementDivideCharacter is the charcter that separates 
+-- components of bloc modles and machines. 
+-- is set to ';'
+-- WARNING if a charcter lement contains ';' (as potentially with LatexIPA)
+-- parsing will fail--would need to modify elements or code
+blockElementDivideCharacter :: Char
+blockElementDivideCharacter = ';'
 
 -- | ArgCrust are characters in arguments that may need to be filtered
 argCruft :: String
@@ -64,7 +71,7 @@ removeComments :: [String] -> String
 removeComments inStringList =
   if null inStringList then []
   else
-    let firstLine = head inStringList
+    let firstLine = strip $ head inStringList
     in
     --is Comment
     if (length firstLine > 1) && (head firstLine == '-') && ((firstLine !! 1) == '-') then removeComments $ tail inStringList
@@ -94,12 +101,29 @@ divideWith target inString =
 
 -- | getSections takes file contents (after comments removed) and splits into the machine sections
 getSections :: String -> [String]
-getSections inString =
+getSections inString = filter (/= "") $ splitOnSection inString
+  {- 
   if null inString then []
   else
     let first = takeWhile (/= '}') inString
     in
     first : getSections (tail $ dropWhile (/= '}') inString)
+  -}
+
+-- | endSectionString is the marking for end of sections in file speciificatinos "};"
+-- this is ues due to latex IPA charcters confusing parser
+endSectionString :: String
+endSectionString = "};"
+
+-- | splitOnSection takes a string and splits stgring based on endSectionString
+splitOnSection :: String -> [String]
+splitOnSection inString =
+  if null inString then []
+  else if length inString < 2 then errorWithoutStackTrace ("Parse of sections improperly formated.  Sections need to end with '};' but have " <> inString)
+  else 
+    --trace ("SOS: " <> (show $ LS.splitOn endSectionString inString)) $ 
+    LS.splitOn endSectionString inString
+
 
 -- | getMachineElement extract machine parts from [string]
 getMachineElements :: [String] -> [(String, String, Int)]
@@ -147,7 +171,7 @@ parseMachine inString =
   else
     let name = last $ words $ takeWhile (/= '{') inString
         guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
-        pieces = divideWith ';' guts
+        pieces = divideWith blockElementDivideCharacter guts
         machineElements =  getMachineElements pieces
     in
     let graphNameLocal = getGraphName machineElements
@@ -179,7 +203,7 @@ parseGraph graphNameLocal inStringList=
     let inString = head inStringList
         gName = last $ words $ takeWhile (/= '{') inString
         guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
-        pieces = divideWith ';' guts
+        pieces = divideWith blockElementDivideCharacter guts
         graphRepresentation = getValue "representation" pieces
     in
     -- values specified
@@ -244,18 +268,29 @@ getBlock name pairList =
     if fName == name then fNumber
     else getBlock name (tail pairList)
 
+-- | endAlphabetString is the marking for end of alphabet subsections in file speciificatinos "];"
+-- this is ues due to latex IPA charcters confusing parser
+endAlphabetString :: String
+endAlphabetString = "\"]"
+
 -- | getAlphabet take string list and sees if it starts with alphabet then parses
 getAlphabet :: [String] -> [String]
 getAlphabet inList =
+  --trace ("GA0: " <> (show inList)) $
   if null inList then errorWithoutStackTrace "No alphabet specifed in blockModel"
   else
     let first = removeWhiteSpace $ head inList
-        parts = divideWith ':' first
+        -- parts = divideWith ':' first
+        namePart = fmap toLower $ takeWhile (/= ':') first
+        elementPart' = tail $ dropWhile (/= '[') first --removes leading '['
+        elementPart = head $ LS.splitOn endAlphabetString elementPart'
+
     in
-    if fmap toLower (head parts) == "alphabet" then
-      let alphString = filter (/= '"') $ takeWhile (/= ']') (last parts)
-          alphList = divideWith ',' $ tail alphString --removes leading '['
+    if namePart == "alphabet" then
+      let -- alphString = filter (/= '"') $ takeWhile (/= ']') (last parts)
+          alphList = divideWith ',' $ filter (/= '"') elementPart -- $ tail alphString --removes leading '['
       in
+      --trace ("GA: " <> first <> " " <> (show alphList)) $ 
       alphList
     else getAlphabet (tail inList)
 
@@ -559,7 +594,7 @@ putGapAtEnd inList =
         in
         first ++ second ++ ["-"]
 
--- | getBlockParams takes strings of args and retruns tuples of params
+-- | getBlockParams takes strings of args and returns tuples of params
 getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
 getBlockParams inStringList =
   let alphabetLocal = if (length $ nub $ getAlphabet inStringList) /= (length $ getAlphabet inStringList) then 
@@ -570,6 +605,7 @@ getBlockParams inStringList =
                       else 
                           -- wrong since reorders but doesn't effect pi or rmatrix
                           -- putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
+                          trace ("There are " <> (show $ length $  getAlphabet inStringList) <> " elements ") $ --  <> (concat $ intersperse " " $ getAlphabet inStringList)) $
                           getAlphabet inStringList
 
       branchLengthLocal = getBranchLength inStringList --(Uniform,[])
@@ -600,10 +636,12 @@ parseCharModel blockNameList inStringList
   | otherwise =
       let inString = head inStringList
           bmName = last $ words $ takeWhile (/= '{') inString
-          guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
-          pieces = divideWith ';' guts
+          guts = removeWhiteSpace $ head $ LS.splitOn endSectionString $ tail $ dropWhile (/= '{') inString
+          -- guts = removeWhiteSpace $ takeWhile (/= '}') $ tail $ dropWhile (/= '{') inString
+          pieces = divideWith blockElementDivideCharacter guts
           numChars = getBlock bmName blockNameList
       in
+      --trace ("PCM: " <> bmName <> " " <> guts) $
       if numChars > 0 then
         let (cAlphabet, cBranchLength, cRateModifiers, cChangeModel,cPrecision, cLength) = getBlockParams pieces
             thisCharModel = CharacterModel { characterName = bmName
@@ -622,11 +660,12 @@ parseCharModel blockNameList inStringList
 -- | getMachineString takes section string and returns the one with machine in it
 getElementString :: String -> [String]-> [String]
 getElementString element inStringList =
-  if null inStringList then []
+  if null inStringList then [] -- errorWithoutStackTrace ("Element '" ++ element ++ "' not found")
   else
     let firstString = head inStringList
+        elementType = fmap toLower $ head $ words firstString
     in
-    if fmap toLower (head $ words firstString) == element then firstString : getElementString element (tail inStringList)
+    if elementType == element then firstString : getElementString element (tail inStringList)
     else getElementString element (tail inStringList)
 
 -- | getCharModelByName takes String and pull charModel by name
