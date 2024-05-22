@@ -615,7 +615,7 @@ qrFactorization aMatrix uMatrix counter =
     if length (filter (== "NaN") $ fmap show $ concat qMatrix) /= 0 then error "\n\tqrFactorization error--Nan values"
     else if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < Complexity.Constants.epsilon then (qMatrix, rMatrix, newU)
     else if counter > maxIterations then 
-      trace ("Warning: Max iterations exceeded in qrFactorizatio")
+      trace ("Warning: Max iterations exceeded in qrFactorization")
       (qMatrix, rMatrix, newU) -- error "Max iterations exceeded in qrFactorization" -- (qMatrix, rMatrix, uMatrix)
     else qrFactorization newA newU (counter + 1)
     --)
