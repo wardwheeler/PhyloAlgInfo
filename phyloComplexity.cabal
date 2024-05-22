@@ -27,6 +27,7 @@ executable phyloComplexity
                 -- -fwrite-ide-info
                 -rtsopts
                 "-with-rtsopts=-N -A64m -AL128M -H1024m -n4m"
+                -fllvm
 
   build-depends:  base >= 4.10
                 , bytestring
