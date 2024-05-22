@@ -63,6 +63,9 @@ import           Complexity.IntegratedModels
 import           Complexity.MatrixUtilities
 import           Complexity.Types
 import           Complexity.Utilities
+import           Control.Concurrent
+import           Control.DeepSeq
+import           Control.Parallel.Strategies
 import Debug.Trace
 
 
@@ -416,10 +419,10 @@ matrix2String inMatrix =
         firstString ++ "\n" ++ matrix2String (tail inMatrix)
 
 -- | makeNeymanMatrix is a general version of makeTCM taing arguments for all of Neyman versions
--- and returning teh log matrix for TCM file creation
+-- and returning the log matrix for TCM file creation
 makeNeymanMatrix :: (Double -> Int-> Int -> Double -> Double) ->  Distribution -> Int -> DistributionParameter -> Int ->  [(Double, Double)] -> String -> [[Double]]
 makeNeymanMatrix logType distribution alphabetSize alphaParam iterations modifiers lastElement=
-  let pairList = fmap (neymanGeneralWithK distribution alphabetSize alphaParam iterations) modifiers
+  let pairList = parmap rdeepseq (neymanGeneralWithK distribution alphabetSize alphaParam iterations) modifiers
       pii = sum $ fmap fst pairList
       pij = sum $ fmap snd pairList
       logPii = (-1) *  logType pii iterations 0 0
@@ -478,6 +481,13 @@ get4StateModelName modelType distribution
     else "j3"
   | otherwise = error ("Markov model " ++ show modelType ++ " not implemented")
 
+-- Map a function over a traversable structure in parallel
+-- Preferred over parMap which is limited to lists
+-- Add chunking (with arguement) (via chunkList) "fmap blah blah `using` parListChunk chunkSize rseq/rpar"
+-- but would have to do one for lists (with Chunk) and one for vectors  (splitAt recusively)
+parmap :: (Traversable t) => Strategy b -> (a -> b) -> t a -> t b
+parmap strat f = withStrategy (parTraversable strat) . fmap f
+
 -- | makeTCM takes unit function (logE or Log2) model type, branch model (and param(s)), and alphabet to create TCMs for POY/PCG
 -- the values will be log2/e/10 whatever (depending on input function) of integrated probabilitites of change (pij)
 -- the "name" string is returned for filename purposes
@@ -500,7 +510,7 @@ makeTCM logType charInfo =
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
             -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
         in
-        -- trace ("MTCM: " <> (show (eigenValueList, uMatrix, uInvMatrix)))
+        --trace ("MTCM: " <> (show (eigenValueList, uMatrix, uInvMatrix))) $
         (tcmName, tcmAlphabet, logMatrix)
       else
         let fourStateModel = get4StateModel tcmChangeModel branchDist
@@ -610,7 +620,7 @@ makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
 makeGTRLogMatrix ::  (Double -> Int-> Int -> Double -> Double) -> String -> [Double] -> [[Double]] -> [[Double]] -> Int ->  Double -> Double -> Int -> Distribution -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix logType lastAlphElement eigenValueList uMatrix uInvMatrix alphSize probDistParam maxValue iterations distribution modifiers =
   let -- zeroMatrix = replicate alphSize $ replicate alphSize 0.0
-      probMatrixList  = fmap (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
+      probMatrixList  = parmap rdeepseq (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
   --trace ("MGTLM: " <> (show probMatrixList))
@@ -624,7 +634,7 @@ makeGTRLogMatrix4State ::  (Double -> Int-> Int -> Double -> Double) -> ([Double
 makeGTRLogMatrix4State logType modelFunction probDistParam  iterations modelParams piVector modifiers =
   let lastAlphElement = "T"
       alphSize = 4
-      probMatrixList  = fmap (modelFunction modelParams piVector probDistParam iterations) modifiers
+      probMatrixList  = parmap rdeepseq (modelFunction modelParams piVector probDistParam iterations) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
   logMatrix

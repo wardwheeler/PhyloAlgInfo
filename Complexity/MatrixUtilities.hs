@@ -174,7 +174,7 @@ invertMatrix aMatrix = --invertMatrixExt aMatrix
       detARecip = 1 /  detA
   in
   if detA == 0 then error "Matrix is singular and cannot be inverted"
-  else if abs detA < epsilon then error ("Matrix is nearly singular (det = " ++ show detA ++ ") and may blow up")
+  else if abs detA < Complexity.Constants.epsilon then error ("Matrix is nearly singular (det = " ++ show detA ++ ") and may blow up")
   else matrixMultiplyScalar detARecip cMatrix
 
 
@@ -217,7 +217,7 @@ adjustSym inMatrix row column
           newValue = (first + second) / 2
       in
       if newValue > 0 then newValue : adjustSym inMatrix row (column + 1)
-      else epsilon : adjustSym inMatrix row (column + 1)
+      else Complexity.Constants.epsilon : adjustSym inMatrix row (column + 1)
 
 
 -- | adjust probabiliteis makes some adjustments for numerical issues
@@ -295,6 +295,7 @@ makeGTRMatrixLocal alphabetSize rMatrixIn piVectorIn =
             eigenVals = getDiagValues rqMatrix 0
             eigenVectorsInverse = invertMatrix eigenVectors
         in
+        --trace ("MGTRL: " <> (show (qFacMatrix, rFacMatrix, eigenVectors))) $
         (eigenVals, eigenVectors, eigenVectorsInverse)
 
 -- | isPosR take input matrix (ignores diagonals) and checks that all >0,
@@ -313,7 +314,7 @@ checkSymmetryQ qMatrix piVector alphSize row column
   | row == alphSize = True
   | column == alphSize = checkSymmetryQ qMatrix piVector alphSize (row + 1) 0
   | row == column = checkSymmetryQ qMatrix piVector alphSize row (column + 1)
-  | abs (((piVector !! row) * ((qMatrix !! row) !! column)) - ((piVector !! column) * ((qMatrix !! column) !! row))) > epsilon = error ("Element (" ++ show row ++ "," ++ show column ++ ") in Q matrix not symmetrical : " ++ show qMatrix)
+  | abs (((piVector !! row) * ((qMatrix !! row) !! column)) - ((piVector !! column) * ((qMatrix !! column) !! row))) > Complexity.Constants.epsilon = error ("Element (" ++ show row ++ "," ++ show column ++ ") in Q matrix not symmetrical : " ++ show qMatrix)
   | otherwise = checkSymmetryQ qMatrix piVector alphSize row (column + 1)
 
 -- | regularizePi take input Pi vector and checks that all >0,
@@ -585,7 +586,7 @@ getHouseholderList inMatrix aMatrix fullDimension counter =
     if length thisQ' == 2 then [thisQ]
     else thisQ : getHouseholderList (makeMatrixMinor counter counter q1AMatrix) aMatrix fullDimension (counter + 1)
 
--- qrDecomposition perfomres QR decomposition using Householder reflections
+-- qrDecomposition performes QR decomposition using Householder reflections
 -- assumes square here though not a general restriction of the method
 qrDecomposition :: [[Double]] -> ([[Double]], [[Double]])
 qrDecomposition aMatrix =
@@ -610,9 +611,12 @@ qrFactorization aMatrix uMatrix counter =
         linNewAMatrix = concat newA
         diffVal = sum $ abs <$> zipWith (-) linAMatrix linNewAMatrix
     in
-    -- trace (show (diffVal/ fromIntegral (length aMatrix * length aMatrix))) (
-    if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < epsilon then (qMatrix, rMatrix, newU)
-    else if counter > maxIterations then (qMatrix, rMatrix, newU) -- error "Max iterations exceeded in qrFactorization" -- (qMatrix, rMatrix, uMatrix)
+    --trace ("qrFact: " <> (show (counter, maxIterations))) $ -- <> " " <> (show (qMatrix, rMatrix)) <> (show $ length (filter (== nan) $ concat qMatrix))) $
+    if length (filter (== "NaN") $ fmap show $ concat qMatrix) /= 0 then error "\n\tqrFactorization error--Nan values"
+    else if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < Complexity.Constants.epsilon then (qMatrix, rMatrix, newU)
+    else if counter > maxIterations then 
+      trace ("Warning: Max iterations exceeded in qrFactorizatio")
+      (qMatrix, rMatrix, newU) -- error "Max iterations exceeded in qrFactorization" -- (qMatrix, rMatrix, uMatrix)
     else qrFactorization newA newU (counter + 1)
     --)
 

@@ -45,11 +45,21 @@ import           Complexity.MatrixUtilities
 import           Complexity.Parsers
 import           Complexity.Types
 import           Complexity.Utilities
+import           Control.Concurrent
+import           Control.DeepSeq
+import           Control.Parallel.Strategies
 import           Data.List
 import           Data.Maybe
 import           System.Environment
 import           System.IO
 import Debug.Trace
+
+-- Map a function over a traversable structure in parallel
+-- Preferred over parMap which is limited to lists
+-- Add chunking (with arguement) (via chunkList) "fmap blah blah `using` parListChunk chunkSize rseq/rpar"
+-- but would have to do one for lists (with Chunk) and one for vectors  (splitAt recusively)
+parmap :: (Traversable t) => Strategy b -> (a -> b) -> t a -> t b
+parmap strat f = withStrategy (parTraversable strat) . fmap f
 
 -- | writeTCM takes model structure (name, alphabet, matrix) and writes file
 -- creates filename from stub and character name
@@ -164,16 +174,19 @@ main =
             hPutStrLn stderr ("Total complexity softwired graph: " ++ show graph2DisplayTreeComplexity)
         else hPutStrLn stderr ("Base graph is a tree so no extra complexity to make a display tree")
 
+
+        -- these parallelized with non-strict parallel
+
         --calculate and output Bit TCMs for each character change model for complexity calculations
-        let tcmListBit = fmap (makeTCM log2 . fst) charInfo
+        let tcmListBit = parmap rdeepseq (makeTCM log2 . fst) charInfo
         mapM_ (writeTCMFile "bit" stub) tcmListBit
 
         --calculate and output Nat TCMs for each character change model for likelihood calculations
-        let tcmListE = fmap (makeTCM logE . fst) charInfo
+        let tcmListE = parmap rdeepseq (makeTCM logE . fst) charInfo
         mapM_ (writeTCMFile "nat" stub) tcmListE
 
         --calculate and output log10 TCMs for each character change model for likelihood calculations
-        let tcmList10 = fmap (makeTCM log10 . fst) charInfo
+        let tcmList10 = parmap rdeepseq (makeTCM log10 . fst) charInfo
         mapM_ (writeTCMFile "dit" stub) tcmList10
 
         -- charInfoOrig so unaffected by model optimization

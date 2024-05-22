@@ -26,7 +26,7 @@ executable phyloComplexity
                 -- -XBangPatterns
                 -- -fwrite-ide-info
                 -rtsopts
-                "-with-rtsopts=-A64m -AL128M -H1024m -n4m"
+                "-with-rtsopts=-N -A64m -AL128M -H1024m -n4m"
 
   build-depends:  base >= 4.10
                 , bytestring
