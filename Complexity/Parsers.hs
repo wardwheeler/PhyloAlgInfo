@@ -274,10 +274,10 @@ endAlphabetString :: String
 endAlphabetString = "\"]"
 
 -- | getAlphabet take string list and sees if it starts with alphabet then parses
-getAlphabet :: [String] -> [String]
-getAlphabet inList =
+getAlphabet :: String -> [String] -> [String]
+getAlphabet bmName inList =
   --trace ("GA0: " <> (show inList)) $
-  if null inList then errorWithoutStackTrace "No alphabet specifed in blockModel"
+  if null inList then errorWithoutStackTrace ("No alphabet specifed in blockModel: " <> bmName)
   else
     let first = removeWhiteSpace $ head inList
         -- parts = divideWith ':' first
@@ -292,12 +292,12 @@ getAlphabet inList =
       in
       --trace ("GA: " <> first <> " " <> (show alphList)) $ 
       alphList
-    else getAlphabet (tail inList)
+    else getAlphabet bmName (tail inList)
 
 -- | getBranchLength gets brankch length distribution and parameters
-getBranchLength :: [String] -> (Distribution, [DistributionParameter])
-getBranchLength inList =
-  if null inList then errorWithoutStackTrace "No BranchLength specifed in blockModel"
+getBranchLength :: String -> [String] -> (Distribution, [DistributionParameter])
+getBranchLength bmName inList =
+  if null inList then errorWithoutStackTrace ("No BranchLength specifed in blockModel: " <> bmName) 
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
@@ -309,12 +309,12 @@ getBranchLength inList =
       else if fmap toLower (parts !! 1) == "uniform" then (Uniform, [fromJust val])
       else if fmap toLower (parts !! 1) == "exponential" then (Exponential, [fromJust val])
       else errorWithoutStackTrace ("Distibution " ++ (parts !! 1) ++ " is unsupported")
-    else getBranchLength (tail inList)
+    else getBranchLength bmName (tail inList)
 
 -- | getRateModifiers gets modifiers distribution and parameters
-getRateModifiers :: [String] -> [(Modifier, [DistributionParameter])]
-getRateModifiers inList =
-  if null inList then errorWithoutStackTrace "No Rate Modifier specifed in blockModel"
+getRateModifiers :: String -> [String] -> [(Modifier, [DistributionParameter])]
+getRateModifiers bmName inList =
+  if null inList then errorWithoutStackTrace ("No Rate Modifier specifed in blockModel: " <> bmName)
   else
     let first = fmap toLower $ removeWhiteSpace $ head inList
         parts = divideWith ':' first
@@ -384,7 +384,7 @@ getRateModifiers inList =
             else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier: " ++ head restMod ++ " "++ (restMod !! 1) ++ " " ++ (restMod !! 2) ++ " " ++ (restMod !! 3) ++ " combination is not implemented\n")
               --[(Invariant, [0.9]),(Gamma, [5, 0.9])]
         else errorWithoutStackTrace ("In getRate Modifier--Rate Modifier " ++ show restMod)
-    else getRateModifiers (tail inList)
+    else getRateModifiers bmName (tail inList)
     --)
 
 -- | convert2Numbers takes string and converts to numbers only if its first char is a number
@@ -401,17 +401,17 @@ convert2Numbers inStringList =
         if isNothing val then errorWithoutStackTrace ("Error parsing input as double value: " <> inString)
         else (fromJust val) : convert2Numbers (tail inStringList)
 
--- | getRValues take alphabet size and list of strings and returns
+-- | getRValues bmNametake alphabet size and list of strings and returns
 -- rmatrix values
-getRValues :: Int -> String -> [[Double]]
-getRValues alphSize inList =
-  if null inList then errorWithoutStackTrace "Empty RMatrix"
+getRValues :: String -> Int -> String -> [[Double]]
+getRValues bmName alphSize inList =
+  if null inList then errorWithoutStackTrace ("Empty RMatrix in block: " <> bmName)
   else
     let parts = divideWith ',' inList
         numberList = convert2Numbers parts
     in
     --trace  ("GRV: " <> (show $ split2Matrix alphSize numberList)) $
-    if length numberList /= (alphSize * alphSize) then errorWithoutStackTrace "Error--mismatch between alphabet size and R Matrix element number"
+    if length numberList /= (alphSize * alphSize) then errorWithoutStackTrace ("Error--mismatch between alphabet size and R Matrix element number in block: " <> bmName)
     else split2Matrix alphSize numberList
     --)
 
@@ -478,9 +478,9 @@ log2NormalizedTransitions base inR =
 
 -- | getChangeModel gets modifiers distribution and parameters
 -- 4-state models adjusted to rates average 1
-getChangeModel :: Int -> [String] -> (MarkovModel, QMatrix, PiVector, [ModelParameter])
-getChangeModel alphSize inList =
-  if null inList then errorWithoutStackTrace "No Character Change model specifed in blockModel"
+getChangeModel :: String -> Int -> [String] -> (MarkovModel, QMatrix, PiVector, [ModelParameter])
+getChangeModel bmName alphSize inList =
+  if null inList then errorWithoutStackTrace ("No Character Change model specifed in blockModel: " <> bmName)
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
@@ -522,11 +522,11 @@ getChangeModel alphSize inList =
           (TN93, [[]],piMatrix,[alpha1Param*adjustFactor, alpha2Param*adjustFactor, betaParam*adjustFactor])
         else if lcParts == "gtr" then
           if head rest == "rmatrix" then
-            let rMatrix =  getRValues alphSize (rest !! 1)
+            let rMatrix =  getRValues bmName alphSize (rest !! 1)
             in
             (GTR, rMatrix,piMatrix,[])
           else -- Pivector first
-            let rMatrix =  getRValues alphSize (rest !! 2)
+            let rMatrix =  getRValues bmName alphSize (rest !! 2)
             in
             (GTR, rMatrix,piMatrix,[])
         else if lcParts == "logmatrix" then
@@ -534,22 +534,22 @@ getChangeModel alphSize inList =
               baseParam = getParam "base" partsSplit
           in
           if head rest == "rmatrix" then
-            let rMatrix =  getRValues alphSize (rest !! 1)
+            let rMatrix =  getRValues bmName alphSize (rest !! 1)
                 newRMatrix = log2NormalizedTransitions baseParam rMatrix
             in
             (GTR, newRMatrix,newPi,[])
           else -- Pivector first
-            let rMatrix =  getRValues alphSize (rest !! 2)
+            let rMatrix =  getRValues bmName alphSize (rest !! 2)
                 newRMatrix = log2NormalizedTransitions baseParam rMatrix
             in
             (GTR, newRMatrix,newPi,[])
         else errorWithoutStackTrace ("Change Model " ++ (parts !! 1) ++ " is not yet implemented")
-    else getChangeModel alphSize (tail inList)
+    else getChangeModel bmName alphSize (tail inList)
 
 -- | getPrecision take string list and sees if it starts with precision then parses
-getPrecision :: [String] -> Int
-getPrecision inList =
-  if null inList then errorWithoutStackTrace "No precision specifed in blockModel"
+getPrecision :: String -> [String] -> Int
+getPrecision bmName inList =
+  if null inList then errorWithoutStackTrace ("No precision specifed in blockModel: " <> bmName)
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
@@ -561,24 +561,24 @@ getPrecision inList =
         in
         if isNothing val then errorWithoutStackTrace  ("Error processing precsion value as Int: " <> (last parts))
         else fromJust val
-    else getPrecision (tail inList)
+    else getPrecision bmName (tail inList)
 
 -- | getLenfgth take string list and sees if it starts with charLength then parses
-getCharLength :: [String] -> Int
-getCharLength inList =
-  if null inList then errorWithoutStackTrace "No character charLength specifed in blockModel"
+getCharLength :: String -> [String] -> Int
+getCharLength bmName inList =
+  if null inList then errorWithoutStackTrace ("No character charLength specifed in blockModel: " <> bmName)
   else
     let first = removeWhiteSpace $ head inList
         parts = divideWith ':' first
     in
     if fmap toLower (head parts) == "length" then
-      if length parts /= 2 then errorWithoutStackTrace "Incorrect number of arguments in charLength, should be 1"
+      if length parts /= 2 then errorWithoutStackTrace ("Incorrect number of arguments in charLength, should be 1 in: " <> bmName)
       else 
         let val = (readMaybe (last parts) :: Maybe Int)
         in
         if isNothing val then errorWithoutStackTrace ("Error processing length value as Int: " <> (last parts))
         else fromJust val
-    else getCharLength (tail inList)
+    else getCharLength bmName (tail inList)
 
 -- | putGapAtEnd puts alphabets so Gap at and for GTR matrix interpretations
 putGapAtEnd :: [String] -> [String]
@@ -595,24 +595,24 @@ putGapAtEnd inList =
         first ++ second ++ ["-"]
 
 -- | getBlockParams takes strings of args and returns tuples of params
-getBlockParams :: [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
-getBlockParams inStringList =
-  let alphabetLocal = if (length $ nub $ getAlphabet inStringList) /= (length $ getAlphabet inStringList) then 
-                          let repeats = (getAlphabet inStringList) \\ (nub $ getAlphabet inStringList) 
+getBlockParams :: String -> [String] -> ([String], (Distribution, [DistributionParameter]), [(Modifier, [DistributionParameter])], (MarkovModel, QMatrix, PiVector, [ModelParameter]), Int, Int)
+getBlockParams bmName inStringList =
+  let alphabetLocal = if (length $ nub $ getAlphabet bmName inStringList) /= (length $ getAlphabet bmName inStringList) then 
+                          let repeats = (getAlphabet bmName inStringList) \\ (nub $ getAlphabet bmName inStringList) 
                               
                           in
-                          errorWithoutStackTrace ("Repeated element in alphabet: " ++ (concat $ intersperse " " repeats))
+                          errorWithoutStackTrace ("Repeated element in block " <> bmName <> " alphabet: " ++ (concat $ intersperse " " repeats))
                       else 
                           -- wrong since reorders but doesn't effect pi or rmatrix
                           -- putGapAtEnd (nub $ getAlphabet inStringList) --Puts -'- last if in alphabetLocal'
-                          trace ("There are " <> (show $ length $  getAlphabet inStringList) <> " elements ") $ --  <> (concat $ intersperse " " $ getAlphabet inStringList)) $
-                          getAlphabet inStringList
+                          trace ("There are " <> (show $ length $  getAlphabet bmName inStringList) <> " elements ") $ --  <> (concat $ intersperse " " $ getAlphabet inStringList)) $
+                          getAlphabet bmName inStringList
 
-      branchLengthLocal = getBranchLength inStringList --(Uniform,[])
-      rateModifiersLocal = getRateModifiers inStringList --[(None,[])]
-      changeModelLocal = getChangeModel (length alphabetLocal) inStringList --(Neyman, [[]], [])
-      precisionLocal = getPrecision inStringList
-      charLengthLocal = getCharLength inStringList
+      branchLengthLocal = getBranchLength bmName  inStringList --(Uniform,[])
+      rateModifiersLocal = getRateModifiers bmName inStringList --[(None,[])]
+      changeModelLocal = getChangeModel bmName (length alphabetLocal) inStringList --(Neyman, [[]], [])
+      precisionLocal = getPrecision bmName  inStringList
+      charLengthLocal = getCharLength bmName  inStringList
   in
   (alphabetLocal, branchLengthLocal, rateModifiersLocal, changeModelLocal, precisionLocal, charLengthLocal)
   
@@ -643,7 +643,7 @@ parseCharModel blockNameList inStringList
       in
       --trace ("PCM: " <> bmName <> " " <> guts) $
       if numChars > 0 then
-        let (cAlphabet, cBranchLength, cRateModifiers, cChangeModel,cPrecision, cLength) = getBlockParams pieces
+        let (cAlphabet, cBranchLength, cRateModifiers, cChangeModel,cPrecision, cLength) = getBlockParams bmName pieces
             thisCharModel = CharacterModel { characterName = bmName
                               , alphabet = cAlphabet
                               , branchLength = cBranchLength
@@ -774,10 +774,10 @@ parseMachineFile optimizeModels fileContents =
     in
     (optmizedSections, parsedSections)
 
--- | reduceModels tkaes model specification and tries to reduce the number of
--- different Markov Models by using more genreal models if alreadMaybey specified.
+-- | reduceModels takes model specification and tries to reduce the number of
+-- different Markov Models by using more general models if alread specified.
 -- e.g subsitution a GTR with all params the same-> no need for Neyman code
--- or more complex and less comples 4-state DNA models
+-- or more complex and less complex 4-state DNA models
 reduceModels :: [MarkovModel] -> [(CharacterModel, Int)] -> [(CharacterModel, Int)]
 reduceModels markovPresent inModelList
   | null markovPresent = errorWithoutStackTrace "No markov models specified in reduceModels"

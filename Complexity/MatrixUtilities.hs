@@ -168,7 +168,8 @@ getRow row column aMatrix =
 -- A^{-1}_{ij} =  C_{ji}/detA
 -- initialize with i=row=1 j=column=1
 invertMatrix :: Matrix -> Matrix
-invertMatrix aMatrix = --invertMatrixExt aMatrix
+invertMatrix aMatrix = invertMatrixExt aMatrix
+  {-
   let cMatrix = cofactorTMatrix aMatrix 1
       detA = determinantNumerical aMatrix --determinant aMatrix
       detARecip = 1 /  detA
@@ -176,6 +177,7 @@ invertMatrix aMatrix = --invertMatrixExt aMatrix
   if detA == 0 then error "Matrix is singular and cannot be inverted"
   else if abs detA < Complexity.Constants.epsilon then error ("Matrix is nearly singular (det = " ++ show detA ++ ") and may blow up")
   else matrixMultiplyScalar detARecip cMatrix
+  -}
 
 
 -- | gets Transpose cofacrtor matrix C^T for matrix inversion
@@ -258,7 +260,7 @@ adjustDiag inMatrix fullMatrix row =
 -- should branch not have kWeight?
 trapezoidIntegration :: ([Double] -> [[Double]] -> [[Double]] -> Double -> Int -> Int -> Int -> Int -> Double) -> (Double -> Int -> Double -> Double) -> [Double] -> [[Double]] -> [[Double]]-> Int -> Int -> Double -> Double -> Int -> Int -> Double -> Double
 trapezoidIntegration pijFun distFun eigenValueList uMatrix uInvMatrix iRow jColumn probDistParam maxValue iterations counter kWeight =
-  if counter == iterations then 0
+  if counter >= iterations then 0
   else
     let interval = maxValue / fromIntegral iterations
         time = fromIntegral counter * interval
@@ -295,7 +297,7 @@ makeGTRMatrixLocal alphabetSize rMatrixIn piVectorIn =
             eigenVals = getDiagValues rqMatrix 0
             eigenVectorsInverse = invertMatrix eigenVectors
         in
-        --trace ("MGTRL: " <> (show (qFacMatrix, rFacMatrix, eigenVectors))) $
+        --trace ("MGTRL: " <> (show eigenVals)) $
         (eigenVals, eigenVectors, eigenVectorsInverse)
 
 -- | isPosR take input matrix (ignores diagonals) and checks that all >0,

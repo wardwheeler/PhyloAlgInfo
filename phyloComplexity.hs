@@ -181,6 +181,7 @@ main =
         let tcmListBit = parmap rdeepseq (makeTCM log2 . fst) charInfo
         mapM_ (writeTCMFile "bit" stub) tcmListBit
 
+        {- Need to add in optin to do these-- or refactor so TCM not made 3 times.
         --calculate and output Nat TCMs for each character change model for likelihood calculations
         let tcmListE = parmap rdeepseq (makeTCM logE . fst) charInfo
         mapM_ (writeTCMFile "nat" stub) tcmListE
@@ -188,6 +189,7 @@ main =
         --calculate and output log10 TCMs for each character change model for likelihood calculations
         let tcmList10 = parmap rdeepseq (makeTCM log10 . fst) charInfo
         mapM_ (writeTCMFile "dit" stub) tcmList10
+        -}
 
         -- charInfoOrig so unaffected by model optimization
         let (aic, bic) = getAICBIC charInfoOrig 0 0

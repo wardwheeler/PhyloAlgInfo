@@ -45,6 +45,8 @@ ToDo:  other models
    3) separate out invariants alone--or convert to gamma 2 classes?
 -}
 
+{-# LANGUAGE BangPatterns #-}
+
 module Complexity.CharacterModels
   (  makeTCM -- general for TCM construcviton log2 or logE
   ,  makeProgramStringCharacters --program to outpput character models (all of them)
@@ -505,12 +507,12 @@ makeTCM logType charInfo =
     else
       if tcmChangeModel == GTR then
         let -- external library seems to violate an order or other invaritant in my code jumbles eigenvectors etc
-            -- (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
+            --(eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
             (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
             -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
         in
-        --trace ("MTCM: " <> (show (eigenValueList, uMatrix, uInvMatrix))) $
+        --trace ("MTCM: " <> (show logMatrix)) $
         (tcmName, tcmAlphabet, logMatrix)
       else
         let fourStateModel = get4StateModel tcmChangeModel branchDist
@@ -605,25 +607,27 @@ getAICBIC charInfoPairList aicCounter bicCounter =
 -- | makeLogMatrix takes the probMatrix List and converts to logMatrix for return
 makeLogMatrix :: (Double -> Int-> Int -> Double -> Double) -> String -> Int -> Int -> [[[Double]]]-> [[Double]]
 makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList =
+  --trace ("In MLM") $
   let zeroMatrix = replicate alphSize $ replicate alphSize 0.0
-      pMatrix = foldl' addMatrices  zeroMatrix probMatrixList
+      pMatrix =foldl' addMatrices  zeroMatrix probMatrixList
       -- make symmetrical
       pMatrixSym =  split2Matrix alphSize $ adjustSym pMatrix 0 0
       pMatrixAdjusted = adjustDiag pMatrixSym pMatrixSym 0
       logMatrix = split2Matrix alphSize $ (* (-1)) <$> getLogMatrix logType pMatrixAdjusted alphSize lastAlphElement 0 0 iterations
   in
-  --trace ("MLM: " <> (show pMatrixAdjusted))
+  --trace ("MLM: " <> (show logMatrix))
   logMatrix
 
 -- | makeGTRLogMatrix is a general version of makeTCM taking arguments for all of GTR versions
 -- and returning the log matrix for TCM file creation
 makeGTRLogMatrix ::  (Double -> Int-> Int -> Double -> Double) -> String -> [Double] -> [[Double]] -> [[Double]] -> Int ->  Double -> Double -> Int -> Distribution -> [(Double, Double)] -> [[Double]]
 makeGTRLogMatrix logType lastAlphElement eigenValueList uMatrix uInvMatrix alphSize probDistParam maxValue iterations distribution modifiers =
+  --trace ("In MGTLM") $
   let -- zeroMatrix = replicate alphSize $ replicate alphSize 0.0
       probMatrixList  = parmap rdeepseq (split2Matrix alphSize . integrateGTRMatrixWithK eigenValueList uMatrix uInvMatrix 0 0 probDistParam maxValue iterations alphSize distribution) modifiers
       logMatrix = makeLogMatrix logType lastAlphElement alphSize iterations probMatrixList
   in
-  --trace ("MGTLM: " <> (show probMatrixList))
+  --trace ("MGTLM: " <> (show logMatrix))
   logMatrix
 
 -- | makeGTRLogMatrix4State is a general version of makeTCM taking arguments for all of 4-state model
