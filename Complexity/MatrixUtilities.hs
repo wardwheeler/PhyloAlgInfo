@@ -614,7 +614,7 @@ qrFactorization aMatrix uMatrix counter =
         diffVal = sum $ abs <$> zipWith (-) linAMatrix linNewAMatrix
     in
     --trace ("qrFact: " <> (show (counter, maxIterations))) $ -- <> " " <> (show (qMatrix, rMatrix)) <> (show $ length (filter (== nan) $ concat qMatrix))) $
-    if length (filter (== "NaN") $ fmap show $ concat qMatrix) /= 0 then error "\n\tqrFactorization error--Nan values"
+    if length (filter (== "NaN") $ fmap show $ concat qMatrix) /= 0 then error "\n\tqrFactorization error--NaN values"
     else if (diffVal/ fromIntegral (length aMatrix * length aMatrix)) < Complexity.Constants.epsilon then (qMatrix, rMatrix, newU)
     else if counter > maxIterations then 
       trace ("Warning: Max iterations exceeded in qrFactorization")

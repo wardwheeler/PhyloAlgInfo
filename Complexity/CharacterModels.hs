@@ -507,8 +507,8 @@ makeTCM logType charInfo =
     else
       if tcmChangeModel == GTR then
         let -- external library may violate an order or other invariant in my code jumbles eigenvectors etc--think fixed now--was due to row v column vector transformation
-            (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
-            --(eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
+            --(eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixExt (length tcmAlphabet) tcmR tcmP
+            (eigenValueList, uMatrix, uInvMatrix) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
             logMatrix = makeGTRLogMatrix logType (last tcmAlphabet) eigenValueList uMatrix uInvMatrix (length tcmAlphabet) (head branchParams) maximumTime tcmPrecision branchDist classList
             -- (_, uMatrix2, uInvMatrix2) =  makeGTRMatrixLocal (length tcmAlphabet) tcmR tcmP
         in
