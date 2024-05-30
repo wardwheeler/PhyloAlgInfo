@@ -43,6 +43,7 @@ import           Numeric.LinearAlgebra
 import           Complexity.Utilities
 import           Complexity.MatrixUtilities
 import           Prelude                    hiding ((<>))
+import qualified Data.Vector.Storable as V
 -- import Debug.Trace
 
 -- | makeGTRMatrixExt makes GTR matricx using external LAPACK/BLAS libraries
@@ -58,11 +59,24 @@ makeGTRMatrixExt alphabetSize rMatrixIn piVectorIn =
     if not isSymmQ then error ("Q matrix not time reversible : " ++ show qMatrix)
     else --put in Numeric.LinearAlgebra type
         let qMatLA = matrix alphabetSize $ concat qMatrix2
-            (qrMatrix,rMatrix) = qr qMatLA
+            (qrMatrix,rMatrix) = thinQR qMatLA
             aMatrix = rMatrix <> qrMatrix
+            eigenVectorsRealLists = toColumnLists qrMatrix
+            eigenVectorsInverseLists = toColumnLists $ inv qrMatrix
+            eigenValsRealList = getDiagValues (toColumnLists aMatrix) 0
+
+            {-This was scrmabling column vecotrs into row vetors
             eigenVectorsRealLists = toLists qrMatrix
             eigenVectorsInverseLists = toLists $ inv qrMatrix
             eigenValsRealList = getDiagValues (toLists aMatrix) 0
+            -}
+            
         in
         (eigenValsRealList, eigenVectorsRealLists, eigenVectorsInverseLists)
     
+-- | toColumnLists takes a Matrix and returns the columns as lists of elements
+toColumnLists :: Matrix Double -> [[Double]]
+toColumnLists inMatrix =
+    let listColumnV = toColumns inMatrix
+    in
+    fmap V.toList listColumnV

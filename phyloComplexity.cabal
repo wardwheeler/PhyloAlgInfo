@@ -43,6 +43,7 @@ executable phyloComplexity
                 , text
                 , parallel
                 , split
+                , vector
                 , zlib
                 
 
