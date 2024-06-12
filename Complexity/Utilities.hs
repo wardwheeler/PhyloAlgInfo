@@ -50,6 +50,7 @@ import Data.String.Encode qualified as E
 import Data.List
 -- import Complexity.Constants
 import Numeric.LinearAlgebra
+import Debug.Trace
 
 -- | occurencesInList counts occurences elements in list--makes result double so can divide later
 occurencesInList :: Eq a => [a] -> a -> Double
@@ -117,7 +118,9 @@ getHuffman inString =
 -- Using Shannon bits, but could use Huffman since Shannon can't be realized
 getInformationContent :: String -> (Double, Int, String, Double)
 getInformationContent programString =
-  if null programString then error "Empty program in getInformation"
+  if null programString then 
+    trace ("Warning: Empty program in getInformation (perhaps no graph)") $
+    (0.0,0,"",0.0)
   else
     let (huffBits, huffBinary) =  getHuffman programString
         compressedStream = GZ.compressWith GZ.defaultCompressParams {GZ.compressLevel = GZ.bestCompression} (E.convertString programString)

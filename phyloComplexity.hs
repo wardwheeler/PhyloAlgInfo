@@ -120,7 +120,9 @@ main =
 
         --Calculate complexity of Graph Component
         -- based on number of edges |E| * 2 (for vertex specification) * log |V| (for number of bits required to specify largest vertex index).
-        let graphProgram = makeProgramStringGraph (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
+        let graphProgram = if (graphName graphConfig /= "EmptyGraph") 
+            then makeProgramStringGraph (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
+            else []
         let (graphShannonBits, graphHuffmanLengthBits, graphHuffmanBitRep, gzipGraph) = getInformationContent graphProgram
 
         let graphDisplayProgram = makeDisplayGraphString (numLeaves graphConfig) (numSingletons graphConfig) (numRoots graphConfig) (numNetworkEdges graphConfig)
@@ -160,8 +162,11 @@ main =
         let marginalDisplayComplexity = gzipDisplay - gzipGraph 
 
         -- let numGraphVertices = fromIntegral $ (2 * numLeaves graphConfig) - numRoots graphConfig + (2 * numNetworkEdges graphConfig) + numSingletons graphConfig
-        let graph2DisplayTreeComplexity = gzipGraph + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * marginalDisplayComplexity)
-                --fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
+        let graph2DisplayTreeComplexity = 
+                if (graphName graphConfig /= "EmptyGraph") 
+                    then gzipGraph + ((2 ** fromIntegral (numNetworkEdges graphConfig)) * marginalDisplayComplexity)
+                else 0
+                    --fromIntegral (numNetworkEdges graphConfig) * logBase 2.0 numGraphVertices
 
         hPutStrLn stderr ("Softwired Graph -> Display tree complexity: " ++ show graph2DisplayTreeComplexity)
 
@@ -223,7 +228,11 @@ main =
         ----follow individual display trees so the number of characters (take smaller of two),
         ----but still need 'r' bits to encoding which display tree
         -- let characterNumber = fromIntegral $ sum $ snd Control.Applicative.<$> characterModelList machineConfig
-        let softWiredFactor = gzipGraph + displayTreeSwitchingComplexity + ((min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber) * marginalDisplayComplexity)
+        let softWiredFactor = 
+                if (graphName graphConfig /= "EmptyGraph")  
+                        then  gzipGraph + displayTreeSwitchingComplexity + ((min (2 ** fromIntegral (numNetworkEdges graphConfig)) characterNumber) * marginalDisplayComplexity)
+                else 0.0
+                
         hPutStrLn stderr ("Softwire complexity factor: " ++ show softWiredFactor)
 
         --Output machine Complexity

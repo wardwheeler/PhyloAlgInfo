@@ -146,7 +146,9 @@ getMachineElements inStringList =
 -- | getGraphName extracts graph from elements list
 getGraphName :: [(String, String, Int)] -> String
 getGraphName elementList =
-  if null elementList then errorWithoutStackTrace "Graph specification not found"
+  if null elementList then 
+    trace("Warning: Graph specification not found") $
+    graphName emptyGraphModel
   else
     let (fType, fName, _) = head elementList
     in
@@ -707,10 +709,14 @@ parseSections inSectionList =
           cCharModelList = parseCharModel blockModels $ getElementString "blockmodel" inSectionList
           reorderedCharacterModelList = reorderCharacterModels cCharModelList blockModels
       in
-      if null graphModels then errorWithoutStackTrace "No graph specification in machine file--or not matching name"
-      else if length graphModels > 1 then errorWithoutStackTrace ("Can only have a single graph specification in machine file.  There are " ++ show (length graphModels))
+      if length graphModels > 1 then errorWithoutStackTrace ("Can only have a single graph specification in machine file.  There are " ++ show (length graphModels))
       else if null reorderedCharacterModelList then errorWithoutStackTrace "Need at least one character model"
-      else
+      else if null graphModels then 
+          trace ("Warning: No graph specification in machine file--or not matching name") $
+          let thisMachineModel = MachineModel {machineName = gMachineName, graphSpecification = emptyGraphModel, characterModelList = reorderedCharacterModelList}
+        in
+        thisMachineModel
+      else 
         --IN HERE for finding parsed graph and models
         let thisMachineModel = MachineModel {machineName = gMachineName, graphSpecification = head graphModels, characterModelList = reorderedCharacterModelList}
         in

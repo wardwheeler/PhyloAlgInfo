@@ -110,3 +110,14 @@ type Matrix = [[Double]]
 -- | Vector for matrix utilities
 -- may comflict with external libraries so hide there
 type Vector = [Double]
+
+-- | emptyGraphModel if no graph in machine
+emptyGraphModel :: GraphModel
+emptyGraphModel =
+    GraphModel
+        { graphName         = "EmptyGraph"
+        , numLeaves         = 0
+        , numRoots          = 0
+        , numSingletons     = 0
+        , numNetworkEdges   = 0
+        } 
