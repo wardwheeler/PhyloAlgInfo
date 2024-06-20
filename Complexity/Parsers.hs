@@ -302,7 +302,11 @@ getAlphabet bmName inList =
                                           else if length a == 2 then 
                                             if head a == '"' then tail a
                                             else init a
-                                          else if (length a) > 2 && head a == '"' && last a == '"' then init $ tail a
+                                          else if (length a) > 2 then 
+                                              if head a == '"' && last a == '"' then init $ tail a
+                                              else if head a == '"' then tail a
+                                              else if last a == '"' then init a
+                                              else a
                                           else a
 
 
