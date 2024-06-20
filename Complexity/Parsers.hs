@@ -290,11 +290,21 @@ getAlphabet bmName inList =
     in
     if namePart == "alphabet" then
       let -- alphString = filter (/= '"') $ takeWhile (/= ']') (last parts)
-          alphList = divideWith ',' $ filter (/= '"') elementPart -- $ tail alphString --removes leading '['
+          alphList = divideWith ',' $ elementPart -- $ tail alphString --removes leading '['
+          -- alphList = divideWith ',' $ elementPart -- $ tail alphString --removes leading '['
       in
       --trace ("GA: " <> first <> " " <> (show alphList)) $ 
-      alphList
+      --removes leading and ending double quotes, but leaves any internal ones in there
+      --fmap init $ fmail tail alphList
+      fmap removeLeadingTrailingQuotes alphList
     else getAlphabet bmName (tail inList)
+    where removeLeadingTrailingQuotes a = if length a == 1 then a
+                                          else if length a == 2 then 
+                                            if head a == '"' then tail a
+                                            else init a
+                                          else if (length a) > 2 && head a == '"' && last a == '"' then init $ tail a
+                                          else a
+
 
 -- | getBranchLength gets brankch length distribution and parameters
 getBranchLength :: String -> [String] -> (Distribution, [DistributionParameter])
