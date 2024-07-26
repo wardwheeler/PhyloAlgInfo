@@ -6,3 +6,5 @@ Haskell source code
 To compile:
 
 cabal build
+
+execution:  phyloComplexity machineConfigurationfile outputFileNameStub
