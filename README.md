@@ -7,4 +7,4 @@ To compile:
 
 cabal build
 
-executiion:  phyloComplexity machineConfiguratrionfile outputFileNAmeStub
+execution:  phyloComplexity machineConfiguratrionfile outputFileNAmeStub
