@@ -714,7 +714,7 @@ parseSections inSectionList =
     let machineModels = parseMachine <$> getElementString "machine" inSectionList
     in
     if length machineModels > 1 then errorWithoutStackTrace "Can only specify a single machine model"
-    else if null machineModels then errorWithoutStackTrace "Error in machine/block model/graph specification--perhaps missing final '};'"
+    else if null machineModels then errorWithoutStackTrace "Error in machine/block model/graph specification--No machine specification or perhaps missing final '};'"
     else
         --Find and pull Graph
       let (gMachineName, graphNameLocal, blockModels) = head machineModels
