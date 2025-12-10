@@ -12,7 +12,7 @@ cabal update
 
 To compile:
 
-cabal build phylocomplexity --with-compiler ghc-9.10.1 --allow-newer
+cabal build pkg:phylocomplexity --with-compiler ghc-9.12.2 --allow-newer
 
 execution:  phyloComplexity machineConfigurationfile outputFileNameStub
 
