@@ -180,8 +180,10 @@ tn93ExponentialWithK first@[alpha1, alpha2, beta] second@[pA, pC, pG, pT] expPar
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 tn93UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-tn93UniformWithK [alpha1, alpha2, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+tn93UniformWithK first@[alpha1, alpha2, beta] second@[pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
+  if length first /= 3 then error ("Specification of [alpha1, alpha2, beta] parameter incorrect not legnth 3 " <> show first)
+  else if  length second /= 4 then error ("Specification of [pA, pC, pG, pT]  parameter incorrect not legnth 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
     let pR = pA + pG
         pY = pC + pT
