@@ -134,12 +134,19 @@ neymanExponential alphabetSize alpha =
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 tn93ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-tn93ExponentialWithK first@[alpha1, alpha2, beta] second@[pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
+tn93ExponentialWithK first second expParam _ (kWeight, kFraction) =
   if length first /= 3 then error ("Specification of [alpha1, alpha2, beta] parameter incorrect not legnth 3 " <> show first)
   else if  length second /= 4 then error ("Specification of [pA, pC, pG, pT]  parameter incorrect not legnth 4 " <> show second)
   else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let alpha1 = first !! 0
+        alpha2 = first !! 1
+        beta  = first !! 2
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         f1 = (pY*alpha1 + pR*beta)
         f2 = (pR*alpha2 + pY*beta)
@@ -180,12 +187,19 @@ tn93ExponentialWithK first@[alpha1, alpha2, beta] second@[pA, pC, pG, pT] expPar
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 tn93UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-tn93UniformWithK first@[alpha1, alpha2, beta] second@[pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
+tn93UniformWithK first second expParam _ (kWeight, kFraction) =
   if length first /= 3 then error ("Specification of [alpha1, alpha2, beta] parameter incorrect not legnth 3 " <> show first)
   else if  length second /= 4 then error ("Specification of [pA, pC, pG, pT]  parameter incorrect not legnth 4 " <> show second)
   else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let alpha1 = first !! 0
+        alpha2 = first !! 1
+        beta  = first !! 2
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         f1 = (pY*alpha1 + pR*beta)
         f2 = (pR*alpha2 + pY*beta)
