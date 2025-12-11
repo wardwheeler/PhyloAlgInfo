@@ -50,13 +50,13 @@ import           Complexity.Types
 -- takes alphabetsize and uniform parameter [0.alpha] and iterations for expE function
 -- the pair time weights and percent weight fro Invairnat and Gamma adjustments
 neymanUniformWithK :: Int -> Double -> Int -> (Double, Double) -> (Double, Double)
-neymanUniformWithK r a iterations (kWeight, kFraction) =
+neymanUniformWithK r a _ (kWeight, kFraction) =
     if kWeight < epsilon  then (kFraction, 0.0)
     else
         let r1 = fromIntegral r
             eak = expE (-1 * a * kWeight)
-            --pii throws some NaN fir invarants
-            pii = ((((eak + 1) * (r1 -1)) + (a * kWeight))/(a * kWeight * r1))
+            -- pii throws some NaN fir invarants
+            -- pii = ((((eak + 1) * (r1 -1)) + (a * kWeight))/(a * kWeight * r1))
             pij = ((eak + (a * kWeight) - 1)/(a * kWeight * r1))
             pii2 = 1 - ((r1 -1) * pij)
         in
@@ -74,7 +74,7 @@ neymanExponentialWithK r a (kWeight, kFraction) =
     if kWeight < epsilon  then (kFraction, 0.0)
     else
         let r1 = fromIntegral r
-            pii = ((a *r1) + kWeight) / (r1 * (a + kWeight))
+            -- pii = ((a *r1) + kWeight) / (r1 * (a + kWeight))
             pij = (kWeight / (r1 * (kWeight + a)))
             pii2 = 1 - ((r1 -1) * pij)
         in
@@ -84,7 +84,7 @@ neymanExponentialWithK r a (kWeight, kFraction) =
 -- | neymanGeneralWithK is Neyman for both Expinential and Uniform with wights list
 -- if weight list is [(1,1)] then is simple Neyman
 neymanGeneralWithK :: Distribution -> Int -> Double -> Int -> (Double, Double) -> (Double, Double)
-neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
+neymanGeneralWithK distribution r a _ (kWeight, kFraction)
   | kWeight < epsilon = (kFraction, 0.0)
   | distribution == Uniform =
         let r1 = fromIntegral r
@@ -108,7 +108,7 @@ neymanGeneralWithK distribution r a iterations (kWeight, kFraction)
 -- after Wheeler Cladistics 30 (2014) 282–290
 -- takes alphabetsize and uniform parameter [0.alpha] and iterations for expE function
 neymanUniform :: Int -> Double -> Int -> (Double, Double)
-neymanUniform alphabetSize alpha iterations =
+neymanUniform alphabetSize alpha _ =
     let pii = (alpha - ((fromIntegral alphabetSize - 1) * expE (-1 * alpha) - 1)) / (fromIntegral alphabetSize * alpha)
         pij = (alpha - 1 + expE (-1 * alpha) ) / (fromIntegral alphabetSize * alpha)
     in
@@ -135,8 +135,8 @@ neymanExponential alphabetSize alpha =
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 tn93ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 tn93ExponentialWithK first second expParam _ (kWeight, kFraction) =
-  if length first /= 3 then error ("Specification of [alpha1, alpha2, beta] parameter incorrect not legnth 3 " <> show first)
-  else if  length second /= 4 then error ("Specification of [pA, pC, pG, pT]  parameter incorrect not legnth 4 " <> show second)
+  if length first /= 3 then errorWithoutStackTrace ("Specification of [alpha1, alpha2, beta] parameter incorrect not length 3 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
   else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
     let alpha1 = first !! 0
@@ -188,8 +188,8 @@ tn93ExponentialWithK first second expParam _ (kWeight, kFraction) =
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 tn93UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
 tn93UniformWithK first second expParam _ (kWeight, kFraction) =
-  if length first /= 3 then error ("Specification of [alpha1, alpha2, beta] parameter incorrect not legnth 3 " <> show first)
-  else if  length second /= 4 then error ("Specification of [pA, pC, pG, pT]  parameter incorrect not legnth 4 " <> show second)
+  if length first /= 3 then errorWithoutStackTrace ("Specification of [alpha1, alpha2, beta] parameter incorrect not length 3 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
   else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
     let alpha1 = first !! 0
@@ -240,10 +240,18 @@ tn93UniformWithK first second expParam _ (kWeight, kFraction) =
 -- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 f84ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-f84ExponentialWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+f84ExponentialWithK first second expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [kappa,beta] parameter incorrect not length 2 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let kappa = first !! 0
+        beta = first !! 1
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         alpha1 = (1+(kappa/pY))*beta
         alpha2 = (1+(kappa/pR))*beta
@@ -286,10 +294,18 @@ f84ExponentialWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight,
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 f84UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-f84UniformWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+f84UniformWithK first second expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [kappa,beta] parameter incorrect not length 2 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let kappa = first !! 0
+        beta = first !! 1
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         alpha1 = (1+(kappa/pY))*beta
         alpha2 = (1+(kappa/pR))*beta
@@ -332,10 +348,18 @@ f84UniformWithK [kappa, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFr
 -- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 hky85ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-hky85ExponentialWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+hky85ExponentialWithK first second expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [alpha,beta] parameter incorrect not length 2 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let alpha = first !! 0
+        beta = first !! 1
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         f1 = (pY*alpha + pR*beta)
         f2 = (pR*alpha + pY*beta)
@@ -376,10 +400,18 @@ hky85ExponentialWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeigh
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 hky85UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-hky85UniformWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+hky85UniformWithK first second expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [alpha,beta] parameter incorrect not length 2 " <> show first)
+  else if  length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let alpha = first !! 0
+        beta = first !! 1
+        pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         f1 = (pY*alpha + pR*beta)
         f2 = (pR*alpha + pY*beta)
@@ -420,10 +452,15 @@ hky85UniformWithK [alpha, beta] [pA, pC, pG, pT] expParam iterations (kWeight, k
 -- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 f81ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-f81ExponentialWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+f81ExponentialWithK _ second expParam _ (kWeight, kFraction) =
+  if length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         c0Column = pA*pY/pR
         c1Column = pC*pR/pY
@@ -462,10 +499,15 @@ f81ExponentialWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFractio
 -- JC69 defualts to Neyman with r=4
 -- this is exponential branch length model with 'k' for raet factor (1, 1) if all same etc)
 f81UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-f81UniformWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+f81UniformWithK _ second expParam _ (kWeight, kFraction) =
+  if length second /= 4 then errorWithoutStackTrace ("Specification of [pA, pC, pG, pT] parameter incorrect not length 4 " <> show second)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let pR = pA + pG
+    let pA = second !! 0
+        pC = second !! 1
+        pG = second !! 2
+        pT = second !! 3
+        pR = pA + pG
         pY = pC + pT
         c0Column = pA*pY/pR
         c1Column = pC*pR/pY
@@ -504,10 +546,13 @@ f81UniformWithK blah [pA, pC, pG, pT] expParam iterations (kWeight, kFraction) =
 -- matrices reorderd (and eigenvalues)
 -- convwerted from TN93 via kappa -> alphas
 k80ExponentialWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-k80ExponentialWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+k80ExponentialWithK first _ expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [alpha,beta] parameter incorrect not length 2 " <> show first)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let f = (alpha +beta)/2
+    let alpha = first !! 0
+        beta = first !! 1
+        f = (alpha +beta)/2
         cColumn = 0.25
         dRow = 0.5
         m2 = expParam * expParam
@@ -527,10 +572,13 @@ k80ExponentialWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) 
 -- matrices reorderd (and eigenvalues)
 -- this is uniform branch length model with 'k' for raet factor (1, 1) if all same etc)
 k80UniformWithK :: [Double] -> [Double] -> Double -> Int -> (Double, Double) -> [[Double]]
-k80UniformWithK [alpha, beta] blah expParam iterations (kWeight, kFraction) =
-  if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
+k80UniformWithK first _ expParam _ (kWeight, kFraction) =
+  if length first /= 2 then errorWithoutStackTrace ("Specification of [alpha,beta] parameter incorrect not length 2 " <> show first)
+  else if kWeight < epsilon then [[kFraction,0,0,0],[0,kFraction,0,0],[0,0,kFraction,0],[0,0,0,kFraction]]
   else
-    let f = (alpha +beta)/2
+    let alpha = first !! 0
+        beta = first !! 1
+        f = (alpha +beta)/2
         cColumn = 0.25
         dRow = 0.5
         ebkm = expE (beta * kWeight * expParam)
