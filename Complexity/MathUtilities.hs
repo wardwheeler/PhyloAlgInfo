@@ -45,7 +45,7 @@ Good symbolic integrator https://www.integral-calculator.com/
 module Complexity.MathUtilities where
 
 import           Complexity.Types
--- import Debug.Trace
+import Debug.Trace
 
 -- | factorial is naive recursive calculation of factorials
 -- Double is more stable numerically
@@ -135,7 +135,11 @@ log10 value iterations counter curValue = logBase 10.0 value
 gammaFun :: Double -> Int -> Int -> Double -> Double
 gammaFun value iterations counter curValue =
   if counter > iterations then factorial (fromIntegral iterations) * expX2Y (fromIntegral iterations) value / curValue
-  else gammaFun value iterations (counter + 1) (curValue * (value + fromIntegral counter))
+  else
+      -- this is a bit ofg a hack but can get very small/large numbers so cut off or get NaN after Infinity  
+      if isInfinite (curValue * (value + fromIntegral counter)) then
+        factorial (fromIntegral iterations) * expX2Y (fromIntegral iterations) value / curValue
+      else gammaFun value iterations (counter + 1) (curValue * (value + fromIntegral counter))
 
 -- | gammaPDF returns probbaility of given argument based on inputs and parameters assumes alpha=beta
 -- hence only 1 gamma parameter
@@ -143,7 +147,7 @@ gammaPDF :: Double -> Int -> Double -> Double -> Double
 gammaPDF alpha iterations interval rVal  =
   let result = interval * expX2Y alpha alpha  * expX2Y rVal (alpha - 1)  * expE (-1 * alpha * rVal) / gammaFun alpha iterations 0 1
   in
-  --trace ("alpha " ++ (show alpha) ++ " iterations " ++ (show iterations) ++ " interval " ++ (show interval) ++ " rVal " ++ (show rVal) ++ " => " ++ (show result))
+  -- trace ("\nalpha " ++ (show alpha) ++ " iterations " ++ (show iterations) ++ " interval " ++ (show interval) ++ " rVal " ++ (show rVal) ++ " gammaFun " ++ (show $ gammaFun alpha iterations 0 1) ++ " => " ++ (show result))
   result
 
 -- | cumulativeSum sums using gamma PDF
@@ -195,7 +199,12 @@ discreteGamma alpha numClasses maxRate iterations rectangles
           --Normalizes values so that the rate expectation is 1.
           rNormalized = fmap (* (fromIntegral numClasses / sum rMeanList)) rMeanList
       in
-      --trace ("\nLast = " ++ (show $ last adjustedCDFList) ++ "\nSum = " ++ (show $ sum rProbList))
+      {- trace ("\n params: " ++ show( alpha, numClasses, maxRate, iterations, rectangles) ++ " " ++ 
+        "\nNumSteps: " ++ show(numSteps) ++ " interval: " ++ show(interval) ++ "\nintevalList: " ++ show(intervalList) ++ "\nrValList: " ++ show (rValList)  ++ "\nrProbList: " ++ show (rProbList)  ++ 
+        "\ncdFList: " ++ show (cdfList)  ++ "\nadjustment: " ++ show (adjustment)  ++ "\nadjustCDFList: " ++ show (adjustedCDFList)  ++ "\nrMeanList: " ++ show (rMeanList)  ++ "\nrNormalizedt: " ++ show (rNormalized) ++ 
+      -}
+       -- trace ("\nLast = " ++ (show $ last adjustedCDFList) ++ "\nSum = " ++ (show $ sum rProbList))
+      
       rNormalized
 
 
